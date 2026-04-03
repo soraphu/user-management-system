@@ -2,11 +2,18 @@ name: user-management-system
 
 services:
   server:
-    build: ./server
-    ports:
-      - "3000:3000"
+    image: php:8.4-fpm
+    volumes:
+      - ./server:/src/server:ro
+    restart: no
+
   nginx:
     image: nginx:stable-alpine3.23-perl
+    volumes:
+      - ./server:/src/server:ro
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
     restart: no
+    depends_on:
+      - server
     ports:
-      - "80:80"
+      - "8080:80"
