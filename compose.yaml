@@ -1,0 +1,12 @@
+name: user-management-system
+
+services:
+  server:
+    build: ./server
+    ports:
+      - "3000:3000"
+  nginx:
+    image: nginx:stable-alpine3.23-perl
+    restart: no
+    ports:
+      - "80:80"
