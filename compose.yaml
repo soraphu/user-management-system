@@ -17,3 +17,17 @@ services:
       - server
     ports:
       - "8080:80"
+
+  db:
+    image: mysql:9.6
+    container_name: mysql_db
+    environment:
+      MYSQL_ROOT_PASSWORD: 12345678
+      MYSQL_DATABASE: users
+      MYSQL_USER: guest
+      MYSQL_PASSWORD: 1234
+    volumes:
+      - db_data:/var/lib/mysql
+    restart: no
+    ports:
+      - "3306:3306"

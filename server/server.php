@@ -1,5 +1,5 @@
 <?php
-// Get the path (e.g., /api/users or /shop/products)
+// Get the path (e.g., /api/users )
 $request = $_SERVER['REQUEST_URI'];
 $request_method = $_SERVER['REQUEST_METHOD'];
 
