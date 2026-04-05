@@ -24,10 +24,13 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: 12345678
       MYSQL_DATABASE: users
-      MYSQL_USER: guest
+      MYSQL_USER: user
       MYSQL_PASSWORD: 1234
     volumes:
       - db_data:/var/lib/mysql
     restart: no
     ports:
       - "3306:3306"
+
+volumes:
+  db_data:

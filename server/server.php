@@ -21,7 +21,7 @@ switch ($path) {
                 ]
             ]);
         } else {
-            faultMethod();
+            faultRequestMethod();
         }
         break; //End of case
 
@@ -29,7 +29,7 @@ switch ($path) {
         if ($request_method == "GET") {
             echo json_encode(["status" => "Get login running"]);
         } else {
-            faultMethod();
+            faultRequestMethod();
         }
         break; //End of case
 
@@ -37,7 +37,7 @@ switch ($path) {
         if ($request_method == "POST") {
             echo json_encode(["status" => "Post register running"]);
         } else {
-            faultMethod();
+            faultRequestMethod();
         }
         break; //End of case
 
@@ -45,7 +45,7 @@ switch ($path) {
         if ($request_method == "POST") {
             echo json_encode(["status" => "Post reset password running"]);
         } else {
-            faultMethod();
+            faultRequestMethod();
         }
         break; //End of case
 
@@ -55,7 +55,7 @@ switch ($path) {
         break;
 }
 
-function faultMethod()
+function faultRequestMethod()
 {
     http_response_code(405);
     echo json_encode(["error" => "Method not allowed"]);
