@@ -2,9 +2,11 @@ name: user-management-system
 
 services:
   server:
-    image: php:8.4-fpm
+    build: ./server
     volumes:
       - ./server:/src/server:ro
+    depends_on:
+      - db
     restart: no
 
   nginx:
@@ -20,10 +22,9 @@ services:
 
   db:
     image: mysql:9.6
-    container_name: mysql_db
     environment:
       MYSQL_ROOT_PASSWORD: 12345678
-      MYSQL_DATABASE: users
+      MYSQL_DATABASE: user_management_system
       MYSQL_USER: user
       MYSQL_PASSWORD: 1234
     volumes:

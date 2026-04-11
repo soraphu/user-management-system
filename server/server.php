@@ -1,7 +1,10 @@
 <?php
+require_once 'db.php';
 // Get the path (e.g., /api/users )
 $request = $_SERVER['REQUEST_URI'];
 $request_method = $_SERVER['REQUEST_METHOD'];
+
+// echo "I am connected to: " . $database . " at " . $host . " with user " . $user . "\n";
 
 // Clean it up (remove query strings like ?id=1)
 $path = parse_url($request, PHP_URL_PATH);
@@ -13,7 +16,7 @@ switch ($path) {
     case '/api':
         if ($request_method == "GET") {
             echo json_encode([
-                "message" => "Welcome to the PHP server!",
+                "message" => "Welcome to the API of User Management System!",
                 "endpoints" => [
                     "/api/user-login/:id - Get login user id",
                     "/api/user-register - Sign up user",
@@ -59,4 +62,12 @@ function faultRequestMethod()
 {
     http_response_code(405);
     echo json_encode(["error" => "Method not allowed"]);
-}//End of function
+} //End of function
+
+function login() {}
+
+function register() {}
+
+function resetPassword() {}
+
+function getUserById($id) {}
