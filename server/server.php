@@ -1,73 +1,101 @@
 <?php
 require_once 'db.php';
 // Get the path (e.g., /api/users )
-$request = $_SERVER['REQUEST_URI'];
+$requestUrl = $_SERVER['REQUEST_URI'];
 $request_method = $_SERVER['REQUEST_METHOD'];
 
-// echo "I am connected to: " . $database . " at " . $host . " with user " . $user . "\n";
-
 // Clean it up (remove query strings like ?id=1)
-$path = parse_url($request, PHP_URL_PATH);
+$path = parse_url($requestUrl, PHP_URL_PATH);
+$segments = explode('/', trim($path, '/'));
 
 header('Content-Type: application/json');
 
-// Now do "whatever you want" based on the path
-switch ($path) {
-    case '/api':
-        if ($request_method == "GET") {
-            echo json_encode([
-                "message" => "Welcome to the API of User Management System!",
-                "endpoints" => [
-                    "/api/user-login/:id - Get login user id",
-                    "/api/user-register - Sign up user",
-                    "/api/user-reset-password - Reset user password"
-                ]
-            ]);
-        } else {
-            faultRequestMethod();
-        }
-        break; //End of case
+if ($segments[0] === 'api' && $segments[1] === 'users') { //path: /api/users
+    $id = $segments[2] ?? null;
 
-    case '/api/user-login':
-        if ($request_method == "GET") {
-            echo json_encode(["status" => "Get login running"]);
-        } else {
-            faultRequestMethod();
-        }
-        break; //End of case
+    switch ($request_method) {
+        case 'GET': //Login and respond user detail.
+            if (idValidate($id)) {
+                handleLogin($id, $pdo);
+            }
+            break;
 
-    case '/api/user-register':
-        if ($request_method == "POST") {
-            echo json_encode(["status" => "Post register running"]);
-        } else {
-            faultRequestMethod();
-        }
-        break; //End of case
+        case 'POST': //Sign up user.
+            handleRegister($pdo);
+            break;
 
-    case '/api/user-reset-password':
-        if ($request_method == "POST") {
-            echo json_encode(["status" => "Post reset password running"]);
-        } else {
-            faultRequestMethod();
-        }
-        break; //End of case
+        case 'PUT': //Reset user password by user ID.
+            if (idValidate($id)) {
+                handleResetPassword($pdo);
+            }
+            break;
 
-    default:
-        http_response_code(404);
-        echo "404 - Page not found";
-        break;
+        case 'DELETE': //Delete user by user ID.
+            if (idValidate($id)) {
+                handleDeleteUser($id, $pdo);
+            }
+            break;
+
+        default:
+            handleFaultRequestMethod();
+            break;
+    }
+} else {
+    handlePageNotFound();
 }
 
-function faultRequestMethod()
+function idValidate($id)
+{
+    if ($id === null) {
+        http_response_code(400);
+        echo json_encode([
+            "error" => "User ID is required",
+            "message" => "Exmaple: /api/users/:id"
+        ]);
+        return false;
+    } else if (!is_numeric($id) || intval($id) <= 0) {
+        http_response_code(400);
+        echo json_encode([
+            "error" => "User ID must be a positive integer",
+            "message" => "Exmaple: /api/users/:id"
+        ]);
+        return false;
+    } else {
+        return true;
+    }
+} //Validate user ID.
+
+function handleFaultRequestMethod()
 {
     http_response_code(405);
-    echo json_encode(["error" => "Method not allowed"]);
-} //End of function
+    echo json_encode(["error" => "Method not allowed."]);
+} //Alert fault request.
 
-function login() {}
+function handlePageNotFound()
+{
+    http_response_code(404);
+    echo json_encode(["error" => "Page not found."]);
+} //Handle page not found.
 
-function register() {}
+function handleLogin($id, $db)
+{
+    try {
+        $sql = "SELECT * FROM users WHERE id = ?";
+        $stmt = $db->prepare($sql);
+        $stmt->execute([$id]);
 
-function resetPassword() {}
+        $user = $stmt->fetch();
 
-function getUserById($id) {}
+        echo json_encode(["status" => "success", "user" => $user]);
+    } catch (Throwable $th) {
+        echo json_encode(["status" => "error", "message" => $th->getMessage()]);
+    }
+} //Handle user login.
+
+function handleDeleteUser($id, $db) {} //Delete user.
+
+function handleRegister($db) {} //Register.
+
+function handleResetPassword($db) {} //Reset password.
+
+function getUserById($id, $db) {}//Get user from database by id.
