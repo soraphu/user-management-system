@@ -15,9 +15,7 @@ if ($segments[0] === 'api' && $segments[1] === 'users') { //path: /api/users
 
     switch ($request_method) {
         case 'GET': //Login and respond user detail.
-            if (idValidate($id)) {
-                handleLogin($id, $pdo);
-            }
+            handleLogin($pdo);
             break;
 
         case 'POST': //Sign up user.
@@ -26,7 +24,7 @@ if ($segments[0] === 'api' && $segments[1] === 'users') { //path: /api/users
 
         case 'PUT': //Reset user password by user ID.
             if (idValidate($id)) {
-                handleResetPassword($pdo);
+                handleResetPassword($id, $pdo);
             }
             break;
 
@@ -42,7 +40,7 @@ if ($segments[0] === 'api' && $segments[1] === 'users') { //path: /api/users
     }
 } else {
     handlePageNotFound();
-}
+} //Main router for API endpoints.
 
 function idValidate($id)
 {
@@ -77,25 +75,49 @@ function handlePageNotFound()
     echo json_encode(["error" => "Page not found."]);
 } //Handle page not found.
 
-function handleLogin($id, $db)
+
+function handleRegister($db)
 {
-    try {
-        $sql = "SELECT * FROM users WHERE id = ?";
-        $stmt = $db->prepare($sql);
-        $stmt->execute([$id]);
+    // try {
+    //     $input = json_decode(file_get_contents('php://input'), true);
 
-        $user = $stmt->fetch();
+    //     if (empty($input['username']) || empty($input['password'])) {
+    //         http_response_code(400);
+    //         echo json_encode(["status" => "error", "message" => "Username and password are required."]);
+    //         return;
+    //     }
 
-        echo json_encode(["status" => "success", "user" => $user]);
-    } catch (Throwable $th) {
-        echo json_encode(["status" => "error", "message" => $th->getMessage()]);
-    }
+    //     $username = $input['username'];
+    //     $password = password_hash($input['password'], PASSWORD_DEFAULT);
+
+    //     $sql = "INSERT INTO accounts (username, email, password, role) VALUES (?, ?, ?, ?)";
+    //     $stmt = $db->prepare($sql);
+    //     $stmt->execute([$username, $password]);
+
+    //     echo json_encode(["status" => "success", "message" => "User registered successfully."]);
+    // } catch (Throwable $th) {
+    //     echo json_encode(["status" => "error", "message" => $th->getMessage()]);
+    // }
+} //Register.
+
+function handleLogin($db)
+{
+    // try {
+
+    //     $sql = "SELECT * FROM accounts WHERE id = ?";
+    //     $stmt = $db->prepare($sql);
+    //     $stmt->execute([$id]);
+
+    //     $user = $stmt->fetch();
+
+    //     echo json_encode(["status" => "success", "user" => $user]);
+    // } catch (Throwable $th) {
+    //     echo json_encode(["status" => "error", "message" => $th->getMessage()]);
+    // }
 } //Handle user login.
 
+function handleResetPassword($id, $db) {} //Reset password.
+
 function handleDeleteUser($id, $db) {} //Delete user.
-
-function handleRegister($db) {} //Register.
-
-function handleResetPassword($db) {} //Reset password.
 
 function getUserById($id, $db) {}//Get user from database by id.

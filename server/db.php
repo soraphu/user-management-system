@@ -2,7 +2,7 @@
 // 1. Connection Details
 // 'db' is the hostname provided by Docker's internal DNS
 $host     = 'db';           // The service name of your MySQL container
-$database = 'user_management_system';  // The name you gave to MYSQL_DATABASE
+$database = 'accounts';  // The name you gave to MYSQL_DATABASE
 $username = 'user';  // The name you gave to MYSQL_USER
 $pass     = '1234'; // The name you gave to MYSQL_PASSWORD
 $charset  = 'utf8mb4';
