@@ -10,7 +10,7 @@ $segments = explode('/', trim($path, '/'));
 
 header('Content-Type: application/json');
 
-if ($segments[0] === 'api' && $segments[1] === 'users') { //path: /api/users
+if ($segments[0] === 'api' && $segments[1] === 'users') { //url: /api/users
     $id = $segments[2] ?? null;
 
     switch ($request_method) {
@@ -18,7 +18,7 @@ if ($segments[0] === 'api' && $segments[1] === 'users') { //path: /api/users
             handleLogin($pdo);
             break;
 
-        case 'POST': //Sign up user.
+        case 'POST': //Register new user.
             handleRegister($pdo);
             break;
 
@@ -76,44 +76,65 @@ function handlePageNotFound()
 } //Handle page not found.
 
 
-function handleRegister($db)
+function handleRegister($pdo)
 {
-    // try {
-    //     $input = json_decode(file_get_contents('php://input'), true);
+    $input = json_decode(file_get_contents('php://input'), true);
 
-    //     if (empty($input['username']) || empty($input['password'])) {
-    //         http_response_code(400);
-    //         echo json_encode(["status" => "error", "message" => "Username and password are required."]);
-    //         return;
-    //     }
+    $username = $input['username'];
+    $email = $input['email'];
+    $password = $input['password'];
 
-    //     $username = $input['username'];
-    //     $password = password_hash($input['password'], PASSWORD_DEFAULT);
+    if (empty($username) || empty($email) || empty($password)) {
+        http_response_code(400);
+        echo json_encode(["status" => "error", "message" => "Required fields are missing."]);
+        return;
+    } //Validate input.
 
-    //     $sql = "INSERT INTO accounts (username, email, password, role) VALUES (?, ?, ?, ?)";
-    //     $stmt = $db->prepare($sql);
-    //     $stmt->execute([$username, $password]);
+    $hashPassword = password_hash($password, PASSWORD_DEFAULT);
 
-    //     echo json_encode(["status" => "success", "message" => "User registered successfully."]);
-    // } catch (Throwable $th) {
-    //     echo json_encode(["status" => "error", "message" => $th->getMessage()]);
-    // }
+    try {
+
+        $sql = "INSERT INTO accounts (username, email, password) VALUES (?, ?, ?)";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([$username, $email, $hashPassword]);
+
+        http_response_code(201);
+        echo json_encode(["status" => "success", "message" => "User registered successfully."]);
+    } catch (Throwable $th) {
+        http_response_code(500);
+        echo json_encode(["status" => "error", "message" => $th->getMessage()]);
+    }
 } //Register.
 
 function handleLogin($db)
 {
-    // try {
+    $input = json_decode(file_get_contents('php://input'), true);
+    $email = $input['email'];
+    $password = $input['password'];
 
-    //     $sql = "SELECT * FROM accounts WHERE id = ?";
-    //     $stmt = $db->prepare($sql);
-    //     $stmt->execute([$id]);
+    if (empty($email) || empty($password)) {
+        http_response_code(400);
+        echo json_encode(["status" => "error", "message" => "Email and password is required."]);
+        return;
+    } //Validate input.
 
-    //     $user = $stmt->fetch();
+    try {
+        $sql = "SELECT * FROM accounts WHERE email = ?";
+        $stmt = $db->prepare($sql);
+        $stmt->execute([$email]);
 
-    //     echo json_encode(["status" => "success", "user" => $user]);
-    // } catch (Throwable $th) {
-    //     echo json_encode(["status" => "error", "message" => $th->getMessage()]);
-    // }
+        $user = $stmt->fetch();
+
+        if ($user && password_verify($password, $user['password'])) {
+            http_response_code(200);
+            echo json_encode(["status" => "success", "message" => "Login successful.", "data" => $user]);
+        } else {
+            throw new Exception("Invalid Email or Password.");
+        }
+    } catch (\Throwable $th) {
+        http_response_code(401);
+        echo json_encode(["status" => "error", "message" => $th->getMessage()]);
+    }
 } //Handle user login.
 
 function handleResetPassword($id, $db) {} //Reset password.

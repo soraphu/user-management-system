@@ -6,8 +6,3 @@ CREATE TABLE IF NOT EXISTS accounts (
     password VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-
--- Add some test data so you can test your login immediately
-INSERT INTO accounts (username, email, password, role) VALUES 
-('admin', 'admin@example.com', '$2y$10$YourHashedPasswordHere', 'admin'),
-('testuser', 'testuser@example.com', '$2y$10$AnotherHashedPassword', 'user');
