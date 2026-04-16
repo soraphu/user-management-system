@@ -10,64 +10,52 @@ $segments = explode('/', trim($path, '/'));
 
 header('Content-Type: application/json');
 
-if ($segments[0] === 'api' && $segments[1] === 'users') { //url: /api/users
-    $id = $segments[2] ?? null;
+if ($segments[0] === 'api' && $segments[1] === 'user') { //url: /api/users
+    $id = $segments[3] ?? null; //Get user ID from URL if exists.
 
-    switch ($request_method) {
-        case 'GET': //Login and respond user detail.
-            handleLogin($pdo);
-            break;
+    switch ($segments[2]) {
 
-        case 'POST': //Register new user.
+        case 'register': //Handle register.
+            if ($request_method !== 'POST') {
+                handleMethodNotAllowed();
+                exit;
+            }
             handleRegister($pdo);
             break;
 
-        case 'PUT': //Reset user password by user ID.
-            if (idValidate($id)) {
-                handleResetPassword($id, $pdo);
+        case 'login': //Handle login.
+            if ($request_method !== 'POST') {
+                handleMethodNotAllowed();
+                exit;
             }
+            handleLogin($pdo);
             break;
 
-        case 'DELETE': //Delete user by user ID.
-            if (idValidate($id)) {
-                handleDeleteUser($id, $pdo);
+        case 'password': //Handle password reset.
+            if ($request_method !== 'POST') {
+                handleMethodNotAllowed();
+                exit;
+            }
+            if ($segments[3] === 'forget') {
+                handleForgetPassword($pdo);
+            } else if ($segments[3] === 'reset') {
+                handleResetPassword($pdo);
             }
             break;
 
         default:
-            handleFaultRequestMethod();
+            handlePageNotFound();
             break;
     }
 } else {
     handlePageNotFound();
 } //Main router for API endpoints.
 
-function idValidate($id)
-{
-    if ($id === null) {
-        http_response_code(400);
-        echo json_encode([
-            "error" => "User ID is required",
-            "message" => "Exmaple: /api/users/:id"
-        ]);
-        return false;
-    } else if (!is_numeric($id) || intval($id) <= 0) {
-        http_response_code(400);
-        echo json_encode([
-            "error" => "User ID must be a positive integer",
-            "message" => "Exmaple: /api/users/:id"
-        ]);
-        return false;
-    } else {
-        return true;
-    }
-} //Validate user ID.
-
-function handleFaultRequestMethod()
+function handleMethodNotAllowed()
 {
     http_response_code(405);
     echo json_encode(["error" => "Method not allowed."]);
-} //Alert fault request.
+} //Handle method not allowed.
 
 function handlePageNotFound()
 {
@@ -75,13 +63,36 @@ function handlePageNotFound()
     echo json_encode(["error" => "Page not found."]);
 } //Handle page not found.
 
+function handleEmptyRequestBody()
+{
+    http_response_code(400);
+    echo json_encode(["error" => "Request body cannot be empty."]);
+} //Handle empty request.
+
+function handleEmailDuplicate($pdo, $email)
+{
+    $sql = "SELECT * FROM accounts WHERE email = ?";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([$email]);
+
+    if ($stmt->fetch()) {
+        return true;
+    } else {
+        return false;
+    }
+} //Check if email already exists in database.
 
 function handleRegister($pdo)
 {
-    $input = json_decode(file_get_contents('php://input'), true);
+    $input = json_decode(file_get_contents('php://input'), true) ?? null;
+
+    if (empty($input)) {
+        handleEmptyRequestBody();
+        exit;
+    }//Validate request body.
 
     $username = $input['username'];
-    $email = $input['email'];
+    $email = strtolower($input['email']);
     $password = $input['password'];
 
     if (empty($username) || empty($email) || empty($password)) {
@@ -93,6 +104,11 @@ function handleRegister($pdo)
     $hashPassword = password_hash($password, PASSWORD_DEFAULT);
 
     try {
+        if (handleEmailDuplicate($pdo, $email)) {
+            http_response_code(409);
+            echo json_encode(["status" => "error", "message" => "Email already exists."]);
+            return;
+        }
 
         $sql = "INSERT INTO accounts (username, email, password) VALUES (?, ?, ?)";
         $stmt = $pdo->prepare($sql);
@@ -108,7 +124,13 @@ function handleRegister($pdo)
 
 function handleLogin($db)
 {
-    $input = json_decode(file_get_contents('php://input'), true);
+    $input = json_decode(file_get_contents('php://input'), true) ?? null;
+
+    if (empty($input)) {
+        handleEmptyRequestBody();
+        exit;
+    }//Validate request body.
+
     $email = $input['email'];
     $password = $input['password'];
 
@@ -137,8 +159,58 @@ function handleLogin($db)
     }
 } //Handle user login.
 
-function handleResetPassword($id, $db) {} //Reset password.
+function handleForgetPassword($db)
+{
+} //Handle forget password.
 
-function handleDeleteUser($id, $db) {} //Delete user.
+function handleResetPassword($db)
+{
+    $input = json_decode(file_get_contents('php://input'), true);
+    $token = $input['token'];
+    $newPassword = $input['new_password'];
 
-function getUserById($id, $db) {}//Get user from database by id.
+    if (empty($token) || empty($newPassword)) {
+        http_response_code(400);
+        echo json_encode(["status" => "error", "message" => "Token and new password are required."]);
+        return;
+    }
+
+    $hashNewPassword = password_hash($newPassword, PASSWORD_DEFAULT);
+    $hashedToken = hash('sha256', $token);
+
+    try {
+        $sql = "SELECT * FROM password_resets WHERE token = ? AND expires_at > NOW()";
+        $stmt = $db->prepare($sql);
+        $stmt->execute([$hashedToken]);
+
+        $resetRequest = $stmt->fetch();
+
+        if (!$resetRequest) {
+            http_response_code(400);
+            echo json_encode(["status" => "error", "message" => "Invalid or expired reset token."]);
+            return;
+        }
+
+        $sql = "UPDATE accounts SET password = ? WHERE email = ?";
+        $stmt = $db->prepare($sql);
+        $stmt->execute([$hashNewPassword, $resetRequest['email']]);
+
+        $sql = "DELETE FROM password_resets WHERE token = ?";
+        $stmt = $db->prepare($sql);
+        $stmt->execute([$hashedToken]);
+
+        http_response_code(200);
+        echo json_encode(["status" => "success", "message" => "Password reset successfully."]);
+    } catch (\Throwable $th) {
+        http_response_code(500);
+        echo json_encode(["status" => "error", "message" => $th->getMessage()]);
+    }
+} //Reset password.
+
+function handleDeleteUser($id, $db)
+{
+} //Delete user.
+
+function getUserById($id, $db)
+{
+}//Get user from database by id.

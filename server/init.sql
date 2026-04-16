@@ -6,3 +6,13 @@ CREATE TABLE IF NOT EXISTS accounts (
     password VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE IF NOT EXISTS password_resets (
+    email VARCHAR(100) NOT NULL,
+    token CHAR(64) NOT NULL,
+    expires_at DATETIME NOT NULL,
+
+    PRIMARY KEY (email),
+    UNIQUE (token) 
+);
+
