@@ -4,6 +4,7 @@ CREATE TABLE IF NOT EXISTS accounts (
     username VARCHAR(50) NOT NULL,
     email VARCHAR(100) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
+    verified BOOLEAN NOT NULL DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -14,4 +15,13 @@ CREATE TABLE IF NOT EXISTS password_resets (
 
     PRIMARY KEY (email),
     UNIQUE (token) 
+);
+
+CREATE TABLE IF NOT EXISTS email_verifications (
+    email VARCHAR(100) NOT NULL,
+    token CHAR(64) NOT NULL,
+    expires_at DATETIME NOT NULL,
+
+    PRIMARY KEY (email),
+    UNIQUE (token)
 );
