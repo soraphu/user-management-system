@@ -36,6 +36,7 @@ if ($segments[0] === 'api' && $segments[1] === 'user') { //url: /api/users
                 handleMethodNotAllowed();
                 exit;
             }
+
             if ($segments[3] === 'forget') {
                 handleForgetPassword($pdo);
             } else if ($segments[3] === 'reset') {
@@ -148,6 +149,8 @@ function handleLogin($db)
         $user = $stmt->fetch();
 
         if ($user && password_verify($password, $user['password'])) {
+            unset($user['password']); //Remove password from response data for security.
+
             http_response_code(200);
             echo json_encode(["status" => "success", "message" => "Login successful.", "data" => $user]);
         } else {
@@ -161,6 +164,51 @@ function handleLogin($db)
 
 function handleForgetPassword($db)
 {
+    $input = json_decode(file_get_contents('php://input'), true);
+
+    $email = $input['email'];
+    $sendToMockMail = isset($input['mock_mail']) ? $input['mock_mail'] : false;
+
+    if (empty($email)) {
+        http_response_code(400);
+        echo json_encode(["status" => "error", "message" => "Email is required."]);
+        return;
+    }
+
+    try {
+        $sql = "SELECT * FROM accounts WHERE email = ?";
+        $stmt = $db->prepare($sql);
+        $stmt->execute([$email]);
+
+        $user = $stmt->fetch();
+
+        if (!$user) {
+            http_response_code(404);
+            echo json_encode(["status" => "error", "message" => "Email not found."]);
+            return;
+        }
+
+        // Generate reset token and save to database (for simplicity, we use a random string here)
+        $token = bin2hex(random_bytes(16));
+        $hashedToken = hash('sha256', $token);
+        $expiresAt = date('Y-m-d H:i:s', strtotime('+1 hour'));
+
+        $sql = "INSERT INTO password_resets (email, token, expires_at) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE token = VALUES(token), expires_at = VALUES(expires_at)";
+        $stmt = $db->prepare($sql);
+        $stmt->execute([$email, $hashedToken, $expiresAt]);
+
+        if ($sendToMockMail == true) {
+            http_response_code(200);
+            echo json_encode(["status" => "success", "message" => "Password reset token generated for $email.", "token" => $token]);
+        } else {
+            http_response_code(200);
+            echo json_encode(["status" => "success", "message" => "Password reset token generated for $email."]);
+            //wait for implement email sending logic here.
+        }
+    } catch (\Throwable $th) {
+        http_response_code(500);
+        echo json_encode(["status" => "error", "message" => $th->getMessage()]);
+    }
 } //Handle forget password.
 
 function handleResetPassword($db)
