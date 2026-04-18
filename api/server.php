@@ -52,6 +52,7 @@ if ($segments[0] === 'api' && $segments[1] === 'user') { //url: /api/users
                 handleMethodNotAllowed();
                 exit;
             }
+
             if ($segments[3] === 'verify') {
                 handleVerifyEmailRequest($pdo);
                 break;
