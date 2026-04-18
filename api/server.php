@@ -13,10 +13,25 @@ $segments = explode('/', trim($path, '/'));
 
 header('Content-Type: application/json');
 
-if ($segments[0] === 'api' && $segments[1] === 'user') { //url: /api/users
+if ($segments[0] === 'api') { //url: /api - show API info.
+    echo json_encode([
+        "message" => "Welcome to the API of user management project.",
+        "endpoints" => [
+            "auth" => [
+                "/api/user/register" => "POST - Register a new user.",
+                "/api/user/login" => "POST - Login a user.",
+                "/api/user/password/forget" => "POST - Request password reset.",
+                "/api/user/password/reset" => "POST - Reset password.",
+                "/api/user/email/verify" => "POST - Request email verification.",
+                "/api/user/email/verified" => "POST - Verify email with token."
+            ]
+        ]
+    ]);
+} else if ($segments[0] === 'api' && $segments[1] === 'user') { //url: /api/users - handle user-related actions.
     $id = $segments[3] ?? null; //Get user ID from URL if exists.
+    $service = $segments[2] ?? null; //Get service from URL if exists.
 
-    switch ($segments[2]) {
+    switch ($service) {
 
         case 'register': //Handle register.
             if ($request_method !== 'POST') {
