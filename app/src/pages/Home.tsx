@@ -1,9 +1,12 @@
 import React from 'react'
+import Nav from '../components/nav'
 
-function Home() {
+function HomePage() {
     return (
-        <div>Home</div>
+        <>
+            <Nav />
+        </>
     )
-}
+} //Home
 
-export default Home
+export default HomePage

@@ -1,9 +1,9 @@
 import React from 'react'
 
-const Mockmail = () => {
+const MockMail = () => {
     return (
         <div>Mockmail</div>
     )
 }
 
-export default Mockmail
+export default MockMail

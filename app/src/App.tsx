@@ -1,20 +1,24 @@
 import React from 'react'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
+import './App.css'
 
-import Home from './pages/Home';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import Mockmail from './pages/Mockmail';
-import Reset_password from './pages/Reset_password';
-import Forget_password from './pages/Forget_password';
+//Page imports
+import HomePage from './pages/Home';
+import LoginPage from './pages/Login';
+import RegisterPage from './pages/Register';
+import MockMail from './pages/MockMail';
+import ResetPasswordPage from './pages/ResetPassword';
+import ForgetPasswordPage from './pages/ForgetPassword';
+import DashboardPage from './pages/Dashboard';
 
 const router = createBrowserRouter([
-  { path: '/', element: <Home /> },
-  { path: '/login', element: <Login /> },
-  { path: '/register', element: <Register /> },
-  { path: '/mockmail', element: <Mockmail /> },
-  { path: '/password/reset', element: <Reset_password /> },
-  { path: '/password/forget', element: <Forget_password /> },
+  { path: '/', element: <HomePage /> },
+  { path: '/login', element: <LoginPage /> },
+  { path: '/register', element: <RegisterPage /> },
+  { path: '/mockmail', element: <MockMail /> },
+  { path: '/password/reset', element: <ResetPasswordPage /> },
+  { path: '/password/forget', element: <ForgetPasswordPage /> },
+  { path: '/dashboard', element: <DashboardPage /> }
 ]);
 
 const App = () => {
