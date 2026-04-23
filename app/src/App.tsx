@@ -1,13 +1,19 @@
-import { useState, type JSX } from 'react'
+import React from 'react'
+import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 
-function App(): JSX.Element {
-  const [name, setName] = useState('Soraphu');
+import Home from './pages/welcome';
+import Login from './pages/login';
 
+const router = createBrowserRouter([
+  { path: '/', element: <Home /> },
+  { path: '/login', element: <Login /> },
+]);
+
+const App = () => {
   return (
-    <>
-      <h1>Welcome to My App {name} </h1>
-      <button onClick={() => setName('Alice')}>Change Name</button>
-    </>
+    <div>
+      <RouterProvider router={router} />
+    </div>
   )
 }
 
