@@ -3,7 +3,6 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import './App.css'
 
 //Page imports
-import HomePage from './pages/Home';
 import LoginPage from './pages/Login';
 import RegisterPage from './pages/Register';
 import MockMail from './pages/MockMail';
@@ -12,9 +11,8 @@ import ForgetPasswordPage from './pages/ForgetPassword';
 import DashboardPage from './pages/Dashboard';
 
 const router = createBrowserRouter([
-  { path: '/', element: <HomePage /> },
+  { path: '/', element: <RegisterPage /> },
   { path: '/login', element: <LoginPage /> },
-  { path: '/register', element: <RegisterPage /> },
   { path: '/mockmail', element: <MockMail /> },
   { path: '/password/reset', element: <ResetPasswordPage /> },
   { path: '/password/forget', element: <ForgetPasswordPage /> },
