@@ -67,8 +67,8 @@ export function SignupForm({
 
         axios.post(import.meta.env.VITE_API_REGISTER, signUpData)
             .then((response) => {
-                console.log(response);
-                navigate(`/login`);
+                console.log(response.data);
+                // navigate(`/login`);
             })
             .catch((error) => {
                 console.error(error);

@@ -3,6 +3,19 @@ require_once 'db_connect.php';
 require_once 'handlers/account_access.php';
 require_once 'handlers/account_management.php';
 
+// Allow the specific origin of your Vite/React dev server
+header("Access-Control-Allow-Origin: http://localhost:5173");
+// Allow specific methods
+header("Access-Control-Allow-Methods: POST, GET, OPTIONS, DELETE");
+// Allow specific headers (crucial for JSON requests)
+header("Access-Control-Allow-Headers: Content-Type, Authorization");
+
+// Handle the "Preflight" OPTIONS request immediately
+if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
+    http_response_code(200);
+    exit();
+}
+
 // Get the path (e.g., /api/users )
 $requestUrl = $_SERVER['REQUEST_URI'];
 $request_method = $_SERVER['REQUEST_METHOD'];
@@ -13,7 +26,7 @@ $segments = explode('/', trim($path, '/'));
 
 header('Content-Type: application/json');
 
-if ($segments[0] === 'api') { //url: /api - show API info.
+if ($path === "/api") { //url: /api - show API info.
     echo json_encode([
         "message" => "Welcome to the API of user management project.",
         "endpoints" => [
