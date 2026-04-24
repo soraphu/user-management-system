@@ -1,3 +1,9 @@
+import axios from "axios";
+import React, { type JSX } from "react";
+import { Eye, EyeClosed } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+
+//Components
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
@@ -25,6 +31,51 @@ export function SignupForm({
     className,
     ...props
 }: React.ComponentProps<"div">) {
+    const [passwordVisible, setPasswordVisible] = React.useState(false);
+    const navigate = useNavigate();
+
+    const passwordVisibleControlButton: JSX.Element = <button
+        type="button"
+        onClick={() => setPasswordVisible(!passwordVisible)}
+        className="absolute right-3 top-1/4 size-fit"
+    >
+        {passwordVisible ? (
+            <EyeClosed className="h-4 w-4" />
+        ) : (
+            <Eye className="h-4 w-4" />
+        )}
+    </button>;
+
+    function handleSignUp(e: any) {
+
+        e.preventDefault();
+
+        const password = e.target.password.value;
+
+        if (password.length < 8) {
+            alert("Password must be at least 8 characters long.");
+            return;
+        }
+
+        const signUpData = {
+            username: e.target.name.value,
+            email: e.target.email.value,
+            password: password,
+        }
+
+        console.log(signUpData);
+
+        axios.post(import.meta.env.VITE_API_REGISTER, signUpData)
+            .then((response) => {
+                console.log(response);
+                navigate(`/login`);
+            })
+            .catch((error) => {
+                console.error(error);
+                alert("Failed to create account. Please try again.");
+            });
+    }//Signup form.
+
     return (
         <div className={cn("flex flex-col gap-6", className)} {...props}>
             <Card>
@@ -35,8 +86,8 @@ export function SignupForm({
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <form onSubmit={handleFormSubmit} >
-                        <FieldGroup>
+                    <form onSubmit={handleSignUp} >
+                        <FieldGroup className="justify-self-center max-w-sm" >
                             <Field>
                                 <FieldLabel htmlFor="name">Username</FieldLabel>
                                 <Input id="name" type="text" placeholder="JohnDoe" required />
@@ -51,16 +102,13 @@ export function SignupForm({
                                 />
                             </Field>
                             <Field>
-                                <Field className="grid grid-cols-2 gap-4">
-                                    <Field>
+                                <Field>
+                                    <Field className="relative w-full" >
                                         <FieldLabel htmlFor="password">Password</FieldLabel>
-                                        <Input id="password" type="password" required />
-                                    </Field>
-                                    <Field>
-                                        <FieldLabel htmlFor="confirm-password">
-                                            Confirm Password
-                                        </FieldLabel>
-                                        <Input id="confirm-password" type="password" required />
+                                        <div className="relative" >
+                                            <Input id="password" type={passwordVisible ? "text" : "password"} required />
+                                            {passwordVisibleControlButton}
+                                        </div>
                                     </Field>
                                 </Field>
                                 <FieldDescription>
@@ -83,8 +131,5 @@ export function SignupForm({
             </FieldDescription>
         </div>
     )
-}
-
-function handleFormSubmit() {
 
 }
