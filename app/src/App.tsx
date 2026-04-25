@@ -10,8 +10,8 @@ import ForgetPasswordPage from './pages/ForgetPassword';
 import DashboardPage from './pages/Dashboard';
 
 const router = createBrowserRouter([
-  { path: '/', element: <RegisterPage /> },
-  { path: '/login', element: <LoginPage /> },
+  { path: '/', element: <LoginPage /> },
+  { path: '/register', element: <RegisterPage /> },
   { path: '/mockmail', element: <MockMail /> },
   { path: '/password/reset', element: <ResetPasswordPage /> },
   { path: '/password/forget', element: <ForgetPasswordPage /> },

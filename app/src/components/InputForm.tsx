@@ -2,10 +2,12 @@ import axios from "axios";
 import React, { type JSX } from "react";
 import { Eye, EyeClosed } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2';
 
-//Components
+//Import Components.
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import {
     Card,
     CardContent,
@@ -19,7 +21,6 @@ import {
     FieldGroup,
     FieldLabel,
 } from "@/components/ui/field"
-import { Input } from "@/components/ui/input"
 
 export const LoginForm = () => {
     return (
@@ -27,13 +28,12 @@ export const LoginForm = () => {
     )
 }//Login Form.
 
-export function SignupForm({
+export function RegisterForm({
     className,
     ...props
 }: React.ComponentProps<"div">) {
     const [passwordVisible, setPasswordVisible] = React.useState(false);
     const navigate = useNavigate();
-
     const passwordVisibleControlButton: JSX.Element = <button
         type="button"
         onClick={() => setPasswordVisible(!passwordVisible)}
@@ -46,35 +46,54 @@ export function SignupForm({
         )}
     </button>;
 
-    function handleSignUp(e: any) {
-
+    async function HandleRegister(e: any) {
         e.preventDefault();
-
         const password = e.target.password.value;
 
         if (password.length < 8) {
-            alert("Password must be at least 8 characters long.");
+            Swal.fire({
+                title: "WARNING",
+                text: "Password must be at least 8 characters long",
+                icon: "warning"
+            })
             return;
-        }
+        }//Validate password.
 
         const signUpData = {
             username: e.target.name.value,
             email: e.target.email.value,
             password: password,
-        }
+        }//Set data.
 
-        console.log(signUpData);
+        try {
+            const res: any = await axios.post(import.meta.env.VITE_API_REGISTER, signUpData);
 
-        axios.post(import.meta.env.VITE_API_REGISTER, signUpData)
-            .then((response) => {
-                console.log(response.data);
-                // navigate(`/login`);
-            })
-            .catch((error) => {
-                console.error(error);
-                alert("Failed to create account. Please try again.");
+            await Swal.fire({
+                icon: "success",
+                title: "SUCCESS",
+                text: "User registered successfully.",
+                showConfirmButton: false,
+                timer: 1500
             });
-    }//Signup form.
+            console.log(res.data);
+            navigate('');
+        } catch (error: any) {
+            if (error.status === 409) {
+                Swal.fire({
+                    title: "ERROR",
+                    text: "This email already exist.",
+                    icon: "error"
+                })
+            } else {
+                console.error(error);
+                Swal.fire({
+                    title: "ERROR",
+                    text: "Fail to create account. Please try again.",
+                    icon: "error"
+                })
+            }//Handle on error.
+        }//try-signup.
+    }//Handle on signup.
 
     return (
         <div className={cn("flex flex-col gap-6", className)} {...props}>
@@ -86,7 +105,7 @@ export function SignupForm({
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <form onSubmit={handleSignUp} >
+                    <form onSubmit={HandleRegister} >
                         <FieldGroup className="justify-self-center max-w-sm" >
                             <Field>
                                 <FieldLabel htmlFor="name">Username</FieldLabel>
@@ -116,7 +135,7 @@ export function SignupForm({
                                 </FieldDescription>
                             </Field>
                             <Field>
-                                <Button type="submit">Create Account</Button>
+                                <Button type="submit" >Create Account</Button>
                                 <FieldDescription className="text-center">
                                     Already have an account? <a href="/login">Sign in</a>
                                 </FieldDescription>
@@ -130,6 +149,5 @@ export function SignupForm({
                 and <a href="#">Privacy Policy</a>.
             </FieldDescription>
         </div>
-    )
-
-}
+    )//return
+}//Signup Form Components.

@@ -1,10 +1,10 @@
 //components
-import { SignupForm } from '../components/InputForm'
+import { RegisterForm } from '../components/InputForm'
 
 const RegisterPage = () => {
     return (
-        <div className='min-h-screen justify-center items-center flex bg-white'>
-            <SignupForm />
+        <div className={`min-h-screen justify-center items-center flex bg-gray-800`} >
+            <RegisterForm />
         </div>
     )
 }
