@@ -1,6 +1,11 @@
 <?php
 
-function duplicateEmailValidtion($pdo, $email)
+function isValidRegisterData()
+{
+    
+}//Validation the register data.
+
+function isEmailDuplicate($pdo, $email)
 {
     $sql = "SELECT * FROM accounts WHERE email = ?";
     $stmt = $pdo->prepare($sql);
@@ -13,20 +18,23 @@ function duplicateEmailValidtion($pdo, $email)
     }
 } //Check if email already exists in database.
 
-function emptyRequestBodyValidation()
+function isRequestBodyEmpty($input)
 {
-    http_response_code(400);
-    echo json_encode(["error" => "Request body cannot be empty."]);
+    if (empty($input)) {
+        http_response_code(400);
+        echo json_encode(["error" => "Request body cannot be empty."]);
+        return true;
+    }
+    return false;
 } //Handle empty request.
 
 function handleLogin($db)
 {
     $input = json_decode(file_get_contents('php://input'), true) ?? null;
 
-    if (empty($input)) {
-        emptyRequestBodyValidation();
+    if (isRequestBodyEmpty($input)) {
         exit;
-    }//Validate request body.
+    }//Empty req body validation.
 
     $email = $input['email'];
     $password = $input['password'];
@@ -62,10 +70,13 @@ function handleRegister($pdo)
 {
     $input = json_decode(file_get_contents('php://input'), true) ?? null;
 
-    if (empty($input)) {
-        emptyRequestBodyValidation();
+    if (isRequestBodyEmpty($input)) {
         exit;
-    }//Validate request body.
+    }//Empty req body validation.
+
+    if (!isValidRegisterData()) {
+        exit;
+    }//Register data validation.
 
     $username = $input['username'];
     $email = strtolower($input['email']);
@@ -80,7 +91,7 @@ function handleRegister($pdo)
     $hashPassword = password_hash($password, PASSWORD_DEFAULT);
 
     try {
-        if (duplicateEmailValidtion($pdo, $email)) {
+        if (isEmailDuplicate($pdo, $email)) {
             http_response_code(409);
             echo json_encode(["status" => "error", "message" => "Email already exists."]);
             return;

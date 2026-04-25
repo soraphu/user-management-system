@@ -55,7 +55,7 @@ export function RegisterForm({
             password: e.target.password.value,
         }//Set data.
 
-        if (!handleSignupDataValidation(user)) return;
+        if (!registerDataValidation(user)) return;
 
         try {
             await axios.post(import.meta.env.VITE_API_REGISTER, user);
@@ -81,7 +81,7 @@ export function RegisterForm({
         }//try-signup.
     }//Handle on signup.
 
-    function handleSignupDataValidation(user: any) {
+    function registerDataValidation(user: any) {
         const realDomains = ["@gmail.com", "@outlook.com", "@hotmail.com", "@yahoo.com"];
 
         // Check if the input ends with any of these
