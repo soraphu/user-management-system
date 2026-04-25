@@ -1,6 +1,6 @@
 import axios from "axios";
 import React, { useEffect, type JSX } from "react";
-import { Eye, EyeClosed, Icon } from 'lucide-react';
+import { Eye, EyeClosed } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 
@@ -46,14 +46,6 @@ export function RegisterForm({
             <Eye className="h-4 w-4" />
         )}
     </button>;
-
-    useEffect(() => {
-        Swal.fire({
-            icon: "warning",
-            title: "WARNING",
-            text: "This is a demo project. For your security, DO NOT use your real email or a password you use elsewhere. Use fake data (e.g., user@test.com)."
-        });
-    }, []); //Init website.
 
     async function handleRegister(e: any) {
         e.preventDefault();
@@ -102,15 +94,15 @@ export function RegisterForm({
                 text: "For PDPA safety, please use a fake email domain like @example.com, @test.com or each other."
             });
 
-            return false; // Stop the registration
-        }//Real email validation.
+            return false;
+        }//Fake email validation.
         if (user.password.length < 8) {
             toast.error("Password must be at least 8 characters long");
 
             return false;
         }//Password validation.
 
-        //Validation pass.
+        //true = Verified | false = Not approved.
         return true;
     }//Handle data validation.
 
