@@ -1,4 +1,6 @@
 import { cn } from "@/lib/utils"
+
+//Import components.
 import { Button } from "@/components/ui/button"
 import {
   Field,
@@ -7,6 +9,7 @@ import {
   FieldLabel,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
+import InputPasswordWithVisibleControl from "./ui/password-visible-control"
 
 export function LoginForm({ className, ...props }: React.ComponentProps<"form">) {
   return (
@@ -38,7 +41,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"form">)
               Forgot your password?
             </a>
           </div>
-          <Input id="password" type="password" required className="bg-background" />
+          <InputPasswordWithVisibleControl id="password" />
         </Field>
         <Field>
           <Button type="submit">Login</Button>

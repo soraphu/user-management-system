@@ -1,6 +1,5 @@
 import axios from "axios";
 import React, { type JSX } from "react";
-import { Eye, EyeClosed } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 
