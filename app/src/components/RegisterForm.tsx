@@ -23,16 +23,7 @@ import {
 } from "@/components/ui/field"
 import { toast } from "sonner";
 
-export const LoginForm = () => {
-    return (
-        <div>This is Login Form</div>
-    )
-}//Login Form.
-
-export function RegisterForm({
-    className,
-    ...props
-}: React.ComponentProps<"div">) {
+const RegisterForm = ({ className, ...props }: React.ComponentProps<"div">) => {
     const [passwordVisible, setPasswordVisible] = React.useState(false);
     const navigate = useNavigate();
     const passwordVisibleControlButton: JSX.Element = <button
@@ -68,6 +59,7 @@ export function RegisterForm({
                 showConfirmButton: false,
                 timer: 1500
             });
+            //Route to root path.
             navigate('/');
 
         } catch (error: any) {
@@ -107,7 +99,7 @@ export function RegisterForm({
 
     return (
         <div className={cn("flex flex-col gap-6", className)} {...props}>
-            <Card>
+            <Card >
                 <CardHeader className="text-center">
                     <CardTitle className="text-xl">Create your account</CardTitle>
                     <CardDescription >
@@ -145,9 +137,9 @@ export function RegisterForm({
                                 </FieldDescription>
                             </Field>
                             <Field>
-                                <Button type="submit" >Create Account</Button>
+                                <Button type="submit" className="bg-black" >Create Account</Button>
                                 <FieldDescription className="text-center">
-                                    Already have an account? <a href="/login">Sign in</a>
+                                    Already have an account? <a href="/">Sign in</a>
                                 </FieldDescription>
                             </Field>
                         </FieldGroup>
@@ -158,6 +150,8 @@ export function RegisterForm({
                 By clicking continue, you agree to our <a href="#">Terms of Service</a>{" "}
                 and <a href="#">Privacy Policy</a>.
             </FieldDescription>
-        </div>
+        </div >
     )//return HTML;
 }//Signup Form Components.
+
+export default RegisterForm;

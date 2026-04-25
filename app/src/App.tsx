@@ -1,4 +1,5 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
+import { Toaster } from 'sonner';
 import './App.css'
 
 //Page imports
@@ -8,9 +9,10 @@ import MockMail from './pages/MockMail';
 import ResetPasswordPage from './pages/ResetPassword';
 import ForgetPasswordPage from './pages/ForgetPassword';
 import DashboardPage from './pages/Dashboard';
-import { Toaster } from 'sonner';
+import PageNotFound from './pages/PageNotFound';
 
 const router = createBrowserRouter([
+  { path: '/*', element: <PageNotFound /> },
   { path: '/', element: <LoginPage /> },
   { path: '/register', element: <RegisterPage /> },
   { path: '/mockmail', element: <MockMail /> },
