@@ -3,12 +3,21 @@ require_once 'db_connect.php';
 require_once 'handlers/account_access.php';
 require_once 'handlers/account_management.php';
 
-// Allow the specific origin of your Vite/React dev server
-header("Access-Control-Allow-Origin: http://localhost:5173");
-// Allow specific methods
-header("Access-Control-Allow-Methods: POST, GET, OPTIONS, DELETE");
-// Allow specific headers (crucial for JSON requests)
-header("Access-Control-Allow-Headers: Content-Type, Authorization");
+// Define which frontends are allowed to talk to this API
+$allowed_origins = [
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+];
+
+$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+
+// Check if the requester is in our "Trusted List"
+if (in_array($origin, $allowed_origins)) {
+    header("Access-Control-Allow-Origin: " . $origin);
+    header("Access-Control-Allow-Methods: POST, GET, OPTIONS, DELETE, PUT");
+    header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
+    header("Access-Control-Allow-Credentials: true");
+}
 
 // Handle the "Preflight" OPTIONS request immediately
 if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
@@ -82,7 +91,7 @@ if ($path === "/api") { //url: /api - show API info.
             }
 
             if ($segments[3] === 'verify') {
-                handleVerifyEmailRequest($pdo);
+                handleVerifyEmailSend($pdo);
                 break;
             } else if ($segments[3] === 'verified') {
                 handleVerifiedEmail($pdo);

@@ -160,5 +160,5 @@ export function RegisterForm({
                 and <a href="#">Privacy Policy</a>.
             </FieldDescription>
         </div>
-    )//return
+    )//return HTML;
 }//Signup Form Components.

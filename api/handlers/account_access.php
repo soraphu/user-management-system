@@ -1,6 +1,6 @@
 <?php
 
-function handleEmailDuplicate($pdo, $email)
+function duplicateEmailValidtion($pdo, $email)
 {
     $sql = "SELECT * FROM accounts WHERE email = ?";
     $stmt = $pdo->prepare($sql);
@@ -13,7 +13,7 @@ function handleEmailDuplicate($pdo, $email)
     }
 } //Check if email already exists in database.
 
-function handleEmptyRequestBody()
+function emptyRequestBodyValidation()
 {
     http_response_code(400);
     echo json_encode(["error" => "Request body cannot be empty."]);
@@ -24,7 +24,7 @@ function handleLogin($db)
     $input = json_decode(file_get_contents('php://input'), true) ?? null;
 
     if (empty($input)) {
-        handleEmptyRequestBody();
+        emptyRequestBodyValidation();
         exit;
     }//Validate request body.
 
@@ -63,7 +63,7 @@ function handleRegister($pdo)
     $input = json_decode(file_get_contents('php://input'), true) ?? null;
 
     if (empty($input)) {
-        handleEmptyRequestBody();
+        emptyRequestBodyValidation();
         exit;
     }//Validate request body.
 
@@ -80,7 +80,7 @@ function handleRegister($pdo)
     $hashPassword = password_hash($password, PASSWORD_DEFAULT);
 
     try {
-        if (handleEmailDuplicate($pdo, $email)) {
+        if (duplicateEmailValidtion($pdo, $email)) {
             http_response_code(409);
             echo json_encode(["status" => "error", "message" => "Email already exists."]);
             return;

@@ -17,6 +17,6 @@ const RegisterPage = () => {
             <RegisterForm />
         </div>
     )
-}
+}//Entire register page.
 
 export default RegisterPage

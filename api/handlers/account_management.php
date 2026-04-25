@@ -93,7 +93,7 @@ function handleResetPassword($db)
     }
 } //Reset password.
 
-function handleVerifyEmailRequest($db)
+function handleVerifyEmailSend($db)
 {
     $input = json_decode(file_get_contents('php://input'), true);
     $email = $input['email'];
