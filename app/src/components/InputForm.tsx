@@ -1,6 +1,6 @@
 import axios from "axios";
-import React, { type JSX } from "react";
-import { Eye, EyeClosed } from 'lucide-react';
+import React, { useEffect, type JSX } from "react";
+import { Eye, EyeClosed, Icon } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 
@@ -21,11 +21,7 @@ import {
     FieldGroup,
     FieldLabel,
 } from "@/components/ui/field"
-// import {
-//     Alert,
-//     AlertDescription,
-//     AlertTitle,
-// } from "@/components/ui/alert"
+import { toast } from "sonner";
 
 export const LoginForm = () => {
     return (
@@ -51,29 +47,28 @@ export function RegisterForm({
         )}
     </button>;
 
+    useEffect(() => {
+        Swal.fire({
+            icon: "warning",
+            title: "WARNING",
+            text: "This is a demo project. For your security, DO NOT use your real email or a password you use elsewhere. Use fake data (e.g., user@test.com)."
+        });
+    }, []); //Init website.
+
     async function handleRegister(e: any) {
         e.preventDefault();
-        const password = e.target.password.value;
-
-        if (password.length < 8) {
-            Swal.fire({
-                title: "WARNING",
-                text: "Password must be at least 8 characters long",
-                icon: "warning"
-            })
-            return;
-        }//Validate password.
-
-        const signUpData = {
+        const user = {
             username: e.target.name.value,
             email: e.target.email.value,
-            password: password,
+            password: e.target.password.value,
         }//Set data.
 
-        try {
-            await axios.post(import.meta.env.VITE_API_REGISTER, signUpData);
+        if (!handleSignupDataValidation(user)) return;
 
-            //Created.
+        try {
+            await axios.post(import.meta.env.VITE_API_REGISTER, user);
+
+            //Created successfully.
             await Swal.fire({
                 icon: "success",
                 title: "SUCCESS",
@@ -81,33 +76,51 @@ export function RegisterForm({
                 showConfirmButton: false,
                 timer: 1500
             });
-            navigate('');
+            navigate('/');
+
         } catch (error: any) {
-            //Failed.
+            //Failed to create.
             if (error.status === 409) {
-                Swal.fire({
-                    title: "ERROR",
-                    text: "This email already exist.",
-                    icon: "error"
-                })
+                toast.error("This email already exist.");
             } else {
                 console.error(error);
-                Swal.fire({
-                    title: "ERROR",
-                    text: "Fail to create account. Please try again.",
-                    icon: "error"
-                })
+                toast.error("Fail to create account. Please try again.");
             }//Handle on error.
         }//try-signup.
     }//Handle on signup.
+
+    function handleSignupDataValidation(user: any) {
+        const realDomains = ["@gmail.com", "@outlook.com", "@hotmail.com", "@yahoo.com"];
+
+        // Check if the input ends with any of these
+        const isRealEmail = realDomains.some(domain => user.email.toLowerCase().endsWith(domain));
+
+        if (isRealEmail) {
+            Swal.fire({
+                icon: "error",
+                title: "REAL DOMAIN DETECTED",
+                text: "For PDPA safety, please use a fake email domain like @example.com, @test.com or each other."
+            });
+
+            return false; // Stop the registration
+        }//Real email validation.
+        if (user.password.length < 8) {
+            toast.error("Password must be at least 8 characters long");
+
+            return false;
+        }//Password validation.
+
+        //Validation pass.
+        return true;
+    }//Handle data validation.
 
     return (
         <div className={cn("flex flex-col gap-6", className)} {...props}>
             <Card>
                 <CardHeader className="text-center">
                     <CardTitle className="text-xl">Create your account</CardTitle>
-                    <CardDescription>
-                        Enter your email below to create your account
+                    <CardDescription >
+                        Enter your fake info below to create account.
                     </CardDescription>
                 </CardHeader>
                 <CardContent>

@@ -8,6 +8,7 @@ import MockMail from './pages/MockMail';
 import ResetPasswordPage from './pages/ResetPassword';
 import ForgetPasswordPage from './pages/ForgetPassword';
 import DashboardPage from './pages/Dashboard';
+import { Toaster } from 'sonner';
 
 const router = createBrowserRouter([
   { path: '/', element: <LoginPage /> },
@@ -20,9 +21,10 @@ const router = createBrowserRouter([
 
 const App = () => {
   return (
-    <div>
+    <main>
       <RouterProvider router={router} />
-    </div>
+      <Toaster />
+    </main>
   )
 }
 
