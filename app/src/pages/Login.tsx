@@ -1,5 +1,5 @@
 import { FaGithub } from "react-icons/fa";
-import LoginForm from "../components/LoginForm"
+import LoginForm from "../components/login-form"
 
 const LoginPage = () => {
     return (
@@ -10,15 +10,18 @@ const LoginPage = () => {
                         <div className="flex size-6 items-center justify-center rounded-md bg-primary text-primary-foreground">
                             <FaGithub size={18} className="hover:text-gray-400 transition-colors" />
                         </div>
-                        Soraphu Github
+                        Soraphu - Github
                     </a>
                 </div>
+
                 <div className="flex flex-1 items-center justify-center">
                     <div className="w-full max-w-xs">
                         <LoginForm />
                     </div>
                 </div>
+
             </div>
+
             <div className="relative hidden bg-muted lg:block">
                 <img
                     src="/placeholder.svg"
@@ -27,7 +30,7 @@ const LoginPage = () => {
                 />
             </div>
         </div>
-    )
-}
+    )//return HTML;
+}//Entire login page.
 
 export default LoginPage

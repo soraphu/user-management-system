@@ -22,21 +22,10 @@ import {
     FieldLabel,
 } from "@/components/ui/field"
 import { toast } from "sonner";
+import InputPasswordWithVisibleControl from "./ui/password-visible-control";
 
 const RegisterForm = ({ className, ...props }: React.ComponentProps<"div">) => {
-    const [passwordVisible, setPasswordVisible] = React.useState(false);
     const navigate = useNavigate();
-    const passwordVisibleControlButton: JSX.Element = <button
-        type="button"
-        onClick={() => setPasswordVisible(!passwordVisible)}
-        className="absolute right-3 top-1/4 size-fit"
-    >
-        {passwordVisible ? (
-            <EyeClosed className="h-4 w-4" />
-        ) : (
-            <Eye className="h-4 w-4" />
-        )}
-    </button>;
 
     async function handleRegister(e: any) {
         e.preventDefault();
@@ -126,10 +115,7 @@ const RegisterForm = ({ className, ...props }: React.ComponentProps<"div">) => {
                                 <Field>
                                     <Field className="relative w-full" >
                                         <FieldLabel htmlFor="password">Password</FieldLabel>
-                                        <div className="relative" >
-                                            <Input id="password" type={passwordVisible ? "text" : "password"} required />
-                                            {passwordVisibleControlButton}
-                                        </div>
+                                        <InputPasswordWithVisibleControl id="password" />
                                     </Field>
                                 </Field>
                                 <FieldDescription>

@@ -38,12 +38,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"form">)
               Forgot your password?
             </a>
           </div>
-          <Input
-            id="password"
-            type="password"
-            required
-            className="bg-background"
-          />
+          <Input id="password" type="password" required className="bg-background" />
         </Field>
         <Field>
           <Button type="submit">Login</Button>

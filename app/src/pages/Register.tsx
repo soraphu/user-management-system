@@ -1,5 +1,5 @@
 //components
-import RegisterForm from '../components/RegisterForm'
+import RegisterForm from '../components/register-form'
 import { useEffect } from 'react';
 import Swal from 'sweetalert2';
 
