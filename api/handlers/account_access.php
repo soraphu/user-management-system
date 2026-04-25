@@ -1,8 +1,43 @@
 <?php
 
-function isValidRegisterData()
+function isValidRegisterData($user)
 {
-    
+    $email = $user['email'];
+    $password = $user['password'];
+
+    // 1. Check if it "looks" like an email
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        http_response_code(403);
+        echo json_encode([
+            "status" => "error",
+            "message" => "Invalid email format."
+        ]);
+        return false;
+    }//Email format validation.
+
+    // 2. Check if it's a "Real" provider you want to block
+    $blocked_domains = ['gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com'];
+    $domain = strtolower(substr(strrchr($email, "@"), 1));
+
+    if (in_array($domain, $blocked_domains)) {
+        http_response_code(403);
+        echo json_encode([
+            "status" => "error",
+            "message" => "Please use a fake email (e.g. @test.com) for PDPA safety."
+        ]);
+        return false;
+    }//Fake email validation.
+
+    if (strlen($password) < 8) {
+        http_response_code(403);
+        echo json_encode([
+            "status" => "error",
+            "message" => "Password must be at least 8 characters long."
+        ]);
+        return false;
+    }//Password validation.
+
+    return true;
 }//Validation the register data.
 
 function isEmailDuplicate($pdo, $email)
@@ -21,8 +56,6 @@ function isEmailDuplicate($pdo, $email)
 function isRequestBodyEmpty($input)
 {
     if (empty($input)) {
-        http_response_code(400);
-        echo json_encode(["error" => "Request body cannot be empty."]);
         return true;
     }
     return false;
@@ -68,19 +101,19 @@ function handleLogin($db)
 
 function handleRegister($pdo)
 {
-    $input = json_decode(file_get_contents('php://input'), true) ?? null;
+    $user = json_decode(file_get_contents('php://input'), true) ?? null;
 
-    if (isRequestBodyEmpty($input)) {
+    if (isRequestBodyEmpty($user)) {
         exit;
     }//Empty req body validation.
 
-    if (!isValidRegisterData()) {
+    if (!isValidRegisterData($user)) {
         exit;
     }//Register data validation.
 
-    $username = $input['username'];
-    $email = strtolower($input['email']);
-    $password = $input['password'];
+    $username = $user['username'];
+    $email = strtolower($user['email']);
+    $password = $user['password'];
 
     if (empty($username) || empty($email) || empty($password)) {
         http_response_code(400);

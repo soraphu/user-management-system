@@ -1,5 +1,5 @@
 import axios from "axios";
-import React, { useEffect, type JSX } from "react";
+import React, { type JSX } from "react";
 import { Eye, EyeClosed } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
@@ -55,7 +55,7 @@ export function RegisterForm({
             password: e.target.password.value,
         }//Set data.
 
-        if (!registerDataValidation(user)) return;
+        if (!isValidRegisterData(user)) return;
 
         try {
             await axios.post(import.meta.env.VITE_API_REGISTER, user);
@@ -81,7 +81,7 @@ export function RegisterForm({
         }//try-signup.
     }//Handle on signup.
 
-    function registerDataValidation(user: any) {
+    function isValidRegisterData(user: any) {
         const realDomains = ["@gmail.com", "@outlook.com", "@hotmail.com", "@yahoo.com"];
 
         // Check if the input ends with any of these
@@ -102,7 +102,6 @@ export function RegisterForm({
             return false;
         }//Password validation.
 
-        //true = Verified | false = Not approved.
         return true;
     }//Handle data validation.
 
