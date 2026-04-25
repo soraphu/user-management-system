@@ -21,6 +21,11 @@ import {
     FieldGroup,
     FieldLabel,
 } from "@/components/ui/field"
+// import {
+//     Alert,
+//     AlertDescription,
+//     AlertTitle,
+// } from "@/components/ui/alert"
 
 export const LoginForm = () => {
     return (
@@ -46,7 +51,7 @@ export function RegisterForm({
         )}
     </button>;
 
-    async function HandleRegister(e: any) {
+    async function handleRegister(e: any) {
         e.preventDefault();
         const password = e.target.password.value;
 
@@ -66,8 +71,9 @@ export function RegisterForm({
         }//Set data.
 
         try {
-            const res: any = await axios.post(import.meta.env.VITE_API_REGISTER, signUpData);
+            await axios.post(import.meta.env.VITE_API_REGISTER, signUpData);
 
+            //Created.
             await Swal.fire({
                 icon: "success",
                 title: "SUCCESS",
@@ -75,9 +81,9 @@ export function RegisterForm({
                 showConfirmButton: false,
                 timer: 1500
             });
-            console.log(res.data);
             navigate('');
         } catch (error: any) {
+            //Failed.
             if (error.status === 409) {
                 Swal.fire({
                     title: "ERROR",
@@ -105,7 +111,7 @@ export function RegisterForm({
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <form onSubmit={HandleRegister} >
+                    <form onSubmit={handleRegister} >
                         <FieldGroup className="justify-self-center max-w-sm" >
                             <Field>
                                 <FieldLabel htmlFor="name">Username</FieldLabel>
