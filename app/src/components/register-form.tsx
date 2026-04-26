@@ -1,5 +1,5 @@
 import axios from "axios";
-import React, { type JSX } from "react";
+import React from "react";
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 
@@ -26,7 +26,7 @@ import InputPasswordWithVisibleControl from "./ui/password-visible-control";
 const RegisterForm = ({ className, ...props }: React.ComponentProps<"div">) => {
     const navigate = useNavigate();
 
-    async function handleRegister(e: any) {
+    async function handleUserRegister(e: any) {
         e.preventDefault();
         const user = {
             username: e.target.name.value,
@@ -59,7 +59,7 @@ const RegisterForm = ({ className, ...props }: React.ComponentProps<"div">) => {
                 toast.error("Fail to create account. Please try again.");
             }//Handle on error.
         }//try-signup.
-    }//Handle on signup.
+    } //Handle on register.
 
     function isValidRegisterData(user: any) {
         const realDomains = ["@gmail.com", "@outlook.com", "@hotmail.com", "@yahoo.com"];
@@ -95,7 +95,7 @@ const RegisterForm = ({ className, ...props }: React.ComponentProps<"div">) => {
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <form onSubmit={handleRegister} >
+                    <form onSubmit={handleUserRegister} >
                         <FieldGroup className="justify-self-center max-w-sm" >
                             <Field>
                                 <FieldLabel htmlFor="name">Username</FieldLabel>
