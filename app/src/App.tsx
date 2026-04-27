@@ -6,6 +6,7 @@ import './App.css'
 import LoginPage from './pages/Login';
 import RegisterPage from './pages/Register';
 import MockMail from './pages/MockMail';
+import VerifyEmail from './pages/VerifyEmail';
 import ResetPasswordPage from './pages/ResetPassword';
 import ForgetPasswordPage from './pages/ForgetPassword';
 import DashboardPage from './pages/Dashboard';
@@ -16,6 +17,7 @@ const router = createBrowserRouter([
   { path: '/', element: <LoginPage /> },
   { path: '/register', element: <RegisterPage /> },
   { path: '/mockmail', element: <MockMail /> },
+  { path: '/verify-email', element: <VerifyEmail /> },
   { path: '/password/reset', element: <ResetPasswordPage /> },
   { path: '/password/forget', element: <ForgetPasswordPage /> },
   { path: '/dashboard', element: <DashboardPage /> }
