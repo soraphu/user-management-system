@@ -25,3 +25,22 @@ CREATE TABLE IF NOT EXISTS email_verifications (
     PRIMARY KEY (email),
     UNIQUE (token)
 );
+
+CREATE TABLE IF NOT EXISTS inbox (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    owner_email VARCHAR(255) NOT NULL, -- The foreign key column
+    sender VARCHAR(255) DEFAULT "server@user.management.system.com",
+    subject VARCHAR(255) NOT NULL,
+    preview TEXT NOT NULL,
+    url VARCHAR(500) DEFAULT NULL,    -- Optional (?)
+    buttonLabel VARCHAR(100) DEFAULT NULL, -- Optional (?)
+    time TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
+    isRead BOOLEAN DEFAULT FALSE,
+    
+    -- Relationship: Links this mail to a specific user in the accounts table
+    CONSTRAINT fk_owner 
+        FOREIGN KEY (owner_email) 
+        REFERENCES accounts(email) 
+        ON DELETE CASCADE 
+        ON UPDATE CASCADE
+);
