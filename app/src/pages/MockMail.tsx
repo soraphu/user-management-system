@@ -41,46 +41,15 @@ export default function MockMail() {
             return;
         } //If email is empty, exit.
 
-        const fetchInbox = async () => {
-            try {
-                setLoading(true);
-
-                const dataResponse = await axios.get(import.meta.env.VITE_API_GET_INBOX + `?email=${email}`);
-
-                // If 200 OK, save the data
-                setInbox(dataResponse.data);
-            } catch (error: any) {
-                const status = error.response?.status;
-
-                let errorMsg = "An unexpected error occurred. Please try again.";
-                if (status === 404) {
-                    errorMsg = "This email not found.";
-                }
-
-                const pressReturn = await Swal.fire({
-                    title: "System Error",
-                    text: errorMsg,
-                    icon: "error",
-                    confirmButtonText: "Return to Home",
-                    confirmButtonColor: "#2563eb",
-                    allowOutsideClick: false, // Force them to click the button
-                });
-
-                if (pressReturn.isConfirmed) navigate("/");
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchInbox();//Fetch
+        handleFetchInbox();//Fetch
 
         setUnReadAmount(inbox.filter(e => !e.isRead).length);
         Swal.fire({
             title: '<strong>Mock Mail System</strong>',
             icon: 'info',
             html: `
-        <div class="text-left space-y-3 text-gray-700">
-          <p>This is a <b>shared sandbox</b> environment for system testing, everyone can access this inbox to test the system features.</p>
+            <div class="text-left space-y-3 text-gray-700">
+            <p>This is a <b>shared sandbox</b> environment for system testing, everyone can access this inbox to test the system features.</p>
           <hr class="my-2" />
           <p class="text-sm italic text-blue-600">
             <strong>Note:</strong> In a production environment, this would be your 
@@ -93,6 +62,38 @@ export default function MockMail() {
             background: '#ffffff',
         });
     }, [navigate]);
+
+    const handleFetchInbox = async () => {
+        try {
+            setLoading(true);
+
+            //GET
+            const dataResponse = await axios.get(import.meta.env.VITE_API_GET_INBOX + `?email=${email}`);
+
+            // If 200 OK, save the data
+            setInbox(dataResponse.data);
+        } catch (error: any) {
+            const status = error.response?.status;
+
+            let errorMsg = "An unexpected error occurred. Please try again.";
+            if (status === 404) {
+                errorMsg = "This email not found.";
+            }
+
+            const pressReturn = await Swal.fire({
+                title: "System Error",
+                text: errorMsg,
+                icon: "error",
+                confirmButtonText: "Return to Home",
+                confirmButtonColor: "#2563eb",
+                allowOutsideClick: false, // Force them to click the button
+            });
+
+            if (pressReturn.isConfirmed) navigate("/");
+        } finally {
+            setLoading(false);
+        }
+    }; //Hanle fetch inbox.
 
     return (
         <div className="flex flex-col h-screen bg-background text-foreground">
