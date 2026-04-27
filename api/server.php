@@ -90,13 +90,19 @@ if ($path === "/api") { //url: /api - show API info.
                 exit;
             }
 
-            if ($segments[3] === 'verify') {
-                handleVerifyEmailRequest($pdo);
-                break;
-            } else if ($segments[3] === 'verified') {
+            if ($segments[3] === 'verified') {
                 handleVerifiedEmail($pdo);
                 break;
             }
+
+        case 'inbox':
+            if ($request_method !== 'GET') {
+                handleMethodNotAllowed();
+                exit;
+            }
+
+            handleGetInbox($pdo);
+            break;
 
         default:
             handlePageNotFound();

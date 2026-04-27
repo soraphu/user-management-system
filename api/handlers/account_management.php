@@ -128,11 +128,8 @@ function handleResetPassword($db)
     }
 } //Reset password.
 
-function handleVerifyEmailRequest($db)
+function handleVerifyEmailRequest($db, $email)
 {
-    $input = json_decode(file_get_contents('php://input'), true);
-    $email = $input['email'];
-
     if (empty($email)) {
         http_response_code(400);
         echo json_encode(["status" => "error", "message" => "Email is required."]);
@@ -208,5 +205,57 @@ function handleVerifiedEmail($db)
     } catch (\Throwable $th) {
         http_response_code(500);
         echo json_encode(["status" => "error", "message" => $th->getMessage()]);
+    }
+}
+
+function handleGetInbox($db)
+{
+    $email = $_GET['email'];
+
+    if (empty($email)) {
+        http_response_code(400);
+        echo json_encode(["status" => "error", "message" => "Email is required."]);
+        return;
+    }
+
+
+    try {
+        $sqlFindEmail = "SELECT * FROM accounts WHERE email = ?";
+        $stmt = $db->prepare($sqlFindEmail);
+        $stmt->execute([$email]);
+
+        $user = $stmt->fetch();
+
+        if (!$user) {
+            http_response_code(404);
+            echo json_encode(["status" => "error", "message" => "Email not found."]);
+            return;
+        }
+
+        // We join or check against 'accounts' implicitly via the foreign key logic
+        $sql = "SELECT id, sender, subject, preview, url, buttonLabel, time, isRead 
+                FROM inbox 
+                WHERE owner_email = ? 
+                ORDER BY time DESC";
+
+        $stmt = $db->prepare($sql);
+        $stmt->execute([$email]);
+
+        // 3. Fetch all rows as an associative array
+        $inbox = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // MySQL stores BOOLEAN as 0 or 1; this ensures React sees true/false
+        foreach ($inbox as &$row) {
+            $row['isRead'] = (bool) $row['isRead'];
+            $row['id'] = (int) $row['id']; // Ensure ID is a number
+        }
+
+        // 5. Send the response
+        header('Content-Type: application/json');
+        echo json_encode($inbox);
+
+    } catch (PDOException $e) {
+        http_response_code(500);
+        echo json_encode(["error" => "Database error: " . $e->getMessage()]);
     }
 }

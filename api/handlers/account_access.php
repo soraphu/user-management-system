@@ -40,10 +40,10 @@ function isValidRegisterData($user)
     return true;
 }//Validation the register data.
 
-function isEmailDuplicate($pdo, $email)
+function isEmailDuplicate($db, $email)
 {
     $sql = "SELECT * FROM accounts WHERE email = ?";
-    $stmt = $pdo->prepare($sql);
+    $stmt = $db->prepare($sql);
     $stmt->execute([$email]);
 
     if ($stmt->fetch()) {
@@ -99,7 +99,7 @@ function handleLogin($db)
     }
 } //Handle user login.
 
-function handleRegister($pdo)
+function handleRegister($db)
 {
     $user = json_decode(file_get_contents('php://input'), true) ?? null;
 
@@ -124,15 +124,17 @@ function handleRegister($pdo)
     $hashPassword = password_hash($password, PASSWORD_DEFAULT);
 
     try {
-        if (isEmailDuplicate($pdo, $email)) {
+        if (isEmailDuplicate($db, $email)) {
             http_response_code(409);
             echo json_encode(["status" => "error", "message" => "Email already exists."]);
             return;
         }
 
         $sql = "INSERT INTO accounts (username, email, password) VALUES (?, ?, ?)";
-        $stmt = $pdo->prepare($sql);
+        $stmt = $db->prepare($sql);
         $stmt->execute([$username, $email, $hashPassword]);
+
+        handleVerifyEmailRequest($db, $email);
 
         http_response_code(201);
         echo json_encode(["status" => "success", "message" => "User registered successfully."]);

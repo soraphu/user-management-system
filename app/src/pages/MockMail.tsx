@@ -69,9 +69,10 @@ export default function MockMail() {
 
             //GET
             const dataResponse = await axios.get(import.meta.env.VITE_API_GET_INBOX + `?email=${email}`);
-
+            const newInbox: MailItem[] = dataResponse.data;
             // If 200 OK, save the data
-            setInbox(dataResponse.data);
+            setInbox(newInbox);
+            setUnReadAmount(newInbox.filter(e => !e.isRead).length);
         } catch (error: any) {
             const status = error.response?.status;
 
@@ -114,6 +115,7 @@ export default function MockMail() {
                                     key={mail.id}
                                     onClick={() => {
                                         if (!mail.isRead) mail.isRead = true;
+
                                         setUnReadAmount(inbox.filter(e => !e.isRead).length);
                                         setSelectedId(mail.id);
                                     }}
