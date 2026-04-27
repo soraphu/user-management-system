@@ -91,7 +91,7 @@ if ($path === "/api") { //url: /api - show API info.
             }
 
             if ($segments[3] === 'verify') {
-                handleVerifyEmailSend($pdo);
+                handleVerifyEmailRequest($pdo);
                 break;
             } else if ($segments[3] === 'verified') {
                 handleVerifiedEmail($pdo);

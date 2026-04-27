@@ -1,4 +1,39 @@
 <?php
+function handleSendVerifyEmailToken($db, $user, $token)
+{
+    try {
+        //Simulate send to email
+        $owner_email = $user['email'];
+        $sender = "server@user.management.system.com";
+        $subject = "Hi {$user['username']},";
+        $preview = "Thank for testing my signup feature, this project was make for learning the process of user management system and security.";
+        $url = "/verify-email?token=$token";
+        $buttonLabel = "Verify your email address";
+        $isRead = 0; // 0 for false, 1 for true in MySQL
+
+        $sqlCreateMail = "INSERT INTO inbox (
+                    owner_email, 
+                    sender, 
+                    subject, 
+                    preview, 
+                    url, 
+                    buttonLabel, 
+                    isRead
+                ) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        $stmt = $db->prepare($sqlCreateMail);
+        $stmt->execute([
+            $owner_email,
+            $sender,
+            $subject,
+            $preview,
+            $url,
+            $buttonLabel,
+            $isRead
+        ]);
+    } catch (\Throwable $th) {
+        throw new Exception("Error Processing Request", 1);
+    }
+}//Handle send verify email token to user.
 
 function handleForgetPassword($db)
 {
@@ -93,11 +128,10 @@ function handleResetPassword($db)
     }
 } //Reset password.
 
-function handleVerifyEmailSend($db)
+function handleVerifyEmailRequest($db)
 {
     $input = json_decode(file_get_contents('php://input'), true);
     $email = $input['email'];
-    $mockMail = isset($input['mock_mail']) ? $input['mock_mail'] : false;
 
     if (empty($email)) {
         http_response_code(400);
@@ -106,8 +140,8 @@ function handleVerifyEmailSend($db)
     }
 
     try {
-        $sql = "SELECT * FROM accounts WHERE email = ?";
-        $stmt = $db->prepare($sql);
+        $sqlFindEmail = "SELECT * FROM accounts WHERE email = ?";
+        $stmt = $db->prepare($sqlFindEmail);
         $stmt->execute([$email]);
 
         $user = $stmt->fetch();
@@ -123,17 +157,12 @@ function handleVerifyEmailSend($db)
         $hashedToken = hash('sha256', $token);
         $expiresAt = date('Y-m-d H:i:s', strtotime('+24 hours'));
 
-        $sql = "INSERT INTO email_verifications (email, token, expires_at) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE token = VALUES(token), expires_at = VALUES(expires_at)";
-        $stmt = $db->prepare($sql);
+        $sqlCreateToken = "INSERT INTO email_verifications (email, token, expires_at) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE token = VALUES(token), expires_at = VALUES(expires_at)";
+        $stmt = $db->prepare($sqlCreateToken);
         $stmt->execute([$email, $hashedToken, $expiresAt]);
 
+        handleSendVerifyEmailToken($db, $user, $token);
 
-        if ($mockMail == true) {
-            http_response_code(200);
-            echo json_encode(["status" => "success", "message" => "Verification token generated for $email.", "token" => $token]);
-        } else {
-            //wait for implement email sending logic here.
-        }
     } catch (\Throwable $th) {
         http_response_code(500);
         echo json_encode(["status" => "error", "message" => $th->getMessage()]);

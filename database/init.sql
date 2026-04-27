@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS email_verifications (
 CREATE TABLE IF NOT EXISTS inbox (
     id INT AUTO_INCREMENT PRIMARY KEY,
     owner_email VARCHAR(255) NOT NULL, -- The foreign key column
-    sender VARCHAR(255) DEFAULT "server@user.management.system.com",
+    sender VARCHAR(255) NOT NULL,
     subject VARCHAR(255) NOT NULL,
     preview TEXT NOT NULL,
     url VARCHAR(500) DEFAULT NULL,    -- Optional (?)
