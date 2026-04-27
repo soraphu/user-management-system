@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils"
 import axios from 'axios';
+import { useNavigate } from "react-router-dom";
 
 //Import components.
 import { Button } from "@/components/ui/button"
@@ -15,6 +16,7 @@ import { toast } from 'sonner';
 
 export function LoginForm({ className, ...props }: React.ComponentProps<"form">) {
   const handleUserLogin = async (e: any) => {
+    const navigate = useNavigate();
     e.preventDefault();
 
     const user: object = {
@@ -27,8 +29,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"form">)
 
       // Success Logic (Save token, redirect, etc.)
       if (response.status === 200) {
-        console.log("Login success");
-        console.log(response.data);
+        navigate("/Dashboard");
       }
     } catch (error: any) {
       // Error Logic

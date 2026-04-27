@@ -1,8 +1,7 @@
 # User Management System
 ## System Function
-- Role : Website will have role "admin" or "user".
-- Login : Users can login to website.
-- Register : Users can register to website.
-- Reset Password : Users can reset password.
-- Verify Email : Make sure user is actually own the email.
-- Rate Limit : Locked
+- Role : Website will have default role "admin" / "user".
+- Login : Login feature, use JWT for verify login complete in another page.
+- Register : Register feature.
+- Reset Password : Reset password on forget, verify by generate sha256 token.
+- Verify Email : Make sure user is actually own the email that use for login, verify by generate sha256 token.
