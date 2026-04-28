@@ -3,8 +3,9 @@ import { useSearchParams } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
-import { useState, type JSX, type ReactNode, useEffect } from "react";
+import { BounceLoader } from "react-spinners";
 import { cn } from "@/lib/utils"; // shadcn helper
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
@@ -109,41 +110,47 @@ export default function MockMail() {
                     <Separator />
 
                     <ScrollArea className="flex-1">
-                        <div className="flex flex-col gap-2 p-4">
-                            {inbox.map((mail) => (
-                                <button
-                                    key={mail.id}
-                                    onClick={() => {
-                                        if (!mail.isRead) mail.isRead = true;
+                        {loading ?
+                            <div className="absolute top-1/2 justify-self-center" >
+                                <BounceLoader color="#0096FF" />
+                            </div>
+                            :
+                            <div className="flex flex-col gap-2 p-4">
+                                {inbox.map((mail) => (
+                                    <button
+                                        key={mail.id}
+                                        onClick={() => {
+                                            if (!mail.isRead) mail.isRead = true;
 
-                                        setUnReadAmount(inbox.filter(e => !e.isRead).length);
-                                        setSelectedId(mail.id);
-                                    }}
-                                    className={cn(
-                                        "flex flex-col items-start gap-2 rounded-lg border p-3 text-left text-sm transition-all hover:bg-accent",
-                                        selectedId === mail.id && "bg-muted"
-                                    )}
-                                >
-                                    <div className="flex w-full flex-col gap-1">
-                                        <div className="flex items-center">
-                                            <div className="flex items-center gap-2">
-                                                <div className="font-semibold">{mail.sender}</div>
-                                                {!mail.isRead && (
-                                                    <span className="flex h-2 w-2 rounded-full bg-blue-600" />
-                                                )}
+                                            setUnReadAmount(inbox.filter(e => !e.isRead).length);
+                                            setSelectedId(mail.id);
+                                        }}
+                                        className={cn(
+                                            "flex flex-col items-start gap-2 rounded-lg border p-3 text-left text-sm transition-all hover:bg-accent",
+                                            selectedId === mail.id && "bg-muted"
+                                        )}
+                                    >
+                                        <div className="flex w-full flex-col gap-1">
+                                            <div className="flex items-center">
+                                                <div className="flex items-center gap-2">
+                                                    <div className="font-semibold">{mail.sender}</div>
+                                                    {!mail.isRead && (
+                                                        <span className="flex h-2 w-2 rounded-full bg-blue-600" />
+                                                    )}
+                                                </div>
+                                                <div className={cn("ml-auto text-xs text-muted-foreground")}>
+                                                    {mail.time}
+                                                </div>
                                             </div>
-                                            <div className={cn("ml-auto text-xs text-muted-foreground")}>
-                                                {mail.time}
-                                            </div>
+                                            <div className="text-xs font-medium">{mail.subject}</div>
                                         </div>
-                                        <div className="text-xs font-medium">{mail.subject}</div>
-                                    </div>
-                                    <div className="line-clamp-2 text-xs text-muted-foreground">
-                                        {mail.preview}
-                                    </div>
-                                </button>
-                            ))}
-                        </div>
+                                        <div className="line-clamp-2 text-xs text-muted-foreground">
+                                            {mail.preview}
+                                        </div>
+                                    </button>
+                                ))}
+                            </div>
+                        }
                     </ScrollArea>
                 </div>
 

@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { type VariantProps } from "class-variance-authority";
 
 type ButtonProps = React.ComponentPropsWithoutRef<typeof Button>;
 
