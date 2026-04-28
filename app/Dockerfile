@@ -15,6 +15,9 @@ FROM nginx:stable-alpine
 # Copy the built files from the previous stage to Nginx's html folder
 COPY --from=build /app/dist /usr/share/nginx/html
 
+# This replaces the default Nginx "Welcome" config with yours
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
 # Expose port 80
 EXPOSE 80
 

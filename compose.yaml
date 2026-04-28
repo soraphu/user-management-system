@@ -19,7 +19,7 @@ services:
     image: nginx:stable-alpine3.23-perl
     volumes:
       - ./api:/src/api:ro
-      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./api/nginx.conf:/etc/nginx/conf.d/default.conf:ro
     restart: no
     depends_on:
       - server
