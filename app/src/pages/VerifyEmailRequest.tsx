@@ -24,25 +24,22 @@ const VerifyEmailRequest = () => {
 
     const email = searchParams.get("email");
 
-    const handleSendVerifyToken = async () => {
-        await axios.post(import.meta.env.VITE_API_VERIFY_EMAIL_REQUEST, {
-            email: email
-        });
-        toast.success("Verification link has send to your mock mail.");
-    }//Handle send verify token.
-
     const handleResendVerifyToken = async () => {
         setIsResending(true);
         // Mocking an API call to your PHP backend
         try {
             // 1. The POST Request
             // We send the email in the body to your PHP API
-            handleSendVerifyToken();
+            await axios.post(import.meta.env.VITE_API_VERIFY_EMAIL_REQUEST, {
+                email: email
+            });
 
             // Trigger a success.
             toast.success("Verification link resent successfully!");
 
         } catch (error: any) {
+            console.log("kuy");
+
             // 3. ERROR (Status 400, 401, 500, etc.)
             // Axios automatically jumps here if the status code is 4xx or 5xx.
 

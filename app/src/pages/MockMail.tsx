@@ -173,7 +173,7 @@ export default function MockMail() {
                                     {selectedEmail.preview}
                                     <NavigateButton
                                         className="bg-blue-600"
-                                        hidden={selectedEmail.url ? false : true} to={selectedEmail.url ?? ""} label={selectedEmail.buttonLabel ?? ""}
+                                        hidden={selectedEmail.url ? false : true} to={selectedEmail.url ? `${selectedEmail.url}&email=${email}` : ""} label={selectedEmail.buttonLabel ?? ""}
                                     />
                                 </CardContent>
                             </Card>
