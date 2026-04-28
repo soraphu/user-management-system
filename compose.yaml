@@ -2,10 +2,10 @@ name: user-management-system
 
 services:
 
-  frontend:
-    build: ./app
-    ports:
-      - "3000:80"
+  # frontend:
+  #   build: ./app
+  #   ports:
+  #     - "3000:80"
 
   server:
     build: ./api

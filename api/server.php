@@ -89,6 +89,10 @@ if ($path === "/api") { //url: /api - show API info.
                 handleMethodNotAllowed();
                 exit;
             }
+            if ($segments[3] === 'verify-request') {
+                handleVerifyEmailRequest($pdo);
+                break;
+            }
 
             if ($segments[3] === 'verified') {
                 handleVerifiedEmail($pdo);

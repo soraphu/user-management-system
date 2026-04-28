@@ -35,6 +35,21 @@ function handleSendVerifyEmailToken($db, $user, $token)
     }
 }//Handle send verify email token to user.
 
+function createVerifyEmailToken($db, $email)
+{
+    $token = bin2hex(random_bytes(16));
+    $hashedToken = hash('sha256', $token);
+    $expiresAt = date('Y-m-d H:i:s', strtotime('+24 hours'));
+
+    //Keep hashed token in database.
+    $sqlCreateToken = "INSERT INTO email_verifications (email, token, expires_at) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE token = VALUES(token), expires_at = VALUES(expires_at)";
+    $stmt = $db->prepare($sqlCreateToken);
+    $stmt->execute([$email, $hashedToken, $expiresAt]);
+
+    //Send real token.
+    return $token;
+}
+
 function handleForgetPassword($db)
 {
     $input = json_decode(file_get_contents('php://input'), true);
@@ -128,8 +143,12 @@ function handleResetPassword($db)
     }
 } //Reset password.
 
-function handleVerifyEmailRequest($db, $email)
+function handleVerifyEmailRequest($db)
 {
+    $input = json_decode(file_get_contents('php://input'), true);
+    $email = $input['email'];
+
+    //Is body empty?
     if (empty($email)) {
         http_response_code(400);
         echo json_encode(["status" => "error", "message" => "Email is required."]);
@@ -137,27 +156,32 @@ function handleVerifyEmailRequest($db, $email)
     }
 
     try {
+        //Database execute.
         $sqlFindEmail = "SELECT * FROM accounts WHERE email = ?";
         $stmt = $db->prepare($sqlFindEmail);
         $stmt->execute([$email]);
-
         $user = $stmt->fetch();
 
+        //Is email was exist in accounts table?
         if (!$user) {
             http_response_code(404);
-            echo json_encode(["status" => "error", "message" => "Email not found."]);
+            echo json_encode(["status" => "error", "message" => "Account with this email not found."]);
             return;
         }
 
-        // Generate verification token and save to database (for simplicity, we use a random string here)
-        $token = bin2hex(random_bytes(16));
-        $hashedToken = hash('sha256', $token);
-        $expiresAt = date('Y-m-d H:i:s', strtotime('+24 hours'));
+        //Is this email already verified?
+        $user['verified'] = (bool) $user['verified'];
 
-        $sqlCreateToken = "INSERT INTO email_verifications (email, token, expires_at) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE token = VALUES(token), expires_at = VALUES(expires_at)";
-        $stmt = $db->prepare($sqlCreateToken);
-        $stmt->execute([$email, $hashedToken, $expiresAt]);
+        if ($user['verified'] == true) {
+            http_response_code(409);
+            echo json_encode(["status" => "error", "message" => "This email already verified."]);
+            return;
+        }
 
+        //Generate verify token.
+        $token = createVerifyEmailToken($db, $user['email']);
+
+        //Send verify token to mock mail.
         handleSendVerifyEmailToken($db, $user, $token);
 
     } catch (\Throwable $th) {

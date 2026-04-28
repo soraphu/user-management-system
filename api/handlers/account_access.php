@@ -134,8 +134,6 @@ function handleRegister($db)
         $stmt = $db->prepare($sql);
         $stmt->execute([$username, $email, $hashPassword]);
 
-        handleVerifyEmailRequest($db, $email);
-
         http_response_code(201);
         echo json_encode(["status" => "success", "message" => "User registered successfully."]);
     } catch (Throwable $th) {
