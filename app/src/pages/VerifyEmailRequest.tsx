@@ -4,7 +4,7 @@ import { useSearchParams } from 'react-router-dom';
 
 import Swal from 'sweetalert2';
 import { Link } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Mail, ArrowRight, RefreshCw } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import {

@@ -14,13 +14,14 @@ import {
     CardTitle,
 } from "@/components/ui/card";
 import { useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2';
 
 const EmailVerifiedPage = () => {
     const navigate = useNavigate();
     const [isVerified, setIsVerified] = useState<boolean>(false);
     const [searchParams] = useSearchParams();
     const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState<string>("");
+    const [error, setError] = useState<string>();
 
     useEffect(() => {
         const verifyToken = async () => {
@@ -58,6 +59,34 @@ const EmailVerifiedPage = () => {
         verifyToken();
     }, [searchParams]);
 
+    const requestNewLink = async () => {
+        const email = searchParams.get('email');
+
+        try {
+            await axios.post(import.meta.env.VITE_API_VERIFY_EMAIL_REQUEST, {
+                email: email
+            });
+        } catch (error: any) {
+            if (error.status === 409) {
+                const pressReturn = await Swal.fire({
+                    icon: "error",
+                    title: "ERROR",
+                    text: error.response.data.message,
+                    confirmButtonText: 'Return to Home',
+                    confirmButtonColor: '#2563eb',
+                    allowOutsideClick: false,
+                    background: '#ffffff',
+                });
+                if (pressReturn.isConfirmed) navigate("/");
+
+            } else {
+                console.error(`Request: ${error.response.data.message}`);
+                navigate(`/verify-email-request?email=${email}`);
+            }
+        }
+
+    }//Request new link.
+
     if (isLoading) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
@@ -76,7 +105,7 @@ const EmailVerifiedPage = () => {
                         </div>
                         <CardTitle className="text-2xl font-bold text-slate-900">Verification Failed</CardTitle>
                         <CardDescription className="text-center text-base pt-2">
-                            {error || "Something went wrong during the verification process."}
+                            {error ?? "Something went wrong during the verification process."}
                         </CardDescription>
                     </CardHeader>
 
@@ -90,7 +119,7 @@ const EmailVerifiedPage = () => {
                         <Button
                             variant="default"
                             className="w-full bg-slate-900"
-                            onClick={() => navigate('/')}
+                            onClick={requestNewLink}
                         >
                             <RefreshCcw className="mr-2 h-4 w-4" />
                             Request New Link
@@ -101,12 +130,12 @@ const EmailVerifiedPage = () => {
                             className="w-full"
                             onClick={() => navigate('/')}
                         >
-                            <Home className="mr-2 h-4 w-4" />
+                            <LogIn className="ml-2 h-4 w-4" />
                             Back to Login
                         </Button>
                     </CardFooter>
                 </Card>
-            </div>
+            </div >
         );
     }
     if (isVerified) {
@@ -127,8 +156,8 @@ const EmailVerifiedPage = () => {
                     <CardContent className="pt-4">
                         <div className="bg-slate-100 rounded-lg p-4 mb-2">
                             <p className="text-sm text-slate-600 text-center">
-                                Welcome to the <strong>RMUTL IoT Dashboard</strong>.
-                                You can now manage your smart plugs and sensors.
+                                Welcome to the <strong>User mangement system</strong> project.
+                                You can now access my website.
                             </p>
                         </div>
                     </CardContent>
@@ -136,7 +165,7 @@ const EmailVerifiedPage = () => {
                     <CardFooter className="flex flex-col gap-3">
                         <Button
                             className="w-full bg-green-600 hover:bg-green-700"
-                            onClick={() => navigate('/dashboard')}
+                            onClick={() => navigate('/')}
                         >
                             Go Back to Login
                             <LogIn className="ml-2 h-4 w-4" />
