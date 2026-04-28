@@ -51,6 +51,10 @@ const RegisterForm = ({ className, ...props }: React.ComponentProps<"div">) => {
             //Route to verofy email request path.
             navigate(`/verify-email-request?email=${user.email}`);
 
+            //Send
+            await axios.post(import.meta.env.VITE_API_VERIFY_EMAIL_REQUEST, {
+                email: user.email
+            });
         } catch (error: any) {
             //Failed to create.
             if (error.status === 409) {

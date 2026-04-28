@@ -4,7 +4,7 @@ import { useSearchParams } from 'react-router-dom';
 
 import Swal from 'sweetalert2';
 import { Link } from 'react-router-dom';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Mail, ArrowRight, RefreshCw } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import {
@@ -24,17 +24,20 @@ const VerifyEmailRequest = () => {
 
     const email = searchParams.get("email");
 
-    const handleResend = async () => {
+    const handleSendVerifyToken = async () => {
+        await axios.post(import.meta.env.VITE_API_VERIFY_EMAIL_REQUEST, {
+            email: email
+        });
+        toast.success("Verification link has send to your mock mail.");
+    }//Handle send verify token.
+
+    const handleResendVerifyToken = async () => {
         setIsResending(true);
         // Mocking an API call to your PHP backend
         try {
             // 1. The POST Request
             // We send the email in the body to your PHP API
-            await axios.post(import.meta.env.VITE_API_VERIFY_EMAIL_REQUEST, {
-                email: email
-            });
-
-            // 2. SUCCESS (Status 2xx)
+            handleSendVerifyToken();
 
             // Trigger a success.
             toast.success("Verification link resent successfully!");
@@ -99,7 +102,7 @@ const VerifyEmailRequest = () => {
                     <Button
                         variant="outline"
                         className="w-full"
-                        onClick={handleResend}
+                        onClick={handleResendVerifyToken}
                         disabled={isResending}
                     >
                         {isResending ? (
