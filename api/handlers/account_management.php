@@ -30,6 +30,7 @@ function handleSendVerifyEmailToken($db, $user, $token)
             $buttonLabel,
             $isRead
         ]);
+
     } catch (\Throwable $th) {
         throw new Exception("Error Processing Request", 1);
     }
@@ -183,6 +184,9 @@ function handleVerifyEmailRequest($db)
 
         //Send verify token to mock mail.
         handleSendVerifyEmailToken($db, $user, $token);
+
+        http_response_code(201);
+        echo json_encode(["status" => "success", "message" => "Verify email request was send to {$user['email']}."]);
 
     } catch (\Throwable $th) {
         http_response_code(500);

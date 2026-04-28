@@ -47,8 +47,9 @@ const RegisterForm = ({ className, ...props }: React.ComponentProps<"div">) => {
                 showConfirmButton: false,
                 timer: 1500
             });
-            //Route to root path.
-            navigate('/');
+
+            //Route to verofy email request path.
+            navigate(`/verify-email-request?email=${user.email}`);
 
         } catch (error: any) {
             //Failed to create.

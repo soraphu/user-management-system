@@ -59,7 +59,7 @@ export default function MockMail() {
         </div>
       `,
             confirmButtonText: 'I Understand',
-            confirmButtonColor: '#2563eb', // Tailwind blue-600
+            confirmButtonColor: '#2563eb',
             background: '#ffffff',
         });
     }, [navigate]);
