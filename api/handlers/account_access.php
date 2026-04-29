@@ -1,4 +1,77 @@
 <?php
+use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
+
+function verifyAccessTokens()
+{
+    // 1. Check if the cookie even exists
+    if (!isset($_COOKIE['auth_token'])) {
+        http_response_code(401);
+        echo json_encode(["message" => "Unauthorized: No token provided"]);
+        exit();
+    }
+
+    $jwt = $_COOKIE['auth_token'];
+    $secretKey = $_ENV['JWT_SECRET']; // Your secret from .env
+
+    try {
+        // 2. Decode and Verify
+        // This checks the signature AND the expiration (exp) automatically
+        $decoded = JWT::decode($jwt, new Key($secretKey, 'HS256'));
+
+        // 3. Return the user data to be used in your logic
+        return (array) $decoded->data;
+
+    } catch (Exception $e) {
+        // 4. Handle errors (Expired, Tampered, Invalid)
+        http_response_code(401);
+        echo json_encode(["message" => "Unauthorized: " . $e->getMessage()]);
+        exit();
+    }
+}
+
+function generateIdentityToken($userId, $secretKey)
+{
+    // 1. Create the Header
+    $header = json_encode(['alg' => 'HS256', 'typ' => 'JWT']);
+    $base64UrlHeader = str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($header));
+
+    // 2. Create the Payload
+    $payload = json_encode([
+        'user_id' => $userId,
+        'iat' => time(),        // Issued at
+        'exp' => time() + 3600  // Expires in 1 hour
+    ]);
+    $base64UrlPayload = str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($payload));
+
+    // 3. Create the Signature
+    $signature = hash_hmac('sha256', $base64UrlHeader . "." . $base64UrlPayload, $secretKey, true);
+    $base64UrlSignature = str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($signature));
+
+    // 4. Combine them
+    return $base64UrlHeader . "." . $base64UrlPayload . "." . $base64UrlSignature;
+}
+
+function respondWithIdentityTokens()
+{
+    // Your JWT secret and payload logic here...
+    $jwt = "your.generated.jwt.token";
+
+    setcookie(
+        "auth_token",        // Name
+        $jwt,               // Value
+        [
+            "expires" => time() + 3600, // 1 hour
+            "path" => "/",
+            "domain" => "localhost",    // Match your dev domain
+            "secure" => false,          // Set to true in Production (HTTPS)
+            "httponly" => true,         // CRITICAL: Prevents JS access
+            "samesite" => "Lax"         // Prevents CSRF attacks
+        ]
+    );
+
+    echo json_encode(["message" => "Login successful"]);
+}
 
 function isValidRegisterData($user)
 {

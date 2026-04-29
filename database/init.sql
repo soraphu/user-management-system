@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS accounts (
 
 CREATE TABLE IF NOT EXISTS password_resets (
     email VARCHAR(100) NOT NULL,
-    token CHAR(64) NOT NULL,
+    token CHAR(255) NOT NULL,
     expires_at DATETIME NOT NULL,
 
     PRIMARY KEY (email),
@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS password_resets (
 
 CREATE TABLE IF NOT EXISTS email_verifications (
     email VARCHAR(100) NOT NULL,
-    token CHAR(64) NOT NULL,
+    token CHAR(255) NOT NULL,
     expires_at DATETIME NOT NULL,
 
     PRIMARY KEY (email),
@@ -44,3 +44,17 @@ CREATE TABLE IF NOT EXISTS inbox (
         ON DELETE CASCADE 
         ON UPDATE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS refresh_tokens (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    token VARCHAR(255) NOT NULL,
+    expires_at DATETIME NOT NULL,
+    
+    UNIQUE (token),
+    INDEX (user_id),
+    FOREIGN KEY (user_id) 
+        REFERENCES accounts(id) 
+        ON DELETE CASCADE 
+        ON UPDATE CASCADE
+) ;

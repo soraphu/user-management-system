@@ -33,15 +33,18 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"form">)
     try {
       await axios.post(import.meta.env.VITE_API_LOGIN, user);
 
+      //Login success.
       navigate("/Dashboard");
     } catch (error: any) {
 
       const message = error.response?.data?.message || "Login failed";
 
+      //If didn't verify email.
       if (error.status === 401) {
         navigate(`/verify-email-request?email=${user.email}`);
       }
 
+      //Other.
       toast.error(message);
     } //trycatch
   }; //Handle user login.
