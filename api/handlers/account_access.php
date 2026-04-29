@@ -85,16 +85,25 @@ function handleLogin($db)
 
         $user = $stmt->fetch();
 
-        if ($user && password_verify($password, $user['password'])) {
-            unset($user['password']); //Remove password from response data for security.
-
-            http_response_code(200);
-            echo json_encode(["status" => "success", "message" => "Login successful.", "data" => $user]);
-        } else {
-            throw new Exception("Invalid Email or Password.");
+        if (empty($user) || !password_verify($password, $user['password'])) {
+            http_response_code(409);
+            echo json_encode(["status" => "error", "message" => "Invalid Email or Password."]);
+            return;
         }
+
+        if (password_verify($password, $user['password']) && !$user['verified']) {
+            http_response_code(401);
+            echo json_encode(["status" => "error", "message" => "Verify email required."]);
+            return;
+        }
+
+        if (password_verify($password, $user['password']) && $user['verified']) {
+            http_response_code(200);
+            echo json_encode(["status" => "success", "message" => "Login successful."]);
+            return;
+        }
+
     } catch (\Throwable $th) {
-        http_response_code(401);
         echo json_encode(["status" => "error", "message" => $th->getMessage()]);
     }
 } //Handle user login.

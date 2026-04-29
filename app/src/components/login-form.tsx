@@ -15,28 +15,35 @@ import InputPasswordWithVisibleControl from "./ui/password-visible-control"
 import { toast } from 'sonner';
 
 export function LoginForm({ className, ...props }: React.ComponentProps<"form">) {
-  const handleUserLogin = async (e: any) => {
-    const navigate = useNavigate();
-    e.preventDefault();
 
-    const user: object = {
+  const navigate = useNavigate();
+
+  const handleUserLogin = async (e: any) => {
+    e.preventDefault();
+    interface UserItem {
+      email: string;
+      password: string;
+    }; //UserItem type
+
+    const user: UserItem = {
       email: e.target.email.value,
       password: e.target.password.value
     };
 
     try {
-      const response = await axios.post(import.meta.env.VITE_API_LOGIN, user);
+      await axios.post(import.meta.env.VITE_API_LOGIN, user);
 
-      // Success Logic (Save token, redirect, etc.)
-      if (response.status === 200) {
-        navigate("/Dashboard");
-      }
+      navigate("/Dashboard");
     } catch (error: any) {
-      // Error Logic
+
       const message = error.response?.data?.message || "Login failed";
+
+      if (error.status === 401) {
+        navigate(`/verify-email-request?email=${user.email}`);
+      }
+
       toast.error(message);
-      console.error("Login Error:", error);
-    }
+    } //trycatch
   }; //Handle user login.
 
   return (

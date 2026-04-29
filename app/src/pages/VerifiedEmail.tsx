@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 
 import { PulseLoader } from 'react-spinners';
-import { CheckCircle2, LogIn, RefreshCcw, XCircle, Home } from 'lucide-react';
+import { CheckCircle2, LogIn, RefreshCcw, XCircle } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import {
     Card,
@@ -156,7 +156,7 @@ const EmailVerifiedPage = () => {
                     <CardContent className="pt-4">
                         <div className="bg-slate-100 rounded-lg p-4 mb-2">
                             <p className="text-sm text-slate-600 text-center">
-                                Welcome to the <strong>User mangement system</strong> project.
+                                Welcome to the <strong>User Mangement System</strong> project.
                                 You can now access my website.
                             </p>
                         </div>
