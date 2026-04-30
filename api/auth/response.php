@@ -1,12 +1,19 @@
 <?php
-function responseError($status, $message)
+function respondFailed($status, $message)
 {
     http_response_code($status);
     echo json_encode(["success" => false, "message" => $message]);
     exit;
 }
 
-function responseSuccess($status, $message)
+function respond400FieldsMissing()
+{
+    http_response_code(400);
+    echo json_encode(["success" => false, "message" => "Required fields are missing."]);
+    exit;
+}
+
+function respondSuccess($status, $message)
 {
     http_response_code($status);
     echo json_encode(["success" => true, "message" => $message]);

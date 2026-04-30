@@ -3,7 +3,7 @@ include_once 'response.php';
 function ensureDataNotEmpty($data)
 {
     if (empty($data)) {
-        responseError(400, "Request data can't be empty.");
+        respondFailed(400, "Request data can't be empty.");
     }
 }
 
@@ -15,10 +15,10 @@ function ensureEmailNotDuplicate($db, $email)
 
     try {
         if ($stmt->fetch()) {
-            responseError(409, "This email already exists.");
+            respondFailed(409, "This email already exists.");
         }
     } catch (\Throwable $th) {
-        responseError(500, "Internal");
+        respondFailed(500, "Internal server error.");
         exit;
     }
 } //Check if email already exists in database.
@@ -34,20 +34,20 @@ function ensureValidRegisterData($user)
     $domain = strtolower(substr(strrchr($email, "@"), 1));
 
     if (empty($username) || empty($email) || empty($password)) {
-        responseError(400, "Required fields are missing.");
+        respond400FieldsMissing();
     } //Validate required field.
 
     // Check if it "looks" like an email
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        responseError(403, "Invalid email format.");
+        respondFailed(403, "Invalid email format.");
     }//Email format validation.
 
     if (in_array($domain, $blocked_domains)) {
-        responseError(403, "Please use a fake email (e.g. @test.com) for PDPA safety.");
+        respondFailed(403, "Please use a fake email (e.g. @test.com) for PDPA safety.");
     }//Fake email validation.
 
     if (strlen($password) < 8) {
-        responseError(400, "Password must be at least 8 characters long.");
+        respondFailed(400, "Password must be at least 8 characters long.");
     }//Password validation.
 }//Validation the register data.
 

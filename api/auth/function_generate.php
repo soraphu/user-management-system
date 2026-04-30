@@ -1,16 +1,16 @@
 <?php
-function handleCreateInbox($db, $user, $newUrl)
+function createMailtoInbox($db, $user, $newUrl)
 {
-    try {
-        //Simulate send to email
-        $owner_email = $user['email'];
-        $sender = "server@user.management.system.com";
-        $subject = "Hi {$user['username']},";
-        $preview = "Thank for testing my signup feature, this project was make for learning the process of user management system and security.";
-        $url = $newUrl;
-        $buttonLabel = "Verify your email address";
-        $isRead = 0; // 0 for false, 1 for true in MySQL
+    //Simulate send to email
+    $owner_email = $user['email'];
+    $sender = "server@user.management.system.com";
+    $subject = "Hi {$user['username']},";
+    $preview = "Thank for testing my signup feature, this project was make for learning the process of user management system and security.";
+    $url = $newUrl;
+    $buttonLabel = "Verify your email address";
+    $isRead = 0; // 0 for false, 1 for true in MySQL
 
+    try {
         $sqlCreateMail = "INSERT INTO inbox (
                     owner_email, 
                     sender, 
@@ -32,9 +32,9 @@ function handleCreateInbox($db, $user, $newUrl)
         ]);
 
     } catch (\Throwable $th) {
-        throw new Exception("Error Processing Request", 1);
+        respondFailed(500, $th->getMessage());
     }
-}//Handle send verify email token to user.
+}//Sent email to inbox.
 
 function createResetPasswordToken($db, $email)
 {
@@ -42,14 +42,18 @@ function createResetPasswordToken($db, $email)
     $hashedToken = hash('sha256', $token);
     $expiresAt = date('Y-m-d H:i:s', strtotime('+1 hour'));
 
-    //Keep hash token in password_resets table.
-    $sql = "INSERT INTO password_resets (email, token, expires_at) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE token = VALUES(token), expires_at = VALUES(expires_at)";
-    $stmt = $db->prepare($sql);
-    $stmt->execute([$email, $hashedToken, $expiresAt]);
+    try {
+        //Keep hash token in password_resets table.
+        $sql = "INSERT INTO password_resets (email, token, expires_at) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE token = VALUES(token), expires_at = VALUES(expires_at)";
+        $stmt = $db->prepare($sql);
+        $stmt->execute([$email, $hashedToken, $expiresAt]);
 
-    //Send real token.
-    return $token;
-}//
+        //Real token.
+        return $token;
+    } catch (\Throwable $th) {
+        respondFailed(500, $th->getMessage());
+    }
+}//Generate reset password token.
 
 function createVerifyEmailToken($db, $email)
 {
@@ -57,11 +61,15 @@ function createVerifyEmailToken($db, $email)
     $hashedToken = hash('sha256', $token);
     $expiresAt = date('Y-m-d H:i:s', strtotime('+24 hours'));
 
-    //Keep hashed token in email_verifications table.
-    $sqlCreateToken = "INSERT INTO email_verifications (email, token, expires_at) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE token = VALUES(token), expires_at = VALUES(expires_at)";
-    $stmt = $db->prepare($sqlCreateToken);
-    $stmt->execute([$email, $hashedToken, $expiresAt]);
+    try {
+        //Keep hashed token in email_verifications table.
+        $sqlCreateToken = "INSERT INTO email_verifications (email, token, expires_at) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE token = VALUES(token), expires_at = VALUES(expires_at)";
+        $stmt = $db->prepare($sqlCreateToken);
+        $stmt->execute([$email, $hashedToken, $expiresAt]);
 
-    //Send real token.
-    return $token;
-}//
+        //Real token.
+        return $token;
+    } catch (\Throwable $th) {
+        respondFailed(500, $th->getMessage());
+    }
+}//Generate verify email token.

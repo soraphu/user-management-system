@@ -39,9 +39,9 @@ function respondApiDocs()
                         "400" => [
                             "success" => false,
                             "message" => [
-                                "Data can't be empty.",
-                                "Password must be at least 8 characters long.",
+                                "Request data can't be empty.",
                                 "Required fields are missing.",
+                                "Password must be at least 8 characters long.",
                             ]
                         ],
                         "403" => [
@@ -56,7 +56,77 @@ function respondApiDocs()
                     ]
                 ],
 
+                "/email/verify-request" => [
+                    "description" => "Request email verify link (send to inbox).",
+                    "method" => "POST",
+                    "requestBody" => [
+                        "content_type" => "application/json",
+                        "schema" => [
+                            "email" => "string (required)",
+                        ]
+                    ],
+                    "response" => [
+                        "201" => ["success" => true, "message" => "Verify email request was send to {your_email}."],
+                        "400" => [
+                            "success" => false,
+                            "message" => [
+                                "Request data can't be empty.",
+                                "Required fields are missing.",
+                            ]
+                        ],
+                        "404" => ["success" => false, "message" => "Account with this email not found."],
+                        "409" => ["success" => false, "message" => "This email already verified."],
+                        "500" => ["success" => false, "message" => "{Catch message}"],
+                    ]
+                ],
+
+                "/email/verified" => [
+                    "description" => "Request to verified email.",
+                    "method" => "POST",
+                    "requestBody" => [
+                        "content_type" => "application/json",
+                        "schema" => [
+                            "token" => "string (required)",
+                        ]
+                    ],
+                    "response" => [
+                        "200" => ["success" => true, "message" => "Email {your_email} verified successfully."],
+                        "400" => [
+                            "success" => false,
+                            "message" => [
+                                "Request data can't be empty.",
+                                "Required fields are missing.",
+                            ]
+                        ],
+                        "404" => ["success" => false, "message" => "Invalid or expired verification token."],
+                        "500" => ["success" => false, "message" => "{Catch message}"],
+                    ]
+                ],
+
                 "/login" => [
+                    "description" => "Authenticate user and issue tokens.",
+                    "method" => "POST",
+                    "requestBody" => [
+                        "content_type" => "application/json",
+                        "schema" => [
+                            "email" => "string (required)",
+                            "password" => "string (required)"
+                        ]
+                    ],
+                    "response" => [
+                        "200" => [
+                            "success" => true,
+                            "message" => "User login successfully.",
+                            "access_token" => "string (JWT - Store in JS Memory)",
+                            "refresh_token" => "Automatically set via HttpOnly Cookie."
+                        ],
+                        "400" => ["success" => false, "message" => "Required fields are missing."],
+                        "409" => ["success" => false, "message" => "Invalid Email or Password."],
+                        "401" => ["success" => false, "message" => "Verify email required."],
+                    ]
+                ],
+
+                "login/refresh-token" => [
                     "description" => "Authenticate user and issue tokens.",
                     "method" => "POST",
                     "requestBody" => [
@@ -77,20 +147,6 @@ function respondApiDocs()
                     ]
                 ],
 
-                "/refresh-token" => [
-                    "description" => "Exchange a Refresh Token (from cookie) for a new Access Token.",
-                    "method" => "POST",
-                    "note" => "Does not require a request body. Reads 'refresh_token' cookie automatically.",
-                    "response" => [
-                        "200" => [
-                            "success" => true,
-                            "access_token" => "string (New JWT)"
-                        ],
-                        "401" => ["success" => false, "message" => "Session expired. Please login again."],
-                        "500" => ["success" => false, "message" => "Internal server error."]
-                    ]
-                ],
-
                 "/password/forget" => [
                     "description" => "Initiate password reset flow by sending an email.",
                     "method" => "POST",
@@ -99,7 +155,8 @@ function respondApiDocs()
                         "schema" => ["email" => "string (valid email)"]
                     ],
                     "response" => [
-                        "200" => ["success" => true, "message" => "Reset link sent to your email."],
+                        "200" => ["success" => true, "message" => "Reset link was sent to {your_email}."],
+                        "400" => ["success" => false, "message" => "Request data can't be empty."],
                         "404" => ["success" => false, "message" => "User with this email not found."],
                         "500" => ["success" => false, "message" => "Internal server error."]
                     ]
@@ -117,19 +174,19 @@ function respondApiDocs()
                     ],
                     "response" => [
                         "200" => ["success" => true, "message" => "Password updated successfully."],
-                        "400" => ["success" => false, "message" => "Invalid or expired token."],
+                        "400" => [
+                            "success" => false,
+                            "message" => [
+                                "Required fields are missing.",
+                                "Password must be at least 8 characters long.",
+                                "Invalid or expired token.",
+                            ]
+                        ],
+                        "404" => ["success" => false, "message" => "Invalid or exipred reset token."],
                         "500" => ["success" => false, "message" => "Internal server error."]
                     ]
                 ],
 
-                "/logout" => [
-                    "description" => "Revoke refresh token and clear cookies.",
-                    "method" => "POST",
-                    "response" => [
-                        "200" => ["success" => true, "message" => "Logged out. Database record deleted."],
-                        "500" => ["success" => false, "message" => "Could not complete logout on server."]
-                    ]
-                ]
             ]
         ]
     ]);
