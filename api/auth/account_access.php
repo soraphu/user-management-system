@@ -2,62 +2,62 @@
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 
-function verifyAccessTokens()
-{
-    // 1. Check if the cookie even exists
-    if (!isset($_COOKIE['auth_token'])) {
-        http_response_code(401);
-        echo json_encode(["message" => "Unauthorized: No token provided"]);
-        exit();
-    }
+// function verifyAccessTokens()
+// {
+//     // 1. Check if the cookie even exists
+//     if (!isset($_COOKIE['auth_token'])) {
+//         http_response_code(401);
+//         echo json_encode(["message" => "Unauthorized: No token provided"]);
+//         exit();
+//     }
 
-    $jwt = $_COOKIE['auth_token'];
-    $secretKey = $_ENV['JWT_SECRET']; // Your secret from .env
+//     $jwt = $_COOKIE['auth_token'];
+//     $secretKey = $_ENV['JWT_SECRET']; // Your secret from .env
 
-    try {
-        // 2. Decode and Verify
-        // This checks the signature AND the expiration (exp) automatically
-        $decoded = JWT::decode($jwt, new Key($secretKey, 'HS256'));
+//     try {
+//         // 2. Decode and Verify
+//         // This checks the signature AND the expiration (exp) automatically
+//         $decoded = JWT::decode($jwt, new Key($secretKey, 'HS256'));
 
-        // 3. Return the user data to be used in your logic
-        return (array) $decoded->data;
+//         // 3. Return the user data to be used in your logic
+//         return (array) $decoded->data;
 
-    } catch (Exception $e) {
-        // 4. Handle errors (Expired, Tampered, Invalid)
-        http_response_code(401);
-        echo json_encode(["message" => "Unauthorized: " . $e->getMessage()]);
-        exit();
-    }
-}
+//     } catch (Exception $e) {
+//         // 4. Handle errors (Expired, Tampered, Invalid)
+//         http_response_code(401);
+//         echo json_encode(["message" => "Unauthorized: " . $e->getMessage()]);
+//         exit();
+//     }
+// }
 
-function issueIdentityTokens($userId) {
-    // 1. Create the JWT Access Token
-    $accessToken = JWT::encode([
-        'sub' => $userId,
-        'iat' => time(),
-        'exp' => time() + (15 * 60) // 15 mins
-    ], $_ENV['JWT_SECRET'], 'HS256');
+// function issueIdentityTokens($userId) {
+//     // 1. Create the JWT Access Token
+//     $accessToken = JWT::encode([
+//         'sub' => $userId,
+//         'iat' => time(),
+//         'exp' => time() + (15 * 60) // 15 mins
+//     ], $_ENV['JWT_SECRET'], 'HS256');
 
-    // 2. Create the Refresh Token
-    $rawRefreshToken = bin2hex(random_bytes(32));
-    $hashedToken = password_hash($rawRefreshToken, PASSWORD_BCRYPT);
+//     // 2. Create the Refresh Token
+//     $rawRefreshToken = bin2hex(random_bytes(32));
+//     $hashedToken = password_hash($rawRefreshToken, PASSWORD_BCRYPT);
 
-    // 3. Save to MySQL (Your refresh_tokens table)
-    $db->query("INSERT INTO refresh_tokens (user_id, token, expires_at) 
-                VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 7 DAY))", 
-                [$userId, $hashedToken]);
+//     // 3. Save to MySQL (Your refresh_tokens table)
+//     $db->query("INSERT INTO refresh_tokens (user_id, token, expires_at) 
+//                 VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 7 DAY))", 
+//                 [$userId, $hashedToken]);
 
-    // 4. Send Refresh Token via Secure Cookie
-    setcookie("refresh_token", $rawRefreshToken, [
-        'expires' => time() + 604800,
-        'httponly' => true,
-        'secure' => true,
-        'samesite' => 'Strict'
-    ]);
+//     // 4. Send Refresh Token via Secure Cookie
+//     setcookie("refresh_token", $rawRefreshToken, [
+//         'expires' => time() + 604800,
+//         'httponly' => true,
+//         'secure' => true,
+//         'samesite' => 'Strict'
+//     ]);
 
-    // 5. Return Access Token for React
-    return ["access_token" => $accessToken];
-}
+//     // 5. Return Access Token for React
+//     return ["access_token" => $accessToken];
+// }
 
 function isValidRegisterData($user)
 {

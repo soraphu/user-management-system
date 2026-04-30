@@ -1,7 +1,7 @@
 <?php
 require_once 'db_connect.php';
-require_once 'handlers/account_access.php';
-require_once 'handlers/account_management.php';
+require_once 'auth/account_access.php';
+require_once 'auth/account_management.php';
 
 // Define which frontends are allowed to talk to this API
 $allowed_origins = [
@@ -207,13 +207,13 @@ if ($first2PathSegments === "/api/auth/v1") {
             exit;
 
         default:
-            pageNotFoundRespond();
+            resPageNotFound();
             exit;
 
     }//switch-case
 } //Main router for API endpoints.
 
-pageNotFoundRespond();
+resPageNotFound();
 
 function ensureReqMethod($expectMethod)
 {
@@ -229,7 +229,7 @@ function ensureReqMethod($expectMethod)
     }//Validation.
 } //Handle method not allowed.
 
-function pageNotFoundRespond()
+function resPageNotFound()
 {
     http_response_code(404);
     echo json_encode(["error" => "Page not found."]);
