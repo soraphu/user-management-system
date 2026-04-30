@@ -5,6 +5,13 @@ include_once "function_generate.php";
 // use Firebase\JWT\JWT;
 // use Firebase\JWT\Key;
 
+function handleFetchJsonBody()
+{
+    $data = json_decode(file_get_contents('php://input'), true) ?? null;
+    ensureDataNotEmpty($data);
+    return $data;
+}
+
 // function verifyAccessTokens()
 // {
 //     // 1. Check if the cookie even exists
@@ -64,9 +71,7 @@ include_once "function_generate.php";
 
 function handleLogin($db)
 {
-    $user = json_decode(file_get_contents('php://input'), true) ?? null;
-
-    ensureDataNotEmpty($user);
+    $user = handleFetchJsonBody();
 
     $email = $user['email'];
     $password = $user['password'];
@@ -109,9 +114,8 @@ function handleLogin($db)
 
 function handleRegister($db)
 {
-    $user = json_decode(file_get_contents('php://input'), true) ?? null;
+    $user = handleFetchJsonBody();
 
-    ensureDataNotEmpty($user);
     ensureValidRegisterData($user);
 
     $username = $user['username'];
@@ -135,15 +139,12 @@ function handleRegister($db)
 
 function handleForgetPassword($db)
 {
-    $input = json_decode(file_get_contents('php://input'), true);
+    $input = handleFetchJsonBody();
 
     $email = $input['email'];
-    $sendToMockMail = isset($input['mock_mail']) ? $input['mock_mail'] : false;
 
     if (empty($email)) {
-        http_response_code(400);
-        echo json_encode(["status" => "error", "message" => "Email is required."]);
-        return;
+        responseError(400, "Email is required.");
     }
 
     try {
@@ -154,31 +155,19 @@ function handleForgetPassword($db)
         $user = $stmt->fetch();
 
         if (!$user) {
-            http_response_code(404);
-            echo json_encode(["status" => "error", "message" => "Email not found."]);
-            return;
+            responseError(404, "Email not found.");
         }
 
         // Generate reset token and save to database (for simplicity, we use a random string here)
-        $token = bin2hex(random_bytes(16));
-        $hashedToken = hash('sha256', $token);
-        $expiresAt = date('Y-m-d H:i:s', strtotime('+1 hour'));
+        $token = createResetPasswordToken($db, $email);
 
-        $sql = "INSERT INTO password_resets (email, token, expires_at) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE token = VALUES(token), expires_at = VALUES(expires_at)";
-        $stmt = $db->prepare($sql);
-        $stmt->execute([$email, $hashedToken, $expiresAt]);
+        handleCreateInbox($db, $user, "/verified?token=$token");
 
-        if ($sendToMockMail == true) {
-            http_response_code(200);
-            echo json_encode(["status" => "success", "message" => "Password reset token generated for $email.", "token" => $token]);
-        } else {
-            http_response_code(200);
-            echo json_encode(["status" => "success", "message" => "Password reset token generated for $email."]);
-            //wait for implement email sending logic here.
-        }
+        responseSuccess(200, "Password reset link was send to $email.");
+        //wait for implement email sending logic here.
+
     } catch (\Throwable $th) {
-        http_response_code(500);
-        echo json_encode(["status" => "error", "message" => $th->getMessage()]);
+        responseError(500, $th->getMessage());
     }
 } //Handle forget password.
 
@@ -228,18 +217,16 @@ function handleResetPassword($db)
 
 function handleVerifyEmailRequest($db)
 {
-    $input = json_decode(file_get_contents('php://input'), true);
+    $input = handleFetchJsonBody();
     $email = $input['email'];
 
     //Is body empty?
     if (empty($email)) {
-        http_response_code(400);
-        echo json_encode(["status" => "error", "message" => "Email is required."]);
-        return;
+        responseError(400, "Email is required.");
     }
 
     try {
-        //Database execute.
+        //Find email.
         $sqlFindEmail = "SELECT * FROM accounts WHERE email = ?";
         $stmt = $db->prepare($sqlFindEmail);
         $stmt->execute([$email]);
@@ -265,7 +252,7 @@ function handleVerifyEmailRequest($db)
         $token = createVerifyEmailToken($db, $user['email']);
 
         //Send verify token to mock mail.
-        handleCreateInbox($db, $user, $token);
+        handleCreateInbox($db, $user, "/verify-email?token=$token");
 
         http_response_code(201);
         echo json_encode(["status" => "success", "message" => "Verify email request was send to {$user['email']}."]);

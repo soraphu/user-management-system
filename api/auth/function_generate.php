@@ -1,5 +1,5 @@
 <?php
-function handleCreateInbox($db, $user, $token)
+function handleCreateInbox($db, $user, $newUrl)
 {
     try {
         //Simulate send to email
@@ -7,7 +7,7 @@ function handleCreateInbox($db, $user, $token)
         $sender = "server@user.management.system.com";
         $subject = "Hi {$user['username']},";
         $preview = "Thank for testing my signup feature, this project was make for learning the process of user management system and security.";
-        $url = "/verify-email?token=$token";
+        $url = $newUrl;
         $buttonLabel = "Verify your email address";
         $isRead = 0; // 0 for false, 1 for true in MySQL
 
@@ -36,17 +36,32 @@ function handleCreateInbox($db, $user, $token)
     }
 }//Handle send verify email token to user.
 
+function createResetPasswordToken($db, $email)
+{
+    $token = bin2hex(random_bytes(16));
+    $hashedToken = hash('sha256', $token);
+    $expiresAt = date('Y-m-d H:i:s', strtotime('+1 hour'));
+
+    //Keep hash token in password_resets table.
+    $sql = "INSERT INTO password_resets (email, token, expires_at) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE token = VALUES(token), expires_at = VALUES(expires_at)";
+    $stmt = $db->prepare($sql);
+    $stmt->execute([$email, $hashedToken, $expiresAt]);
+
+    //Send real token.
+    return $token;
+}//
+
 function createVerifyEmailToken($db, $email)
 {
     $token = bin2hex(random_bytes(16));
     $hashedToken = hash('sha256', $token);
     $expiresAt = date('Y-m-d H:i:s', strtotime('+24 hours'));
 
-    //Keep hashed token in database.
+    //Keep hashed token in email_verifications table.
     $sqlCreateToken = "INSERT INTO email_verifications (email, token, expires_at) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE token = VALUES(token), expires_at = VALUES(expires_at)";
     $stmt = $db->prepare($sqlCreateToken);
     $stmt->execute([$email, $hashedToken, $expiresAt]);
 
     //Send real token.
     return $token;
-}
+}//
