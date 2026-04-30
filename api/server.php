@@ -159,82 +159,77 @@ if ($path === "/api") { //url: /api - show API info.
     exit;
 }//api
 
-$first2PathSegments = "/" . $pathSegments[0] . "/" . $pathSegments[1];
+$first2PathSegments = "/{$pathSegments[0]}/{$pathSegments[1]}/{$pathSegments[2]}";
 
-if ($first2PathSegments === "/api/auth") {
+if ($first2PathSegments === "/api/auth/v1") {
     $id = $pathSegments[3] ?? null; //Get user ID from URL if exists.
-    $service = $pathSegments[2] ?? null; //Get service from URL if exists.
+    $service = $pathSegments[3] ?? null; //Get service from URL if exists.
 
     switch ($service) {
 
-        case 'register': //Handle register.
-            if ($request_method !== 'POST') {
-                handleMethodNotAllowed();
-                exit;
-            }
+        //Handle register.
+        case 'register':
+            ensureReqMethod("POST");
             handleRegister($pdo);
-            break;
+            exit;
 
         case 'login': //Handle login.
-            if ($request_method !== 'POST') {
-                handleMethodNotAllowed();
-                exit;
-            }
+            ensureReqMethod("POST");
             handleLogin($pdo);
-            break;
+            exit;
 
         case 'password': //Handle password reset.
-            if ($request_method !== 'POST') {
-                handleMethodNotAllowed();
+            ensureReqMethod("POST");
+            if ($pathSegments[4] === 'forget') {
+                handleForgetPassword($pdo);
                 exit;
             }
-
-            if ($pathSegments[3] === 'forget') {
-                handleForgetPassword($pdo);
-            } else if ($pathSegments[3] === 'reset') {
+            if ($pathSegments[4] === 'reset') {
                 handleResetPassword($pdo);
+                exit;
             }
-            break;
 
         case 'email': //Handle email verification.
-            if ($request_method !== 'POST') {
-                handleMethodNotAllowed();
+            ensureReqMethod("POST");
+            if ($pathSegments[4] === 'verify-request') {
+                handleVerifyEmailRequest($pdo);
                 exit;
             }
-            if ($pathSegments[3] === 'verify-request') {
-                handleVerifyEmailRequest($pdo);
-                break;
-            }
 
-            if ($pathSegments[3] === 'verified') {
+            if ($pathSegments[4] === 'verified') {
                 handleVerifiedEmail($pdo);
-                break;
+                exit;
             }
 
         case 'inbox':
-            if ($request_method !== 'GET') {
-                handleMethodNotAllowed();
-                exit;
-            }
-
+            ensureReqMethod("POST");
             handleGetInbox($pdo);
-            break;
+            exit;
 
         default:
-            handlePageNotFound();
-            break;
-    }
-} else {
-    handlePageNotFound();
+            pageNotFoundRespond();
+            exit;
+
+    }//switch-case
 } //Main router for API endpoints.
 
-function handleMethodNotAllowed()
+pageNotFoundRespond();
+
+function ensureReqMethod($expectMethod)
 {
-    http_response_code(405);
-    echo json_encode(["error" => "Method not allowed."]);
+    $request_method = $_SERVER['REQUEST_METHOD'];
+
+    if ($request_method !== $expectMethod) {
+        http_response_code(405);
+        echo json_encode([
+            "success" => false,
+            "message" => "Method not allowed."
+        ]);
+        exit;
+    }//Validation.
 } //Handle method not allowed.
 
-function handlePageNotFound()
+function pageNotFoundRespond()
 {
     http_response_code(404);
     echo json_encode(["error" => "Page not found."]);
