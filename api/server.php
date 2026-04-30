@@ -1,7 +1,7 @@
 <?php
-require_once 'db_connect.php';
+require_once 'db/db_connect.php';
 require_once 'auth/handler.php';
-require_once 'auth/account_management.php';
+require_once 'auth/respond_docs.php';
 
 // Define which frontends are allowed to talk to this API
 $allowed_origins = [
@@ -25,158 +25,28 @@ if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
     exit();
 }
 
+header('Content-Type: application/json');
+
 // Get the path (e.g., /api/users )
 $requestUrl = $_SERVER['REQUEST_URI'];
-$request_method = $_SERVER['REQUEST_METHOD'];
-
 // Clean it up (remove query strings like ?id=1)
 $path = parse_url($requestUrl, PHP_URL_PATH);
 // Remove the trailing slash if it exists (but keep it if it's just "/")
 $path = ($path !== '/') ? rtrim($path, '/') : $path;
 
-$pathSegments = explode('/', trim($path, '/'));
-
-header('Content-Type: application/json');
-
 if ($path === "/") {
-    echo json_encode(
-        [
-            "info" => [
-                "title" => "Welcome to my User Mangement System API.",
-                "version" => "1.0.0",
-                "note" => "To see API tutorial go to https://domain.com/api"
-            ],
-        ]
-    );
-    exit;
-}//root path
+    respondRootDocs();
+}//root docs
 
 if ($path === "/api") { //url: /api - show API info.
-    echo json_encode([
-        "info" => [
-            "title" => "User Management System API",
-            "base_url" => "https://domain.com/api/v1",
-            "version" => "1.0.0"
-        ],
-        "endpoints" => [
-            "/auth" => [
-                "/register" => [
-                    "description" => "Register a new user.",
-                    "method" => "POST",
-                    "requestBody" => [
-                        "content_type" => "application/json",
-                        "schema" => [
-                            "username" => "string (min: 3)",
-                            "email" => "string (valid email)",
-                            "password" => "string (min: 8)"
-                        ]
-                    ],
-                    "response" => [
-                        "201" => ["success" => true, "message" => "User registered."],
-                        "400" => [
-                            "success" => false,
-                            "message" => [
-                                "Data can't be empty.",
-                                "Password must be at least 8 characters long.",
-                                "Required fields are missing.",
-                            ]
-                        ],
-                        "403" => [
-                            "success" => false,
-                            "message" => [
-                                "Invalid email format.",
-                                "Please use a fake email (e.g. @test.com) for PDPA safety.",
-                            ]
-                        ],
-                        "409" => ["success" => false, "message" => "This email already exists."],
-                        "500" => ["success" => false, "message" => "Internal server error."]
-                    ]
-                ],
+    respondAPIDocs();
+}//api docs
 
-                "/login" => [
-                    "description" => "Authenticate user and issue tokens.",
-                    "method" => "POST",
-                    "requestBody" => [
-                        "content_type" => "application/json",
-                        "schema" => [
-                            "email" => "string (required)",
-                            "password" => "string (required)"
-                        ]
-                    ],
-                    "response" => [
-                        "200" => [
-                            "success" => true,
-                            "access_token" => "string (JWT - Store in JS Memory)",
-                            "note" => "Refresh token is automatically set via HttpOnly Cookie."
-                        ],
-                        "401" => ["success" => false, "message" => "Invalid credentials."],
-                        "500" => ["success" => false, "message" => "Database connection error."]
-                    ]
-                ],
-
-                "/refresh-token" => [
-                    "description" => "Exchange a Refresh Token (from cookie) for a new Access Token.",
-                    "method" => "POST",
-                    "note" => "Does not require a request body. Reads 'refresh_token' cookie automatically.",
-                    "response" => [
-                        "200" => [
-                            "success" => true,
-                            "access_token" => "string (New JWT)"
-                        ],
-                        "401" => ["success" => false, "message" => "Session expired. Please login again."],
-                        "500" => ["success" => false, "message" => "Internal server error."]
-                    ]
-                ],
-
-                "/password/forget" => [
-                    "description" => "Initiate password reset flow by sending an email.",
-                    "method" => "POST",
-                    "requestBody" => [
-                        "content_type" => "application/json",
-                        "schema" => ["email" => "string (valid email)"]
-                    ],
-                    "response" => [
-                        "200" => ["success" => true, "message" => "Reset link sent to your email."],
-                        "404" => ["success" => false, "message" => "User with this email not found."],
-                        "500" => ["success" => false, "message" => "Internal server error."]
-                    ]
-                ],
-
-                "/password/reset" => [
-                    "description" => "Update password using a valid reset token.",
-                    "method" => "POST",
-                    "requestBody" => [
-                        "content_type" => "application/json",
-                        "schema" => [
-                            "token" => "string (required)",
-                            "new_password" => "string (min: 8)"
-                        ]
-                    ],
-                    "response" => [
-                        "200" => ["success" => true, "message" => "Password updated successfully."],
-                        "400" => ["success" => false, "message" => "Invalid or expired token."],
-                        "500" => ["success" => false, "message" => "Internal server error."]
-                    ]
-                ],
-
-                "/logout" => [
-                    "description" => "Revoke refresh token and clear cookies.",
-                    "method" => "POST",
-                    "response" => [
-                        "200" => ["success" => true, "message" => "Logged out. Database record deleted."],
-                        "500" => ["success" => false, "message" => "Could not complete logout on server."]
-                    ]
-                ]
-            ]
-        ]
-    ]);
-    exit;
-}//api
-
+// Cut each path to array.
+$pathSegments = explode('/', trim($path, '/'));
 $first2PathSegments = "/{$pathSegments[0]}/{$pathSegments[1]}/{$pathSegments[2]}";
 
 if ($first2PathSegments === "/api/v1/auth") {
-    $id = $pathSegments[3] ?? null; //Get user ID from URL if exists.
     $service = $pathSegments[3] ?? null; //Get service from URL if exists.
 
     switch ($service) {
@@ -187,12 +57,14 @@ if ($first2PathSegments === "/api/v1/auth") {
             handleRegister($pdo);
             exit;
 
-        case 'login': //Handle login.
+        //Handle login.
+        case 'login':
             ensureReqMethod("POST");
             handleLogin($pdo);
             exit;
 
-        case 'password': //Handle password reset.
+        //Handle password reset.
+        case 'password':
             ensureReqMethod("POST");
             if ($pathSegments[4] === 'forget') {
                 handleForgetPassword($pdo);
@@ -203,7 +75,8 @@ if ($first2PathSegments === "/api/v1/auth") {
                 exit;
             }
 
-        case 'email': //Handle email verification.
+        //Handle email verification.
+        case 'email':
             ensureReqMethod("POST");
             if ($pathSegments[4] === 'verify-request') {
                 handleVerifyEmailRequest($pdo);
@@ -215,8 +88,9 @@ if ($first2PathSegments === "/api/v1/auth") {
                 exit;
             }
 
+        //Handle get inbox data.
         case 'inbox':
-            ensureReqMethod("POST");
+            ensureReqMethod("GET");
             handleGetInbox($pdo);
             exit;
 

@@ -17,4 +17,6 @@ function respondPageNotFound()
 {
     http_response_code(404);
     echo json_encode(["error" => "Page not found."]);
+    exit;
 } //Handle page not found.
+

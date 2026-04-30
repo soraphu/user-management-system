@@ -3,7 +3,7 @@ include_once 'response.php';
 function ensureDataNotEmpty($data)
 {
     if (empty($data)) {
-        responseError(400, "Data can't be empty.");
+        responseError(400, "Request data can't be empty.");
     }
 }
 
