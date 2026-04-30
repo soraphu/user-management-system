@@ -71,10 +71,10 @@ function handleFetchJsonBody()
 
 function handleLogin($db)
 {
-    $user = handleFetchJsonBody();
+    $input = handleFetchJsonBody();
 
-    $email = $user['email'];
-    $password = $user['password'];
+    $email = $input['email'];
+    $password = $input['password'];
 
     if (empty($email) || empty($password)) {
         http_response_code(400);
@@ -114,13 +114,13 @@ function handleLogin($db)
 
 function handleRegister($db)
 {
-    $user = handleFetchJsonBody();
+    $input = handleFetchJsonBody();
 
-    ensureValidRegisterData($user);
+    ensureValidRegisterData($input);
 
-    $username = $user['username'];
-    $email = strtolower($user['email']);
-    $password = $user['password'];
+    $username = $input['username'];
+    $email = strtolower($input['email']);
+    $password = $input['password'];
 
     $hashPassword = password_hash($password, PASSWORD_DEFAULT);
 
@@ -173,14 +173,12 @@ function handleForgetPassword($db)
 
 function handleResetPassword($db)
 {
-    $input = json_decode(file_get_contents('php://input'), true);
+    $input = handleFetchJsonBody();
     $token = $input['token'];
     $newPassword = $input['new_password'];
 
     if (empty($token) || empty($newPassword)) {
-        http_response_code(400);
-        echo json_encode(["status" => "error", "message" => "Token and new password are required."]);
-        return;
+        responseError(400, "Token and new password are required.");
     }
 
     $hashNewPassword = password_hash($newPassword, PASSWORD_DEFAULT);
@@ -191,27 +189,25 @@ function handleResetPassword($db)
         $stmt = $db->prepare($sql);
         $stmt->execute([$hashedToken]);
 
-        $resetRequest = $stmt->fetch();
+        $resetToken = $stmt->fetch();
 
-        if (!$resetRequest) {
-            http_response_code(400);
-            echo json_encode(["status" => "error", "message" => "Invalid or expired reset token."]);
-            return;
+        if (empty($resetToken)) {
+            responseError(404, "Invalid or expired reset token.");
         }
 
+        //Security check successful, execute reset password.
         $sql = "UPDATE accounts SET password = ? WHERE email = ?";
         $stmt = $db->prepare($sql);
-        $stmt->execute([$hashNewPassword, $resetRequest['email']]);
+        $stmt->execute([$hashNewPassword, $resetToken['email']]);
 
+        //Delete reset password token.
         $sql = "DELETE FROM password_resets WHERE token = ?";
         $stmt = $db->prepare($sql);
         $stmt->execute([$hashedToken]);
 
-        http_response_code(200);
-        echo json_encode(["status" => "success", "message" => "Password reset successfully."]);
+        responseSuccess(200, "Password reset successfully.");
     } catch (\Throwable $th) {
-        http_response_code(500);
-        echo json_encode(["status" => "error", "message" => $th->getMessage()]);
+        responseError(500, $th->getMessage());
     }
 } //Reset password.
 
