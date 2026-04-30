@@ -1,6 +1,8 @@
 <?php
-use Firebase\JWT\JWT;
-use Firebase\JWT\Key;
+include_once "validation.php";
+include_once "response.php";
+// use Firebase\JWT\JWT;
+// use Firebase\JWT\Key;
 
 // function verifyAccessTokens()
 // {
@@ -59,77 +61,14 @@ use Firebase\JWT\Key;
 //     return ["access_token" => $accessToken];
 // }
 
-function isValidRegisterData($user)
-{
-    $email = $user['email'];
-    $password = $user['password'];
-
-    // 1. Check if it "looks" like an email
-    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        http_response_code(403);
-        echo json_encode([
-            "status" => "error",
-            "message" => "Invalid email format."
-        ]);
-        return false;
-    }//Email format validation.
-
-    // 2. Check if it's a "Real" provider you want to block
-    $blocked_domains = ['gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com'];
-    $domain = strtolower(substr(strrchr($email, "@"), 1));
-
-    if (in_array($domain, $blocked_domains)) {
-        http_response_code(403);
-        echo json_encode([
-            "status" => "error",
-            "message" => "Please use a fake email (e.g. @test.com) for PDPA safety."
-        ]);
-        return false;
-    }//Fake email validation.
-
-    if (strlen($password) < 8) {
-        http_response_code(403);
-        echo json_encode([
-            "status" => "error",
-            "message" => "Password must be at least 8 characters long."
-        ]);
-        return false;
-    }//Password validation.
-
-    return true;
-}//Validation the register data.
-
-function isEmailDuplicate($db, $email)
-{
-    $sql = "SELECT * FROM accounts WHERE email = ?";
-    $stmt = $db->prepare($sql);
-    $stmt->execute([$email]);
-
-    if ($stmt->fetch()) {
-        return true;
-    } else {
-        return false;
-    }
-} //Check if email already exists in database.
-
-function isRequestBodyEmpty($input)
-{
-    if (empty($input)) {
-        return true;
-    }
-    return false;
-} //Handle empty request.
-
 function handleLogin($db)
 {
-    $input = json_decode(file_get_contents('php://input'), true) ?? null;
+    $user = json_decode(file_get_contents('php://input'), true) ?? null;
 
-    if (isRequestBodyEmpty($input)) {
-        exit;
-    }//Empty req body validation.
+    ensureDataNotEmpty($user);
 
-    $email = $input['email'];
-    $password = $input['password'];
+    $email = $user['email'];
+    $password = $user['password'];
 
     if (empty($email) || empty($password)) {
         http_response_code(400);
@@ -171,41 +110,24 @@ function handleRegister($db)
 {
     $user = json_decode(file_get_contents('php://input'), true) ?? null;
 
-    if (isRequestBodyEmpty($user)) {
-        exit;
-    }//Empty req body validation.
-
-    if (!isValidRegisterData($user)) {
-        exit;
-    }//Register data validation.
+    ensureDataNotEmpty($user);
+    ensureValidRegisterData($user);
 
     $username = $user['username'];
     $email = strtolower($user['email']);
     $password = $user['password'];
 
-    if (empty($username) || empty($email) || empty($password)) {
-        http_response_code(400);
-        echo json_encode(["status" => "error", "message" => "Required fields are missing."]);
-        return;
-    } //Validate input.
-
     $hashPassword = password_hash($password, PASSWORD_DEFAULT);
 
     try {
-        if (isEmailDuplicate($db, $email)) {
-            http_response_code(409);
-            echo json_encode(["status" => "error", "message" => "Email already exists."]);
-            return;
-        }
+        ensureEmailNotDuplicate($db, $email);
 
         $sql = "INSERT INTO accounts (username, email, password) VALUES (?, ?, ?)";
         $stmt = $db->prepare($sql);
         $stmt->execute([$username, $email, $hashPassword]);
 
-        http_response_code(201);
-        echo json_encode(["status" => "success", "message" => "User registered successfully."]);
+        responseSuccess(201, "Internal server error.");
     } catch (Throwable $th) {
-        http_response_code(500);
-        echo json_encode(["status" => "error", "message" => $th->getMessage()]);
+        responseError(500, "Internal server error.");
     }
 } //Register.

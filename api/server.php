@@ -1,6 +1,6 @@
 <?php
 require_once 'db_connect.php';
-require_once 'auth/account_access.php';
+require_once 'auth/handler.php';
 require_once 'auth/account_management.php';
 
 // Define which frontends are allowed to talk to this API
@@ -73,8 +73,22 @@ if ($path === "/api") { //url: /api - show API info.
                     ],
                     "response" => [
                         "201" => ["success" => true, "message" => "User registered."],
-                        "400" => ["success" => false, "message" => "Password must be at least 8 characters."],
-                        "409" => ["success" => false, "message" => "This email already signup."],
+                        "400" => [
+                            "success" => false,
+                            "message" => [
+                                "Data can't be empty.",
+                                "Password must be at least 8 characters long.",
+                                "Required fields are missing.",
+                            ]
+                        ],
+                        "403" => [
+                            "success" => false,
+                            "message" => [
+                                "Invalid email format.",
+                                "Please use a fake email (e.g. @test.com) for PDPA safety.",
+                            ]
+                        ],
+                        "409" => ["success" => false, "message" => "This email already exists."],
                         "500" => ["success" => false, "message" => "Internal server error."]
                     ]
                 ],
@@ -161,7 +175,7 @@ if ($path === "/api") { //url: /api - show API info.
 
 $first2PathSegments = "/{$pathSegments[0]}/{$pathSegments[1]}/{$pathSegments[2]}";
 
-if ($first2PathSegments === "/api/auth/v1") {
+if ($first2PathSegments === "/api/v1/auth") {
     $id = $pathSegments[3] ?? null; //Get user ID from URL if exists.
     $service = $pathSegments[3] ?? null; //Get service from URL if exists.
 
@@ -207,30 +221,10 @@ if ($first2PathSegments === "/api/auth/v1") {
             exit;
 
         default:
-            resPageNotFound();
+            respondPageNotFound();
             exit;
 
     }//switch-case
 } //Main router for API endpoints.
 
-resPageNotFound();
-
-function ensureReqMethod($expectMethod)
-{
-    $request_method = $_SERVER['REQUEST_METHOD'];
-
-    if ($request_method !== $expectMethod) {
-        http_response_code(405);
-        echo json_encode([
-            "success" => false,
-            "message" => "Method not allowed."
-        ]);
-        exit;
-    }//Validation.
-} //Handle method not allowed.
-
-function resPageNotFound()
-{
-    http_response_code(404);
-    echo json_encode(["error" => "Page not found."]);
-} //Handle page not found.
+respondPageNotFound();
