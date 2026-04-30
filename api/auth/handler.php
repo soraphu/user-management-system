@@ -161,7 +161,7 @@ function handleForgetPassword($db)
         // Generate reset token and save to database (for simplicity, we use a random string here)
         $token = createResetPasswordToken($db, $email);
 
-        handleCreateInbox($db, $user, "/verified?token=$token");
+        handleCreateInbox($db, $user, "//password/reset?token=$token");
 
         responseSuccess(200, "Password reset link was send to $email.");
         //wait for implement email sending logic here.
@@ -185,8 +185,8 @@ function handleResetPassword($db)
     $hashedToken = hash('sha256', $token);
 
     try {
-        $sql = "SELECT * FROM password_resets WHERE token = ? AND expires_at > NOW()";
-        $stmt = $db->prepare($sql);
+        $sqlFindToken = "SELECT * FROM password_resets WHERE token = ? AND expires_at > NOW()";
+        $stmt = $db->prepare($sqlFindToken);
         $stmt->execute([$hashedToken]);
 
         $resetToken = $stmt->fetch();
@@ -196,13 +196,13 @@ function handleResetPassword($db)
         }
 
         //Security check successful, execute reset password.
-        $sql = "UPDATE accounts SET password = ? WHERE email = ?";
-        $stmt = $db->prepare($sql);
+        $sqlResetPassword = "UPDATE accounts SET password = ? WHERE email = ?";
+        $stmt = $db->prepare($sqlResetPassword);
         $stmt->execute([$hashNewPassword, $resetToken['email']]);
 
         //Delete reset password token.
-        $sql = "DELETE FROM password_resets WHERE token = ?";
-        $stmt = $db->prepare($sql);
+        $sqlDeleteToken = "DELETE FROM password_resets WHERE token = ?";
+        $stmt = $db->prepare($sqlDeleteToken);
         $stmt->execute([$hashedToken]);
 
         responseSuccess(200, "Password reset successfully.");
@@ -216,10 +216,9 @@ function handleVerifyEmailRequest($db)
     $input = handleFetchJsonBody();
     $email = $input['email'];
 
-    //Is body empty?
     if (empty($email)) {
         responseError(400, "Email is required.");
-    }
+    }//Valdation email was send with request body.
 
     try {
         //Find email.
@@ -229,68 +228,59 @@ function handleVerifyEmailRequest($db)
         $user = $stmt->fetch();
 
         //Is email was exist in accounts table?
-        if (!$user) {
-            http_response_code(404);
-            echo json_encode(["status" => "error", "message" => "Account with this email not found."]);
-            return;
+        if (empty($user)) {
+            responseError(404, "Account with this email not found.");
         }
 
-        //Is this email already verified?
+        //Turn 0 | 1 to bool
         $user['verified'] = (bool) $user['verified'];
 
+        //Is this email already verified?
         if ($user['verified'] == true) {
-            http_response_code(409);
-            echo json_encode(["status" => "error", "message" => "This email already verified."]);
-            return;
+            responseError(409, "This email already verified.");
         }
 
-        //Generate verify token.
         $token = createVerifyEmailToken($db, $user['email']);
 
         //Send verify token to mock mail.
         handleCreateInbox($db, $user, "/verify-email?token=$token");
 
-        http_response_code(201);
-        echo json_encode(["status" => "success", "message" => "Verify email request was send to {$user['email']}."]);
-
+        responseSuccess(201, "Verify email request was send to {$user['email']}.");
     } catch (\Throwable $th) {
-        http_response_code(500);
-        echo json_encode(["status" => "error", "message" => $th->getMessage()]);
+        responseSuccess(500, $th->getMessage());
     }
 }//Handle request email verification.
 
 function handleVerifiedEmail($db)
 {
-    $input = json_decode(file_get_contents('php://input'), true);
+    $input = handleFetchJsonBody();
     $token = $input['token'];
 
     if (empty($token)) {
-        http_response_code(400);
-        echo json_encode(["status" => "error", "message" => "Token is required."]);
-        return;
+        responseError(400, "Token is required.");
     }
 
     $hashedToken = hash('sha256', $token);
 
     try {
-        $sql = "SELECT * FROM email_verifications WHERE token = ? AND expires_at > NOW()";
-        $stmt = $db->prepare($sql);
+        $sqlFindToken = "SELECT * FROM email_verifications WHERE token = ? AND expires_at > NOW()";
+        $stmt = $db->prepare($sqlFindToken);
         $stmt->execute([$hashedToken]);
 
-        $verificationRequest = $stmt->fetch();
+        $verifyToken = $stmt->fetch();
 
-        if (!$verificationRequest) {
-            http_response_code(400);
-            echo json_encode(["status" => "error", "message" => "Invalid or expired verification token."]);
-            return;
+        if (empty($verifyToken)) {
+            responseError(404, "Invalid or expired verification token.");
         }
 
-        $sql = "UPDATE accounts SET verified = 1 WHERE email = ?";
-        $stmt = $db->prepare($sql);
-        $stmt->execute([$verificationRequest['email']]);
+        //Update email to verified.
+        $sqlEmailVerifed = "UPDATE accounts SET verified = 1 WHERE email = ?";
+        $stmt = $db->prepare($sqlEmailVerifed);
+        $stmt->execute([$verifyToken['email']]);
 
-        $sql = "DELETE FROM email_verifications WHERE token = ?";
-        $stmt = $db->prepare($sql);
+        //Delete token.
+        $sqlDeleteToken = "DELETE FROM email_verifications WHERE token = ?";
+        $stmt = $db->prepare($sqlDeleteToken);
         $stmt->execute([$hashedToken]);
 
         http_response_code(200);
