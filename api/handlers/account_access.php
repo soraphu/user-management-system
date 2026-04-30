@@ -30,47 +30,33 @@ function verifyAccessTokens()
     }
 }
 
-function generateIdentityToken($userId, $secretKey)
-{
-    // 1. Create the Header
-    $header = json_encode(['alg' => 'HS256', 'typ' => 'JWT']);
-    $base64UrlHeader = str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($header));
+function issueIdentityTokens($userId) {
+    // 1. Create the JWT Access Token
+    $accessToken = JWT::encode([
+        'sub' => $userId,
+        'iat' => time(),
+        'exp' => time() + (15 * 60) // 15 mins
+    ], $_ENV['JWT_SECRET'], 'HS256');
 
-    // 2. Create the Payload
-    $payload = json_encode([
-        'user_id' => $userId,
-        'iat' => time(),        // Issued at
-        'exp' => time() + 3600  // Expires in 1 hour
+    // 2. Create the Refresh Token
+    $rawRefreshToken = bin2hex(random_bytes(32));
+    $hashedToken = password_hash($rawRefreshToken, PASSWORD_BCRYPT);
+
+    // 3. Save to MySQL (Your refresh_tokens table)
+    $db->query("INSERT INTO refresh_tokens (user_id, token, expires_at) 
+                VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 7 DAY))", 
+                [$userId, $hashedToken]);
+
+    // 4. Send Refresh Token via Secure Cookie
+    setcookie("refresh_token", $rawRefreshToken, [
+        'expires' => time() + 604800,
+        'httponly' => true,
+        'secure' => true,
+        'samesite' => 'Strict'
     ]);
-    $base64UrlPayload = str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($payload));
 
-    // 3. Create the Signature
-    $signature = hash_hmac('sha256', $base64UrlHeader . "." . $base64UrlPayload, $secretKey, true);
-    $base64UrlSignature = str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($signature));
-
-    // 4. Combine them
-    return $base64UrlHeader . "." . $base64UrlPayload . "." . $base64UrlSignature;
-}
-
-function respondWithIdentityTokens()
-{
-    // Your JWT secret and payload logic here...
-    $jwt = "your.generated.jwt.token";
-
-    setcookie(
-        "auth_token",        // Name
-        $jwt,               // Value
-        [
-            "expires" => time() + 3600, // 1 hour
-            "path" => "/",
-            "domain" => "localhost",    // Match your dev domain
-            "secure" => false,          // Set to true in Production (HTTPS)
-            "httponly" => true,         // CRITICAL: Prevents JS access
-            "samesite" => "Lax"         // Prevents CSRF attacks
-        ]
-    );
-
-    echo json_encode(["message" => "Login successful"]);
+    // 5. Return Access Token for React
+    return ["access_token" => $accessToken];
 }
 
 function isValidRegisterData($user)

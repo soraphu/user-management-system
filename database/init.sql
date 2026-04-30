@@ -52,7 +52,6 @@ CREATE TABLE IF NOT EXISTS refresh_tokens (
     expires_at DATETIME NOT NULL,
     
     UNIQUE (token),
-    INDEX (user_id),
     FOREIGN KEY (user_id) 
         REFERENCES accounts(id) 
         ON DELETE CASCADE 

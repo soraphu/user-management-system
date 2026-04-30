@@ -31,27 +31,139 @@ $request_method = $_SERVER['REQUEST_METHOD'];
 
 // Clean it up (remove query strings like ?id=1)
 $path = parse_url($requestUrl, PHP_URL_PATH);
-$segments = explode('/', trim($path, '/'));
+// Remove the trailing slash if it exists (but keep it if it's just "/")
+$path = ($path !== '/') ? rtrim($path, '/') : $path;
+
+$pathSegments = explode('/', trim($path, '/'));
 
 header('Content-Type: application/json');
 
+if ($path === "/") {
+    echo json_encode(
+        [
+            "info" => [
+                "title" => "Welcome to my User Mangement System API.",
+                "version" => "1.0.0",
+                "note" => "To see API tutorial go to https://domain.com/api"
+            ],
+        ]
+    );
+    exit;
+}//root path
+
 if ($path === "/api") { //url: /api - show API info.
     echo json_encode([
-        "message" => "Welcome to the API of user management project.",
+        "info" => [
+            "title" => "User Management System API",
+            "base_url" => "https://domain.com/api/v1",
+            "version" => "1.0.0"
+        ],
         "endpoints" => [
-            "auth" => [
-                "/api/user/register" => "POST - Register a new user.",
-                "/api/user/login" => "POST - Login a user.",
-                "/api/user/password/forget" => "POST - Request password reset.",
-                "/api/user/password/reset" => "POST - Reset password.",
-                "/api/user/email/verify" => "POST - Request email verification.",
-                "/api/user/email/verified" => "POST - Verify email with token."
+            "/auth" => [
+                "/register" => [
+                    "description" => "Register a new user.",
+                    "method" => "POST",
+                    "requestBody" => [
+                        "content_type" => "application/json",
+                        "schema" => [
+                            "username" => "string (min: 3)",
+                            "email" => "string (valid email)",
+                            "password" => "string (min: 8)"
+                        ]
+                    ],
+                    "response" => [
+                        "201" => ["success" => true, "message" => "User registered."],
+                        "400" => ["success" => false, "message" => "Password must be at least 8 characters."],
+                        "409" => ["success" => false, "message" => "This email already signup."],
+                        "500" => ["success" => false, "message" => "Internal server error."]
+                    ]
+                ],
+
+                "/login" => [
+                    "description" => "Authenticate user and issue tokens.",
+                    "method" => "POST",
+                    "requestBody" => [
+                        "content_type" => "application/json",
+                        "schema" => [
+                            "email" => "string (required)",
+                            "password" => "string (required)"
+                        ]
+                    ],
+                    "response" => [
+                        "200" => [
+                            "success" => true,
+                            "access_token" => "string (JWT - Store in JS Memory)",
+                            "note" => "Refresh token is automatically set via HttpOnly Cookie."
+                        ],
+                        "401" => ["success" => false, "message" => "Invalid credentials."],
+                        "500" => ["success" => false, "message" => "Database connection error."]
+                    ]
+                ],
+
+                "/refresh-token" => [
+                    "description" => "Exchange a Refresh Token (from cookie) for a new Access Token.",
+                    "method" => "POST",
+                    "note" => "Does not require a request body. Reads 'refresh_token' cookie automatically.",
+                    "response" => [
+                        "200" => [
+                            "success" => true,
+                            "access_token" => "string (New JWT)"
+                        ],
+                        "401" => ["success" => false, "message" => "Session expired. Please login again."],
+                        "500" => ["success" => false, "message" => "Internal server error."]
+                    ]
+                ],
+
+                "/password/forget" => [
+                    "description" => "Initiate password reset flow by sending an email.",
+                    "method" => "POST",
+                    "requestBody" => [
+                        "content_type" => "application/json",
+                        "schema" => ["email" => "string (valid email)"]
+                    ],
+                    "response" => [
+                        "200" => ["success" => true, "message" => "Reset link sent to your email."],
+                        "404" => ["success" => false, "message" => "User with this email not found."],
+                        "500" => ["success" => false, "message" => "Internal server error."]
+                    ]
+                ],
+
+                "/password/reset" => [
+                    "description" => "Update password using a valid reset token.",
+                    "method" => "POST",
+                    "requestBody" => [
+                        "content_type" => "application/json",
+                        "schema" => [
+                            "token" => "string (required)",
+                            "new_password" => "string (min: 8)"
+                        ]
+                    ],
+                    "response" => [
+                        "200" => ["success" => true, "message" => "Password updated successfully."],
+                        "400" => ["success" => false, "message" => "Invalid or expired token."],
+                        "500" => ["success" => false, "message" => "Internal server error."]
+                    ]
+                ],
+
+                "/logout" => [
+                    "description" => "Revoke refresh token and clear cookies.",
+                    "method" => "POST",
+                    "response" => [
+                        "200" => ["success" => true, "message" => "Logged out. Database record deleted."],
+                        "500" => ["success" => false, "message" => "Could not complete logout on server."]
+                    ]
+                ]
             ]
         ]
     ]);
-} else if ($segments[0] === 'api' && $segments[1] === 'user') { //url: /api/users - handle user-related actions.
-    $id = $segments[3] ?? null; //Get user ID from URL if exists.
-    $service = $segments[2] ?? null; //Get service from URL if exists.
+    exit;
+}//api
+
+$first2PathSegments = "/" . $pathSegments[0] . "/" . $pathSegments[1];
+
+if ($first2PathSegments === "/api/auth") {
+    $id = $pathSegments[3] ?? null; //Get user ID from URL if exists.
+    $service = $pathSegments[2] ?? null; //Get service from URL if exists.
 
     switch ($service) {
 
@@ -77,9 +189,9 @@ if ($path === "/api") { //url: /api - show API info.
                 exit;
             }
 
-            if ($segments[3] === 'forget') {
+            if ($pathSegments[3] === 'forget') {
                 handleForgetPassword($pdo);
-            } else if ($segments[3] === 'reset') {
+            } else if ($pathSegments[3] === 'reset') {
                 handleResetPassword($pdo);
             }
             break;
@@ -89,12 +201,12 @@ if ($path === "/api") { //url: /api - show API info.
                 handleMethodNotAllowed();
                 exit;
             }
-            if ($segments[3] === 'verify-request') {
+            if ($pathSegments[3] === 'verify-request') {
                 handleVerifyEmailRequest($pdo);
                 break;
             }
 
-            if ($segments[3] === 'verified') {
+            if ($pathSegments[3] === 'verified') {
                 handleVerifiedEmail($pdo);
                 break;
             }
