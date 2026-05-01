@@ -96,7 +96,7 @@ if ($first2PathSegments === "/api/v1/auth") {
                 exit;
             }
             if ($pathSegments[4] === 'mark-as-read') {
-                ensureReqMethod("POST");
+                ensureReqMethod("PATCH");
                 handleMarkMailAsRead($pdo);
                 exit;
             }

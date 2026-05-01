@@ -70,7 +70,7 @@ export default function MockMail() {
 
     const handleUpdateMailReaded = async (mail: MailItem) => {
         try {
-            await axios.post(API_ENDPOINTS.MarkMailAsRead, { mail_id: mail.id });
+            await axios.patch(API_ENDPOINTS.MarkMailAsRead, { mail_id: mail.id });
             consoleLogOnDev("Mail marked as read: " + mail.id);
         } catch (error: any) {
             const errorMessage = getCatchMessage(error);

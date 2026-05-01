@@ -9,6 +9,8 @@ services:
 
   server:
     build: ./api
+    env_file:
+      - ./api/.env
     volumes:
       - ./api:/src/api:ro
     depends_on:
