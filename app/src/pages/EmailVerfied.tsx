@@ -15,6 +15,8 @@ import {
 } from "@/components/ui/card";
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
+import { toast } from 'sonner';
+import { getCatchMessage } from '@/handler/request_handler';
 
 const EmailVerfied = () => {
     const navigate = useNavigate();
@@ -27,7 +29,7 @@ const EmailVerfied = () => {
         const verifyToken = async () => {
             const token = searchParams.get('token');
 
-            // 1. Guard Clause: If no token exists in the URL
+            // If no token exists in the URL
             if (!token) {
                 setError("No verification token found.");
                 setIsLoading(false);
@@ -35,21 +37,16 @@ const EmailVerfied = () => {
             }
 
             try {
-                // 2. The POST request to your PHP API
                 // Using the environment variable you mentioned
-                const response = await axios.post(import.meta.env.VITE_API_VERIFIED_EMAIL, {
+                const response: any = await axios.post(import.meta.env.VITE_API_VERIFIED_EMAIL, {
                     token: token
                 });
 
-                // 3. Status OK handle
                 // Axios enters the try block only if status is 2xx
-                if (response.status === 200) {
-                    setIsVerified(true);
-                }
+                setIsVerified(true);
             } catch (error: any) {
-                // 4. Error Path
-                const message = error.response?.data?.message || "Verification failed or link expired.";
-                setError(message);
+                const errorMessage = getCatchMessage(error);
+                setError(errorMessage);
             } finally {
                 setIsLoading(false);
             }
@@ -59,32 +56,57 @@ const EmailVerfied = () => {
         verifyToken();
     }, [searchParams]);
 
-    const requestNewLink = async () => {
+    const swalNavigateOnConfirm = async ({ icon, title, text, confirmButtonText, navigateTo }: {
+        icon: "success" | "error", title: string, text: string, confirmButtonText: string, navigateTo: string
+    }) => {
+        const dialog = await Swal.fire({
+            icon: icon,
+            title: title,
+            text: text,
+            confirmButtonText: confirmButtonText,
+            confirmButtonColor: '#2563eb',
+            allowOutsideClick: false,
+            background: '#ffffff',
+        });
+        if (dialog.isConfirmed) navigate(navigateTo);
+    }//Swal navigate on confirm.
+
+    const handleRequestNewLink = async () => {
         const email = searchParams.get('email');
 
         try {
-            await axios.post(import.meta.env.VITE_API_VERIFY_EMAIL_REQUEST, {
+            const response = await axios.post(import.meta.env.VITE_API_VERIFY_EMAIL_REQUEST, {
                 email: email
             });
+
+            const responseMessage = response.data.message;
+
+            swalNavigateOnConfirm({
+                icon: "success",
+                title: "Verification Link Expired",
+                text: responseMessage,
+                confirmButtonText: 'Go to Mock Mail',
+                navigateTo: `/mock-mail?email=${email}`
+            });
         } catch (error: any) {
-            if (error.status === 409) {
-                const pressReturn = await Swal.fire({
-                    icon: "error",
-                    title: "ERROR",
-                    text: error.response.data.message,
-                    confirmButtonText: 'Return to Home',
-                    confirmButtonColor: '#2563eb',
-                    allowOutsideClick: false,
-                    background: '#ffffff',
-                });
-                if (pressReturn.isConfirmed) navigate("/");
+            const errorMessage = getCatchMessage(error);
 
+            if (error.response) {
+                const statusCode = error.response.status;
+
+                if (statusCode === 404 || statusCode === 409) {
+                    swalNavigateOnConfirm({
+                        icon: "error",
+                        title: "ERROR",
+                        text: errorMessage,
+                        confirmButtonText: 'Return to Home',
+                        navigateTo: `/`
+                    });
+                }
             } else {
-                console.error(`Request: ${error.response.data.message}`);
-                navigate(`/verify-email-request?email=${email}`);
-            }
-        }
-
+                toast.error(errorMessage);
+            }//ifelse
+        }//trycatch
     }//Request new link.
 
     if (isLoading) {
@@ -119,7 +141,7 @@ const EmailVerfied = () => {
                         <Button
                             variant="default"
                             className="w-full bg-slate-900"
-                            onClick={requestNewLink}
+                            onClick={handleRequestNewLink}
                         >
                             <RefreshCcw className="mr-2 h-4 w-4" />
                             Request New Link
