@@ -152,7 +152,7 @@ function handleForgetPassword($db)
         // Generate reset token and save to database (for simplicity, we use a random string here)
         $token = createResetPasswordToken($db, $email);
 
-        createMailtoInbox($db, $user, "//password/reset?token=$token");
+        createMailtoInbox($db, $user, "/password/reset?token=$token");
 
         respondSuccess(200, "Password reset link was send to $email.");
     } catch (\Throwable $th) {

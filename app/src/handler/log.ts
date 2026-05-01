@@ -13,15 +13,3 @@ export function consoleErrorOnDev(message: any) {
         console.error(message);
     }
 } //Log on dev mode only.
-
-export function swalAlertNavigate(
-    { icon, title, text, confirmButtonText }: { icon: "success" | "error" | "warning" | "info" | "question", title: string, text: string, confirmButtonText?: string }
-) {
-    Swal.fire({
-        icon: icon,
-        title: title,
-        confirmButtonColor: "#4169E1",
-        confirmButtonText: confirmButtonText || "I Understand",
-        text: text
-    });
-}

@@ -4,8 +4,9 @@ export function getCatchMessage(err: any): string {
     if (err.response && err.response.data) {
         const serverMessage = err.response.data.message;
 
+        consoleErrorOnDev("Server response: ");
         consoleErrorOnDev(err.response);
-        consoleErrorOnDev(serverMessage);
+        consoleErrorOnDev("Server message: " + serverMessage);
 
         return serverMessage;
     } else {

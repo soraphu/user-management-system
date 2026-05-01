@@ -1,8 +1,6 @@
-import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 
-import Swal from 'sweetalert2';
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
 import { Mail, ArrowRight, RefreshCw } from 'lucide-react';
@@ -16,56 +14,72 @@ import {
     CardTitle,
 } from "@/components/ui/card";
 import { toast } from 'sonner';
+import { getCatchMessage } from '@/handler/request_handler';
+import Swal from 'sweetalert2';
+import { swalConfirmButtonColor } from '@/handler/config';
 
-const VerifyEmailRequest = () => {
+const SendVerifyEmail = () => {
     const [isResending, setIsResending] = useState(false);
     const [searchParams] = useSearchParams();
+    const location = useLocation();
     const navigate = useNavigate();
-
     const email = searchParams.get("email");
 
-    const handleResendVerifyToken = async () => {
+    const requestEmailFields = async (text: string) => {
+        const result = await Swal.fire({
+            icon: "error",
+            title: "Error",
+            text: text,
+            input: "email",
+            inputPlaceholder: "Enter your email address",
+            confirmButtonColor: swalConfirmButtonColor,
+            confirmButtonText: "Enter",
+        });
+
+        if (result.isConfirmed) {
+            navigate(`${location.pathname}?email=${result.value}`);
+        }
+    }//Handle required email on missing.
+
+    const handleResendVerifyEmailLink = async () => {
         setIsResending(true);
-        // Mocking an API call to your PHP backend
+
+        //Ensure email is available.
+        if (!email) {
+            setIsResending(false);
+            requestEmailFields("The email is missing, Please provide your email and try again.");
+            return;
+        }//if
+
         try {
-            // 1. The POST Request
-            // We send the email in the body to your PHP API
-            await axios.post(import.meta.env.VITE_API_VERIFY_EMAIL_REQUEST, {
-                email: email
-            });
+            // Send the email in the body to your verify email request API.
+            const response = await axios.post(import.meta.env.VITE_API_VERIFY_EMAIL_REQUEST, { email: email });
 
             // Trigger a success.
-            toast.success("Verification link resent successfully!");
-
+            toast.success(response.data.message);
         } catch (error: any) {
-            console.log("kuy");
-
-            // 3. ERROR (Status 400, 401, 500, etc.)
-            // Axios automatically jumps here if the status code is 4xx or 5xx.
+            const errorMessage = getCatchMessage(error);
 
             if (error.response) {
-                // The server responded with a status code outside the 2xx range
-                console.error("Server Error:", error.response.data);
-                const pressReturn = await Swal.fire({
-                    icon: "error",
-                    title: "ERROR",
-                    text: error.response.data.message,
-                    confirmButtonText: 'Return to Home',
-                    confirmButtonColor: '#2563eb',
-                    allowOutsideClick: false,
-                    background: '#ffffff',
-                });
-
-                if (pressReturn.isConfirmed) navigate("/");
-            } else if (error.request) {
-                // The request was made but no response was received (Server is down)
-                console.error("Network Error: No response from server");
-                toast.error("Cannot connect to the server.");
-
-            } else {
-                // Something happened in setting up the request that triggered an Error
-                toast.error(`Request Error: ${error.message}`);
+                const statusCode = error.response.status;
+                if (statusCode === 404) {
+                    requestEmailFields(errorMessage);
+                }
+                if (statusCode === 409) {
+                    const dialog = await Swal.fire({
+                        icon: "error",
+                        title: "Error",
+                        text: errorMessage,
+                        confirmButtonColor: swalConfirmButtonColor,
+                        confirmButtonText: "Go to login"
+                    });
+                    if (dialog.isConfirmed) {
+                        navigate("/");
+                    }//Navigate to login on confirm.
+                }//Email already verified.
             }
+            toast.error(errorMessage);
+
         } finally {
             setIsResending(false);
         }
@@ -99,7 +113,7 @@ const VerifyEmailRequest = () => {
                     <Button
                         variant="outline"
                         className="w-full"
-                        onClick={handleResendVerifyToken}
+                        onClick={handleResendVerifyEmailLink}
                         disabled={isResending}
                     >
                         {isResending ? (
@@ -111,7 +125,7 @@ const VerifyEmailRequest = () => {
 
                 <CardFooter className="flex justify-center">
                     <p className="text-sm text-muted-foreground">
-                        Verify email send test
+                        Send verification email test
                     </p>
                 </CardFooter>
             </Card>
@@ -119,4 +133,4 @@ const VerifyEmailRequest = () => {
     );
 }
 
-export default VerifyEmailRequest
+export default SendVerifyEmail

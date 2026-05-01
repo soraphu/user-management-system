@@ -16,7 +16,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 
-const EmailVerifiedPage = () => {
+const EmailVerfied = () => {
     const navigate = useNavigate();
     const [isVerified, setIsVerified] = useState<boolean>(false);
     const [searchParams] = useSearchParams();
@@ -177,4 +177,4 @@ const EmailVerifiedPage = () => {
     }
 };
 
-export default EmailVerifiedPage;
+export default EmailVerfied;

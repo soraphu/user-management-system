@@ -6,18 +6,18 @@ import './App.css'
 import LoginPage from './pages/Login';
 import RegisterPage from './pages/Register';
 import MockMail from './pages/MockMail';
-import VerifyEmailRequest from './pages/VerifyEmailRequest';
+import SendVerifyEmail from './pages/SendVerifyEmail';
 import ResetPasswordPage from './pages/ResetPassword';
 import ForgetPasswordPage from './pages/ForgetPassword';
 import DashboardPage from './pages/Dashboard';
 import PageNotFound from './pages/PageNotFound';
-import VerifiedEmail from './pages/VerifiedEmail';
+import VerifiedEmail from './pages/EmailVerfied';
 
 const router = createBrowserRouter([
   { path: '/*', element: <PageNotFound /> },
   { path: '/', element: <LoginPage /> },
   { path: '/register', element: <RegisterPage /> },
-  { path: '/verify-email-request', element: <VerifyEmailRequest /> },
+  { path: '/verify-email-request', element: <SendVerifyEmail /> },
   { path: '/mockmail', element: <MockMail /> },
   { path: '/verify-email', element: <VerifiedEmail /> },
   { path: '/password/reset', element: <ResetPasswordPage /> },
