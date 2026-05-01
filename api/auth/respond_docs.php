@@ -127,22 +127,19 @@ function respondApiDocs()
                 ],
 
                 "login/refresh-token" => [
-                    "description" => "Authenticate user and issue tokens.",
+                    "description" => "Refresh access token using valid refresh token (from HttpOnly Cookie).",
                     "method" => "POST",
                     "requestBody" => [
                         "content_type" => "application/json",
-                        "schema" => [
-                            "email" => "string (required)",
-                            "password" => "string (required)"
-                        ]
+                        "schema" => []
                     ],
                     "response" => [
-                        "200" => [
+                        "201" => [
                             "success" => true,
-                            "access_token" => "string (JWT - Store in JS Memory)",
-                            "note" => "Refresh token is automatically set via HttpOnly Cookie."
+                            "message" => "Access token refreshed.",
+                            "access_token" => "string (JWT - Store in JS Memory)"
                         ],
-                        "401" => ["success" => false, "message" => "Invalid credentials."],
+                        "404" => ["success" => false, "message" => "Invalid or expired refresh token."],
                         "500" => ["success" => false, "message" => "Database connection error."]
                     ]
                 ],
