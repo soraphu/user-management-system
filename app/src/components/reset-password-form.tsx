@@ -16,6 +16,7 @@ import { getCatchMessage } from "@/handler/request_handler";
 import axios from "axios";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import Swal from "sweetalert2";
+import { RESET_PASSWORD_API } from "@/handler/config";
 
 const ResetPasswordForm = () => {
     const [searchParams] = useSearchParams();
@@ -43,7 +44,7 @@ const ResetPasswordForm = () => {
         }//!Password characters long < 8.
 
         try {
-            const reponse = await axios.post(import.meta.env.VITE_API_RESET_PASSWORD, {
+            const reponse = await axios.post(RESET_PASSWORD_API, {
                 token: token,
                 new_password: password
             });

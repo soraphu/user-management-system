@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { GoToMockMailButton } from "@/components/to-mock-mail-button"
 import { toast } from "sonner"
+import { FORGET_PASSWORD_API } from "@/handler/config"
 
 const ForgetPasswordForm = () => {
     const [sentSuccess, setSentSuccess] = useState(false);
@@ -28,7 +29,7 @@ const ForgetPasswordForm = () => {
         consoleLogOnDev(`Target email: ${email}`);
 
         try {
-            const response = await axios.post(import.meta.env.VITE_API_FORGET_PASSWORD, { email: email });
+            const response = await axios.post(FORGET_PASSWORD_API, { email: email });
             const responseMessage = response.data.message;
 
             setSentSuccess(true);

@@ -1,9 +1,8 @@
 import axios from 'axios';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 
-import { Link } from 'react-router-dom';
 import { useState } from 'react';
-import { Mail, ArrowRight, RefreshCw } from 'lucide-react';
+import { Mail, RefreshCw } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import {
     Card,
@@ -16,7 +15,7 @@ import {
 import { toast } from 'sonner';
 import { getCatchMessage } from '@/handler/request_handler';
 import Swal from 'sweetalert2';
-import { swalConfirmButtonColor } from '@/handler/config';
+import { swalConfirmButtonColor, VERIFY_EMAIL_REQUEST_API } from '@/handler/config';
 import { GoToMockMailButton } from '@/components/to-mock-mail-button';
 
 const SendVerifyEmail = () => {
@@ -54,7 +53,7 @@ const SendVerifyEmail = () => {
 
         try {
             // Send the email in the body to your verify email request API.
-            const response = await axios.post(import.meta.env.VITE_API_VERIFY_EMAIL_REQUEST, { email: email });
+            const response = await axios.post(VERIFY_EMAIL_REQUEST_API, { email: email });
 
             // Trigger a success.
             toast.success(response.data.message);

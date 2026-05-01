@@ -3,6 +3,7 @@ import React from "react";
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { getCatchMessage } from "@/handler/request_handler";
+import { REGISTER_API, swalConfirmButtonColor, VERIFY_EMAIL_REQUEST_API } from "@/handler/config";
 
 //Import Components.
 import { cn } from "@/lib/utils"
@@ -23,7 +24,6 @@ import {
 } from "@/components/ui/field"
 import { toast } from "sonner";
 import { InputPasswordWithVisibleControl } from "./ui/password-visible-control";
-import { swalConfirmButtonColor } from "@/handler/config";
 
 const RegisterForm = ({ className, ...props }: React.ComponentProps<"div">) => {
     const navigate = useNavigate();
@@ -46,7 +46,7 @@ const RegisterForm = ({ className, ...props }: React.ComponentProps<"div">) => {
         if (!isValidRegisterData(user)) return;
 
         try {
-            await axios.post(import.meta.env.VITE_API_REGISTER, user);
+            await axios.post(REGISTER_API, user);
 
             //Created successfully.
             await Swal.fire({
@@ -61,7 +61,7 @@ const RegisterForm = ({ className, ...props }: React.ComponentProps<"div">) => {
             navigate(`/verify-email-request?email=${user.email}`);
 
             //Request verify email link.
-            await axios.post(import.meta.env.VITE_API_VERIFY_EMAIL_REQUEST, { email: user.email });
+            await axios.post(VERIFY_EMAIL_REQUEST_API, { email: user.email });
         } catch (error: any) {
             const message: string = getCatchMessage(error);
             toast.error(message);
