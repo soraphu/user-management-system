@@ -1,4 +1,5 @@
 //components
+import { swalConfirmButtonColor } from '@/handler/config';
 import RegisterForm from '../components/register-form'
 import { useEffect } from 'react';
 import Swal from 'sweetalert2';
@@ -8,7 +9,9 @@ const RegisterPage = () => {
         Swal.fire({
             icon: "warning",
             title: "WARNING",
-            text: "This is a demo project. For your security, DO NOT use your real email or a password you use elsewhere. Use fake data (e.g., user@test.com)."
+            text: "This is a demo project. For your security, DO NOT use your real email or a password you use elsewhere. Use fake data (e.g., user@test.com).",
+            confirmButtonColor: swalConfirmButtonColor,
+            confirmButtonText: "I Understand"
         });
     }, []); //Init website.
 

@@ -1,6 +1,6 @@
 <?php
 include_once "validation.php";
-include_once "response.php";
+include_once "respond.php";
 include_once "function_generate.php";
 // use Firebase\JWT\JWT;
 // use Firebase\JWT\Key;

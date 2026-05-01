@@ -1,0 +1,1 @@
+export const swalConfirmButtonColor = "#3085d6";

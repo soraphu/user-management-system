@@ -2,6 +2,8 @@ import axios from "axios";
 import React from "react";
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
+import { consoleLogOnDev } from "@/handler/log";
+import { getCatchMessage } from "@/handler/request_handler";
 
 //Import Components.
 import { cn } from "@/lib/utils"
@@ -22,18 +24,26 @@ import {
 } from "@/components/ui/field"
 import { toast } from "sonner";
 import InputPasswordWithVisibleControl from "./ui/password-visible-control";
+import { swalConfirmButtonColor } from "@/handler/config";
 
 const RegisterForm = ({ className, ...props }: React.ComponentProps<"div">) => {
     const navigate = useNavigate();
 
     async function handleUserRegister(e: any) {
         e.preventDefault();
-        const user = {
+        interface UserItem {
+            username: string,
+            email: string,
+            password: string,
+        }
+
+        const user: UserItem = {
             username: e.target.name.value,
             email: e.target.email.value,
             password: e.target.password.value,
         }//Set data.
 
+        //Validate data.
         if (!isValidRegisterData(user)) return;
 
         try {
@@ -51,18 +61,11 @@ const RegisterForm = ({ className, ...props }: React.ComponentProps<"div">) => {
             //Route to verofy email request path.
             navigate(`/verify-email-request?email=${user.email}`);
 
-            //Send
-            await axios.post(import.meta.env.VITE_API_VERIFY_EMAIL_REQUEST, {
-                email: user.email
-            });
+            //Request verify email link.
+            await axios.post(import.meta.env.VITE_API_VERIFY_EMAIL_REQUEST, { email: user.email });
         } catch (error: any) {
-            //Failed to create.
-            if (error.status === 409) {
-                toast.error("This email already exist.");
-            } else {
-                console.error(error);
-                toast.error("Fail to create account. Please try again.");
-            }//Handle on error.
+            const message: string = getCatchMessage(error);
+            toast.error(message);
         }//try-signup.
     } //Handle on register.
 
@@ -76,6 +79,7 @@ const RegisterForm = ({ className, ...props }: React.ComponentProps<"div">) => {
             Swal.fire({
                 icon: "error",
                 title: "REAL DOMAIN DETECTED",
+                confirmButtonColor: swalConfirmButtonColor,
                 text: "For PDPA safety, please use a fake email domain like @example.com, @test.com or each other."
             });
 
