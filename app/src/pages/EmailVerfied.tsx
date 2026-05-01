@@ -17,7 +17,7 @@ import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { toast } from 'sonner';
 import { getCatchMessage } from '@/handler/request_handler';
-import { API_VERIFIED_EMAIL, API_VERIFY_EMAIL_SENT } from '@/handler/config';
+import { API_ENDPOINTS } from '@/handler/config';
 
 const EmailVerfied = () => {
     const navigate = useNavigate();
@@ -39,7 +39,7 @@ const EmailVerfied = () => {
 
             try {
                 // Using the environment variable you mentioned
-                await axios.post(API_VERIFIED_EMAIL, {
+                await axios.post(API_ENDPOINTS.VerifiedEmail, {
                     token: token
                 });
 
@@ -76,7 +76,7 @@ const EmailVerfied = () => {
         const email = searchParams.get('email');
 
         try {
-            const response = await axios.post(API_VERIFY_EMAIL_SENT, {
+            const response = await axios.post(API_ENDPOINTS.VerifyEmailSent, {
                 email: email
             });
 

@@ -13,7 +13,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { InputPasswordWithVisibleControl } from "./ui/password-visible-control"
 import { toast } from 'sonner';
-import { API_LOGIN } from "@/handler/config";
+import { API_ENDPOINTS } from "@/handler/config";
 
 export function LoginForm({ className, ...props }: React.ComponentProps<"form">) {
 
@@ -32,7 +32,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"form">)
     };
 
     try {
-      await axios.post(API_LOGIN, user);
+      await axios.post(API_ENDPOINTS.Login, user);
 
       //Login success.
       navigate("/Dashboard");
