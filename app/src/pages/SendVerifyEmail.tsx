@@ -13,9 +13,9 @@ import {
     CardTitle,
 } from "@/components/ui/card";
 import { toast } from 'sonner';
-import { getCatchMessage } from '@/handler/request_handler';
+import { getCatchMessage } from '@/helper/request_handler';
 import Swal from 'sweetalert2';
-import { swalConfirmButtonColor, API_ENDPOINTS } from '@/handler/config';
+import { swalConfirmButtonColor, API_ENDPOINTS } from '@/helper/config';
 import { GoToMockMailButton } from '@/components/to-mock-mail-button';
 
 const SendVerifyEmail = () => {

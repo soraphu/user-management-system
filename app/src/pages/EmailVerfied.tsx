@@ -16,8 +16,8 @@ import {
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { toast } from 'sonner';
-import { getCatchMessage } from '@/handler/request_handler';
-import { API_ENDPOINTS } from '@/handler/config';
+import { getCatchMessage } from '@/helper/request_handler';
+import { API_ENDPOINTS } from '@/helper/config';
 
 const EmailVerfied = () => {
     const navigate = useNavigate();

@@ -13,10 +13,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { NavigateButton } from "@/components/ui/link-button";
 import { Navbar } from "@/components/ui/navbar";
-import { getCatchMessage } from "@/handler/request_handler";
+import { getCatchMessage } from "@/helper/request_handler";
 import { toast } from "sonner";
-import { consoleLogOnDev } from "@/handler/log";
-import { API_ENDPOINTS } from "@/handler/config";
+import { consoleLogOnDev } from "@/helper/log";
+import { API_ENDPOINTS } from "@/helper/config";
 
 interface MailItem {
     id: number;

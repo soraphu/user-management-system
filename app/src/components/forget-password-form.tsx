@@ -1,7 +1,7 @@
-import { getCatchMessage } from "@/handler/request_handler"
+import { getCatchMessage } from "@/helper/request_handler"
 import { useState } from "react"
 import axios from "axios"
-import { consoleLogOnDev } from "@/handler/log"
+import { consoleLogOnDev } from "@/helper/log"
 
 import { Link } from "react-router-dom"
 import { Button } from "@/components/ui/button"
@@ -17,7 +17,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { GoToMockMailButton } from "@/components/to-mock-mail-button"
 import { toast } from "sonner"
-import { API_ENDPOINTS } from "@/handler/config"
+import { API_ENDPOINTS } from "@/helper/config"
 
 const ForgetPasswordForm = () => {
     const [sentSuccess, setSentSuccess] = useState(false);

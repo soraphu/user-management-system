@@ -2,8 +2,8 @@ import axios from "axios";
 import React from "react";
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
-import { getCatchMessage } from "@/handler/request_handler";
-import { swalConfirmButtonColor, API_ENDPOINTS } from "@/handler/config";
+import { getCatchMessage } from "@/helper/request_handler";
+import { swalConfirmButtonColor, API_ENDPOINTS } from "@/helper/config";
 
 //Import Components.
 import { cn } from "@/lib/utils"

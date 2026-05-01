@@ -9,14 +9,14 @@ import {
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { KeyRound } from "lucide-react";
-import { consoleLogOnDev } from "@/handler/log";
+import { consoleLogOnDev } from "@/helper/log";
 import { InputPasswordWithVisibleControl } from "./ui/password-visible-control";
 import { toast } from "sonner";
-import { getCatchMessage } from "@/handler/request_handler";
+import { getCatchMessage } from "@/helper/request_handler";
 import axios from "axios";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import Swal from "sweetalert2";
-import { API_ENDPOINTS } from "@/handler/config";
+import { API_ENDPOINTS } from "@/helper/config";
 
 const ResetPasswordForm = () => {
     const [searchParams] = useSearchParams();
