@@ -17,6 +17,7 @@ import { toast } from 'sonner';
 import { getCatchMessage } from '@/handler/request_handler';
 import Swal from 'sweetalert2';
 import { swalConfirmButtonColor } from '@/handler/config';
+import { GoToMockMailButton } from '@/components/to-mock-mail-button';
 
 const SendVerifyEmail = () => {
     const [isResending, setIsResending] = useState(false);
@@ -100,18 +101,11 @@ const SendVerifyEmail = () => {
                 </CardHeader>
 
                 <CardContent className="grid gap-4">
-                    <Link to={`/mockmail?email=${email}`} target='_blank' >
-                        <Button
-                            variant="default"
-                            className="w-full"
-                        >
-                            Go to Mock Mail
-                            <ArrowRight className="ml-2 h-4 w-4" />
-                        </Button>
-                    </Link>
+
+                    <GoToMockMailButton email={email} />
 
                     <Button
-                        variant="outline"
+                        variant="default"
                         className="w-full"
                         onClick={handleResendVerifyEmailLink}
                         disabled={isResending}

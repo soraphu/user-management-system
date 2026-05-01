@@ -1,13 +1,25 @@
 <?php
-function createMailtoInbox($db, $user, $newUrl)
+function createMailtoInbox($db, $user, $type, $newUrl)
 {
+    $newPreview = "";
+    $newButtonLabel = "";
+
+    if ($type === "verify") {
+        $newPreview = "Thank for testing my signup feature, this project was make for learning about user management system and security, so click the button below to verify your email address.";
+        $newButtonLabel = "Verify your email address";
+    }
+    if ($type === "reset") {
+        $newPreview = "Thank for testing my reset password feature, this project was make for learning about user management system and security, so click the button below to reset your password.";
+        $newButtonLabel = "Reset your password";
+    }
+
     //Simulate send to email
     $owner_email = $user['email'];
     $sender = "server@user.management.system.com";
     $subject = "Hi {$user['username']},";
-    $preview = "Thank for testing my signup feature, this project was make for learning the process of user management system and security.";
+    $preview = $newPreview;
     $url = $newUrl;
-    $buttonLabel = "Verify your email address";
+    $buttonLabel = $newButtonLabel;
     $isRead = 0; // 0 for false, 1 for true in MySQL
 
     try {

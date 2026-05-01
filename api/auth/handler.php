@@ -152,7 +152,7 @@ function handleForgetPassword($db)
         // Generate reset token and save to database (for simplicity, we use a random string here)
         $token = createResetPasswordToken($db, $email);
 
-        createMailtoInbox($db, $user, "/password/reset?token=$token");
+        createMailtoInbox($db, $user, "reset", "/password/reset?token=$token");
 
         respondSuccess(200, "Password reset link was send to $email.");
     } catch (\Throwable $th) {
@@ -236,7 +236,7 @@ function handleVerifyEmailRequest($db)
         $token = createVerifyEmailToken($db, $user['email']);
 
         //Send verify token to mock mail.
-        createMailtoInbox($db, $user, "/verify-email?token=$token");
+        createMailtoInbox($db, $user, "verify", "/verify-email?token=$token");
 
         respondSuccess(201, "Verify email request was send to {$user['email']}.");
     } catch (\Throwable $th) {

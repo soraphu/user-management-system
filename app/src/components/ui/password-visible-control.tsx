@@ -18,10 +18,10 @@ const InputPasswordWithVisibleControl = ({ id }: { id: string | undefined }) => 
 
     return (
         <div className="relative" >
-            <Input id={id} type={passwordVisible ? "text" : "password"} required />
+            <Input id={id} type={passwordVisible ? "text" : "password"} placeholder="••••••••" required />
             {passwordVisibleControlButton}
         </div>
     )
 }//InputPasswordWithVisibleControl component.
 
-export default InputPasswordWithVisibleControl
+export { InputPasswordWithVisibleControl }

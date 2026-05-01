@@ -38,7 +38,7 @@ const EmailVerfied = () => {
 
             try {
                 // Using the environment variable you mentioned
-                const response: any = await axios.post(import.meta.env.VITE_API_VERIFIED_EMAIL, {
+                await axios.post(import.meta.env.VITE_API_VERIFIED_EMAIL, {
                     token: token
                 });
 

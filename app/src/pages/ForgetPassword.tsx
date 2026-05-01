@@ -1,8 +1,10 @@
+import ForgetPasswordForm from "@/components/forget-password-form"
 
-const ForgetPasswordPage = () => {
+function ForgotPasswordPage() {
     return (
-        <div>Forget_password</div>
+        <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-12 sm:px-6 lg:px-8">
+            <ForgetPasswordForm />
+        </div>
     )
 }
-
-export default ForgetPasswordPage
+export default ForgotPasswordPage;

@@ -2,7 +2,6 @@ import axios from "axios";
 import React from "react";
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
-import { consoleLogOnDev } from "@/handler/log";
 import { getCatchMessage } from "@/handler/request_handler";
 
 //Import Components.
@@ -23,7 +22,7 @@ import {
     FieldLabel,
 } from "@/components/ui/field"
 import { toast } from "sonner";
-import InputPasswordWithVisibleControl from "./ui/password-visible-control";
+import { InputPasswordWithVisibleControl } from "./ui/password-visible-control";
 import { swalConfirmButtonColor } from "@/handler/config";
 
 const RegisterForm = ({ className, ...props }: React.ComponentProps<"div">) => {

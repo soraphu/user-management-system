@@ -11,7 +11,7 @@ import {
   FieldLabel,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import InputPasswordWithVisibleControl from "./ui/password-visible-control"
+import { InputPasswordWithVisibleControl } from "./ui/password-visible-control"
 import { toast } from 'sonner';
 
 export function LoginForm({ className, ...props }: React.ComponentProps<"form">) {

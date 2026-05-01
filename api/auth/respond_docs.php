@@ -149,7 +149,7 @@ function respondApiDocs()
                     "method" => "POST",
                     "requestBody" => [
                         "content_type" => "application/json",
-                        "schema" => ["email" => "string (valid email)"]
+                        "schema" => ["email" => "string (required)"]
                     ],
                     "response" => [
                         "200" => ["success" => true, "message" => "Reset link was sent to {your_email}."],
@@ -179,11 +179,11 @@ function respondApiDocs()
                                 "Invalid or expired token.",
                             ]
                         ],
-                        "404" => ["success" => false, "message" => "Invalid or exipred reset token."],
+                        "404" => ["success" => false, "message" => "Invalid or expired reset token."],
                         "500" => ["success" => false, "message" => "Internal server error."]
                     ]
                 ],
-                
+
                 "/inbox" => [
                     "description" => "Get user's inbox messages (Requires valid email).",
                     "method" => "GET",
