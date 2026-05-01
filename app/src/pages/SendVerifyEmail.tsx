@@ -15,7 +15,7 @@ import {
 import { toast } from 'sonner';
 import { getCatchMessage } from '@/handler/request_handler';
 import Swal from 'sweetalert2';
-import { swalConfirmButtonColor, VERIFY_EMAIL_REQUEST_API } from '@/handler/config';
+import { swalConfirmButtonColor, API_VERIFY_EMAIL_SENT } from '@/handler/config';
 import { GoToMockMailButton } from '@/components/to-mock-mail-button';
 
 const SendVerifyEmail = () => {
@@ -53,7 +53,7 @@ const SendVerifyEmail = () => {
 
         try {
             // Send the email in the body to your verify email request API.
-            const response = await axios.post(VERIFY_EMAIL_REQUEST_API, { email: email });
+            const response = await axios.post(API_VERIFY_EMAIL_SENT, { email: email });
 
             // Trigger a success.
             toast.success(response.data.message);
