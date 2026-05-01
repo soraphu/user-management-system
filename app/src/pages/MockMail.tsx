@@ -13,6 +13,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { NavigateButton } from "@/components/ui/link-button";
 import { Navbar } from "@/components/ui/navbar";
+import { getCatchMessage } from "@/handler/request_handler";
+import { toast } from "sonner";
+import { consoleLogOnDev } from "@/handler/log";
 
 interface MailItem {
     id: number;
@@ -64,37 +67,51 @@ export default function MockMail() {
         });
     }, [navigate]);
 
+    const handleUpdateMailReaded = async (mail: MailItem) => {
+        try {
+            await axios.post(import.meta.env.VITE_API_UPDATE_MAIL_READ, { mail_id: mail.id });
+            consoleLogOnDev("Mail marked as read: " + mail.id);
+        } catch (error: any) {
+            const errorMessage = getCatchMessage(error);
+            toast.error(errorMessage);
+        }
+    }//Handle set readed on database.
+
     const handleFetchInbox = async () => {
         try {
             setLoading(true);
 
             //GET
             const dataResponse = await axios.get(import.meta.env.VITE_API_GET_INBOX + `?email=${email}`);
-            const newInbox: MailItem[] = dataResponse.data;
+            const newInbox: MailItem[] = dataResponse.data.inbox;
             // If 200 OK, save the data
             setInbox(newInbox);
             setUnReadAmount(newInbox.filter(e => !e.isRead).length);
         } catch (error: any) {
-            const status = error.response?.status;
+            const errorMessage = getCatchMessage(error);
 
-            let errorMsg = "An unexpected error occurred. Please try again.";
-            if (status === 404) {
-                errorMsg = "This email not found.";
+            if (error.response) {
+                const statusCode = error.response.status;
+
+                if (statusCode === 404) {
+                    const dialog = await Swal.fire({
+                        title: "System Error",
+                        text: errorMessage,
+                        icon: "error",
+                        confirmButtonText: "Return to Login",
+                        confirmButtonColor: "#2563eb",
+                        allowOutsideClick: false,
+                    });
+
+                    if (dialog.isConfirmed) navigate("/");
+                }
+            }//Server response
+            else {
+                toast.error(errorMessage);
             }
-
-            const pressReturn = await Swal.fire({
-                title: "System Error",
-                text: errorMsg,
-                icon: "error",
-                confirmButtonText: "Return to Home",
-                confirmButtonColor: "#2563eb",
-                allowOutsideClick: false, // Force them to click the button
-            });
-
-            if (pressReturn.isConfirmed) navigate("/");
         } finally {
             setLoading(false);
-        }
+        }//trycatch
     }; //Hanle fetch inbox.
 
     return (
@@ -119,12 +136,16 @@ export default function MockMail() {
                                 {inbox.map((mail) => (
                                     <button
                                         key={mail.id}
-                                        onClick={() => {
-                                            if (!mail.isRead) mail.isRead = true;
+                                        onClick={async () => {
+                                            if (!mail.isRead) {
+                                                mail.isRead = true;
+                                                handleUpdateMailReaded(mail);
+                                            }//Set on readed unread mail.
 
                                             setUnReadAmount(inbox.filter(e => !e.isRead).length);
                                             setSelectedId(mail.id);
                                         }}
+
                                         className={cn(
                                             "flex flex-col items-start gap-2 rounded-lg border p-3 text-left text-sm transition-all hover:bg-accent",
                                             selectedId === mail.id && "bg-muted"

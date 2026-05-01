@@ -283,7 +283,6 @@ function handleVerifiedEmail($db)
         echo json_encode(["status" => "error", "message" => $th->getMessage()]);
     }
 }
-
 function handleGetInbox($db)
 {
     $email = $_GET['email'] ?? null;
@@ -326,3 +325,32 @@ function handleGetInbox($db)
         respondFailed(500, $e->getMessage());
     }
 }//Inbox
+
+function handleMarkMailAsRead($db)
+{
+    $input = handleFetchJsonBody();
+    $mailId = $input['mail_id'];
+
+    if (empty($mailId)) {
+        respond400FieldsMissing();
+    }
+
+    try {
+        $sqlFindMail = "SELECT * FROM inbox WHERE id = ?";
+        $stmt = $db->prepare($sqlFindMail);
+        $stmt->execute([$mailId]);
+        $mail = $stmt->fetch();
+
+        if (empty($mail)) {
+            respondFailed(404, "Mail not found.");
+        }//Mail exist check.
+
+        $sql = "UPDATE inbox SET isRead = 1 WHERE id = ?";
+        $stmt = $db->prepare($sql);
+        $stmt->execute([$mailId]);
+
+        respondSuccess(200, "Mail marked as read.");
+    } catch (PDOException $e) {
+        respondFailed(500, $e->getMessage());
+    }
+}//Mark mail as read.

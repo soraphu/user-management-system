@@ -183,9 +183,42 @@ function respondApiDocs()
                         "500" => ["success" => false, "message" => "Internal server error."]
                     ]
                 ],
+                
+                "/inbox" => [
+                    "description" => "Get user's inbox messages (Requires valid email).",
+                    "method" => "GET",
+                    "requestBody" => [
+                        "content_type" => "application/json",
+                        "schema" => []
+                    ],
+                    "response" => [
+                        "200" => [
+                            "success" => true,
+                            "inbox" => [],
+                        ],
+                        "400" => ["success" => false, "message" => "Request data can't be empty."],
+                        "404" => ["success" => false, "message" => "User with this email not found."],
+                        "500" => ["success" => false, "message" => "{Catch message}"]
+                    ]
+                ],
 
-            ]
-        ]
+                "/inbox/mark-as-read" => [
+                    "description" => "Mark a specific email as read.",
+                    "method" => "POST",
+                    "requestBody" => [
+                        "content_type" => "application/json",
+                        "schema" => ["mail_id" => "integer (required)"]
+                    ],
+                    "response" => [
+                        "200" => ["success" => true, "message" => "Mail marked as read."],
+                        "400" => ["success" => false, "message" => "Request data can't be empty."],
+                        "404" => ["success" => false, "message" => "Mail not found."],
+                        "500" => ["success" => false, "message" => "{Catch message}"]
+                    ]
+                ]
+
+            ]//auth
+        ]//endpoints
     ]);
     exit;
 } //api doc

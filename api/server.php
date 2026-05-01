@@ -90,9 +90,16 @@ if ($first2PathSegments === "/api/v1/auth") {
 
         //Handle get inbox data.
         case 'inbox':
-            ensureReqMethod("GET");
-            handleGetInbox($pdo);
-            exit;
+            if (empty($pathSegments[4])) {
+                ensureReqMethod("GET");
+                handleGetInbox($pdo);
+                exit;
+            }
+            if ($pathSegments[4] === 'mark-as-read') {
+                ensureReqMethod("POST");
+                handleMarkMailAsRead($pdo);
+                exit;
+            }
 
         default:
             respondPageNotFound();
