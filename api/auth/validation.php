@@ -1,5 +1,8 @@
 <?php
 include_once 'respond.php';
+require_once __DIR__ . '/../vendor/autoload.php';
+use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
 function ensureDataNotEmpty($data)
 {
     if (empty($data)) {
@@ -64,3 +67,30 @@ function ensureReqMethod($expectMethod)
         exit;
     }//Validation.
 } //Handle method not allowed.
+
+function decodeAccessToken($access_token)
+{
+    // Check if the cookie even exists
+    if (empty($access_token)) {
+        http_response_code(401);
+        echo json_encode(["message" => "Unauthorized: No token provided"]);
+        exit();
+    }
+
+    $secretKey = $_ENV['JWT_SECRET']; // Your secret from .env
+
+    try {
+        // Decode and Verify
+        // This checks the signature AND the expiration (exp) automatically
+        $decoded = JWT::decode($access_token, new Key($secretKey, 'HS256'));
+
+        // Return the user data to be used in your logic
+        return (array) $decoded->data;
+
+    } catch (Exception $e) {
+        // Handle errors (Expired, Tampered, Invalid)
+        http_response_code(401);
+        echo json_encode(["message" => "Unauthorized: " . $e->getMessage()]);
+        exit();
+    }
+}

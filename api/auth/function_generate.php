@@ -1,4 +1,7 @@
 <?php
+require_once __DIR__ . '/../vendor/autoload.php';
+use Firebase\JWT\JWT;
+
 function createMailtoInbox($db, $user, $type, $newUrl)
 {
     $newPreview = "";
@@ -85,3 +88,50 @@ function createVerifyEmailToken($db, $email)
         respondFailed(500, $th->getMessage());
     }
 }//Generate verify email token.
+
+function createIdentityTokens($user, $db)
+{
+    // Create access token.
+    $accessToken = generateAccessToken($user);
+
+    // Create the Refresh Token
+    handleSetupRefreshToken($user, $db);
+
+    return $accessToken;
+}//Generate access token and refresh token.
+
+function generateAccessToken($user)
+{
+    $accessToken = JWT::encode([
+        'uid' => $user['id'],
+        'role' => $user['role'],
+        'iat' => time(),
+        'exp' => time() + (15 * 60)
+    ], $_ENV['JWT_SECRET'], 'HS256');
+
+    return $accessToken;
+} //Generate access token.
+
+function handleSetupRefreshToken($user, $db)
+{
+    $isDevMode = !((bool) $_ENV['DEV']);
+
+    $refreshToken = bin2hex(random_bytes(32));
+    $hashedRefreshToken = password_hash($refreshToken, PASSWORD_BCRYPT);
+
+    $expires = date('Y-m-d H:i:s', strtotime('+7 days'));
+
+    // Save to MySQL (Your refresh_tokens table)
+    $sqlCreateToken = "INSERT INTO refresh_tokens (user_id, token, expires_at) 
+                VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE token = VALUES(token), expires_at = VALUES(expires_at)";
+    $stmt = $db->prepare($sqlCreateToken);
+    $stmt->execute([$user['id'], $hashedRefreshToken, $expires]);
+
+    // Send Refresh Token via Secure Cookie
+    setcookie("refresh_token", $refreshToken, [
+        'expires' => strtotime($expires),
+        'httponly' => true,
+        'secure' => $isDevMode, //Set to true in production (requires HTTPS)
+        'samesite' => 'Strict'
+    ]);
+}

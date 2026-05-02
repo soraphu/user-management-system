@@ -116,7 +116,7 @@ function respondApiDocs()
                     "response" => [
                         "200" => [
                             "success" => true,
-                            "message" => "User login successfully.",
+                            "message" => "User {your_email} login successfully.",
                             "access_token" => "string (JWT - Store in JS Memory)",
                             "refresh_token" => "Automatically set via HttpOnly Cookie."
                         ],
