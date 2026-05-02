@@ -53,6 +53,22 @@ function handleLogin($db)
     }
 } //Handle user login.
 
+function handleRefreshAccessToken($db)
+{
+    $user = ensureValidRefreshToken($db);
+
+    if (isset($user)) {
+        $accessToken = generateAccessToken($user);
+
+        http_response_code(200);
+        echo json_encode([
+            "success" => true,
+            "message" => "Access token refreshed successfully.",
+            "access_token" => $accessToken
+        ]);
+    }
+}
+
 function handleRegister($db)
 {
     $input = handleFetchJsonBody();
@@ -132,16 +148,16 @@ function handleResetPassword($db)
         $stmt = $db->prepare($sqlFindToken);
         $stmt->execute([$hashedToken]);
 
-        $resetToken = $stmt->fetch();
+        $rows = $stmt->fetch();
 
-        if (empty($resetToken)) {
+        if (empty($rows)) {
             respondFailed(404, "Invalid or expired reset token.");
         }
 
         //Security check successful, execute reset password.
         $sqlResetPassword = "UPDATE accounts SET password = ? WHERE email = ?";
         $stmt = $db->prepare($sqlResetPassword);
-        $stmt->execute([$hashNewPassword, $resetToken['email']]);
+        $stmt->execute([$hashNewPassword, $rows['email']]);
 
         //Delete reset password token.
         $sqlDeleteToken = "DELETE FROM password_resets WHERE token = ?";

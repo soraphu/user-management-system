@@ -139,6 +139,7 @@ function respondApiDocs()
                             "message" => "Access token refreshed.",
                             "access_token" => "string (JWT - Store in JS Memory)"
                         ],
+                        "400" => ["success" => false, "message" => "Required fields are missing."],
                         "404" => ["success" => false, "message" => "Invalid or expired refresh token."],
                         "500" => ["success" => false, "message" => "Database connection error."]
                     ]
@@ -215,7 +216,7 @@ function respondApiDocs()
                         "404" => ["success" => false, "message" => "Mail not found."],
                         "500" => ["success" => false, "message" => "{Catch message}"]
                     ]
-                ]
+                ],
 
             ]//auth
         ]//endpoints

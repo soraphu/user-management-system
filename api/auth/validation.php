@@ -68,12 +68,46 @@ function ensureReqMethod($expectMethod)
     }//Validation.
 } //Handle method not allowed.
 
+function ensureValidRefreshToken($db)
+{
+    $refreshToken = $_COOKIE['refresh_token'];
+
+    if (empty($refreshToken)) {
+        respondFailed(400, "Unauthorized: No refresh token provided.");
+        exit();
+    }
+
+    $hashedRefreshToken = hash('sha256', $refreshToken);
+
+    try {
+        $sqlFindToken = "SELECT * FROM refresh_token WHERE token = ? AND expires_at > NOW()";
+        $stmt = $db->prepare($sqlFindToken);
+        $stmt->execute([$hashedRefreshToken]);
+
+        $refreshTokenRows = $stmt->fetch();
+
+        if (empty($refreshTokenRows)) {
+            respondFailed(404, "Invalid or expired refresh token.");
+        }
+
+        $sqlFetchUser = "SELECT id, role FROM accounts WHERE id = ?";
+        $stmt = $db->prepare($sqlFetchUser);
+        $stmt->execute([$hashedRefreshToken]);
+
+        $userRows = $stmt->fetch();
+
+        return $userRows;
+    } catch (\Throwable $th) {
+        respondFailed(500, "Internal server error.");
+        exit();
+    }
+}
+
 function decodeAccessToken($access_token)
 {
     // Check if the cookie even exists
     if (empty($access_token)) {
-        http_response_code(401);
-        echo json_encode(["message" => "Unauthorized: No token provided"]);
+        respondFailed(401, "Unauthorized: No token provided");
         exit();
     }
 
@@ -89,8 +123,7 @@ function decodeAccessToken($access_token)
 
     } catch (Exception $e) {
         // Handle errors (Expired, Tampered, Invalid)
-        http_response_code(401);
-        echo json_encode(["message" => "Unauthorized: " . $e->getMessage()]);
+        respondFailed(401, "Unauthorized: " . $e->getMessage());
         exit();
     }
 }

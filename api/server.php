@@ -60,8 +60,14 @@ if ($first2PathSegments === "/api/v1/auth") {
         //Handle login.
         case 'login':
             ensureReqMethod("POST");
-            handleLogin($pdo);
-            exit;
+            if (empty($pathSegments[4])) {
+                handleLogin($pdo);
+                exit;
+            }
+            if ($pathSegments[4] === "refresh-token") {
+                handleRefreshAccessToken($pdo);
+                exit;
+            }
 
         //Handle password reset.
         case 'password':

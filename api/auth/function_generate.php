@@ -114,10 +114,10 @@ function generateAccessToken($user)
 
 function handleSetupRefreshToken($user, $db)
 {
-    $isDevMode = !((bool) $_ENV['DEV']);
+    $isDevMode = (bool) $_ENV['DEV'];
 
     $refreshToken = bin2hex(random_bytes(32));
-    $hashedRefreshToken = password_hash($refreshToken, PASSWORD_BCRYPT);
+    $hashedRefreshToken = hash('sha256', $refreshToken);
 
     $expires = date('Y-m-d H:i:s', strtotime('+7 days'));
 
@@ -131,7 +131,7 @@ function handleSetupRefreshToken($user, $db)
     setcookie("refresh_token", $refreshToken, [
         'expires' => strtotime($expires),
         'httponly' => true,
-        'secure' => $isDevMode, //Set to true in production (requires HTTPS)
+        'secure' => !$isDevMode, //Set to true in production (requires HTTPS)
         'samesite' => 'Strict'
     ]);
 }
