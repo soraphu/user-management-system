@@ -1,7 +1,7 @@
 import { getCatchMessage } from "@/helper/request_handler"
 import { useState } from "react"
 import axios from "axios"
-import { consoleLogOnDev } from "@/helper/log"
+import { consoleLogDevMode } from "@/helper/log"
 
 import { Link } from "react-router-dom"
 import { Button } from "@/components/ui/button"
@@ -26,7 +26,7 @@ const ForgetPasswordForm = () => {
     const handleSendResetLink = async (e: any) => {
         e.preventDefault();
         const email = e.target.email.value;
-        consoleLogOnDev(`Target email: ${email}`);
+        consoleLogDevMode(`Target email: ${email}`);
 
         try {
             const response = await axios.post(API_ENDPOINTS.ForgetPassword, { email: email });

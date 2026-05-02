@@ -15,7 +15,7 @@ import { Input } from "@/components/ui/input"
 import { InputPasswordWithVisibleControl } from "./ui/password-visible-control"
 import { toast, Toaster } from 'sonner';
 import { API_ENDPOINTS } from "@/helper/config";
-import { consoleLogOnDev } from "@/helper/log";
+import { consoleLogDevMode as consoleLogDevMode } from "@/helper/log";
 import { getCatchMessage } from "@/helper/request_handler";
 
 export function LoginForm({ className, ...props }: React.ComponentProps<"form">) {
@@ -38,7 +38,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"form">)
       const response = await axios.post(API_ENDPOINTS.Login, user);
 
       //Login success.
-      consoleLogOnDev(response.data);
+      consoleLogDevMode(response.data);
       const newAccessToken = response.data.access_token;
       setAccessToken(newAccessToken);
 

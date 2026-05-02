@@ -9,7 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { KeyRound } from "lucide-react";
-import { consoleLogOnDev } from "@/helper/log";
+import { consoleLogDevMode } from "@/helper/log";
 import { InputPasswordWithVisibleControl } from "./ui/password-visible-control";
 import { toast } from "sonner";
 import { getCatchMessage } from "@/helper/request_handler";
@@ -26,7 +26,7 @@ const ResetPasswordForm = () => {
     const handleResetPassword = async () => {
         const passwordElement = document.getElementById("password") as HTMLInputElement;
         const password = passwordElement.value;
-        consoleLogOnDev(password);
+        consoleLogDevMode(password);
 
         if (!password) {
             toast.error("Password is required.");

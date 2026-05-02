@@ -1,12 +1,12 @@
 import { isDevMode } from "./config";
 
-export function consoleLogOnDev(message: any) {
+export function consoleLogDevMode(message: any) {
     if (isDevMode) {
         console.log(message);
     }
 } //Log on dev mode only.
 
-export function consoleErrorOnDev(message: any) {
+export function consoleErrorDevMode(message: any) {
     if (isDevMode) {
         console.error(message);
     }

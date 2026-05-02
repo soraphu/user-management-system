@@ -1,21 +1,21 @@
-import { consoleErrorOnDev } from "./log";
+import { consoleErrorDevMode } from "./log";
 
 export function getCatchMessage(err: any): string {
     if (err.response && err.response.data) {
         const serverMessage = err.response.data.message || "There is no message response from the server.";
 
-        consoleErrorOnDev("===========================================");
-        consoleErrorOnDev("Server response : Yes");
-        consoleErrorOnDev(err.response);
-        consoleErrorOnDev("API Server message: " + serverMessage);
-        consoleErrorOnDev("===========================================");
+        consoleErrorDevMode("===========================================");
+        consoleErrorDevMode("Server response : Yes");
+        consoleErrorDevMode(err.response);
+        consoleErrorDevMode("API Server message: " + serverMessage);
+        consoleErrorDevMode("===========================================");
 
         return serverMessage;
     } else {
-        consoleErrorOnDev("===========================================");
-        consoleErrorOnDev("Server response : No");
-        consoleErrorOnDev("Error message: " + err.message);
-        consoleErrorOnDev("===========================================");
+        consoleErrorDevMode("===========================================");
+        consoleErrorDevMode("Server response : No");
+        consoleErrorDevMode("Error message: " + err.message);
+        consoleErrorDevMode("===========================================");
 
         return "Unable to connect to the server. Please try again later.";
     }

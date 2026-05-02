@@ -15,7 +15,7 @@ import { NavigateButton } from "@/components/ui/link-button";
 import { Navbar } from "@/components/ui/navbar";
 import { getCatchMessage } from "@/helper/request_handler";
 import { toast } from "sonner";
-import { consoleLogOnDev } from "@/helper/log";
+import { consoleLogDevMode } from "@/helper/log";
 import { API_ENDPOINTS } from "@/helper/config";
 
 interface MailItem {
@@ -71,7 +71,7 @@ export default function MockMail() {
     const handleUpdateMailReaded = async (mail: MailItem) => {
         try {
             await axios.patch(`${API_ENDPOINTS.MarkMailAsRead}/${mail.id}`);
-            consoleLogOnDev("Mail marked as read successful: " + mail.id);
+            consoleLogDevMode("Mail marked as read successful: " + mail.id);
         } catch (error: any) {
             const errorMessage = getCatchMessage(error);
             toast.error(errorMessage);
