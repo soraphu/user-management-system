@@ -122,16 +122,20 @@ function handleSetupRefreshToken($user, $db)
     $expires = date('Y-m-d H:i:s', strtotime('+7 days'));
 
     // Save to MySQL (Your refresh_tokens table)
-    $sqlCreateToken = "INSERT INTO refresh_tokens (user_id, token, expires_at) 
-                VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE token = VALUES(token), expires_at = VALUES(expires_at)";
-    $stmt = $db->prepare($sqlCreateToken);
-    $stmt->execute([$user['id'], $hashedRefreshToken, $expires]);
+    try {
+        $sqlCreateToken = "INSERT INTO refresh_tokens (user_id, token, expires_at) 
+                    VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE token = VALUES(token), expires_at = VALUES(expires_at)";
+        $stmt = $db->prepare($sqlCreateToken);
+        $stmt->execute([$user['id'], $hashedRefreshToken, $expires]);
 
-    // Send Refresh Token via Secure Cookie
-    setcookie("refresh_token", $refreshToken, [
-        'expires' => strtotime($expires),
-        'httponly' => true,
-        'secure' => !$isDevMode, //Set to true in production (requires HTTPS)
-        'samesite' => 'Strict'
-    ]);
+        // Send Refresh Token via Secure Cookie
+        setcookie("refresh_token", $refreshToken, [
+            'expires' => strtotime($expires),
+            'httponly' => true,
+            'secure' => !$isDevMode, //Set to true in production (requires HTTPS)
+            'samesite' => 'Strict'
+        ]);
+    } catch (\Throwable $th) {
+        respondFailed(500, $th->getMessage());
+    }
 }

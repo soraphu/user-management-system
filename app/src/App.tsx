@@ -1,3 +1,4 @@
+import { AuthProvider } from './auth/AuthContext';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import { Toaster } from 'sonner';
 import './App.css'
@@ -28,8 +29,10 @@ const router = createBrowserRouter([
 const App = () => {
   return (
     <main>
-      <RouterProvider router={router} />
-      <Toaster />
+      <AuthProvider>
+        <RouterProvider router={router} />
+        <Toaster />
+      </AuthProvider>
     </main>
   )
 }

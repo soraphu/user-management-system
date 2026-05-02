@@ -1,5 +1,7 @@
 export const swalConfirmButtonColor = "#3085d6";
 
+export const isDevMode = true;
+
 const apiBaseURL = import.meta.env.VITE_AUTH_API_BASE_URL;
 
 export const API_ENDPOINTS = {

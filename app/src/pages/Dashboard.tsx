@@ -1,7 +1,10 @@
+import { useAuth } from "@/auth/AuthContext"
 
 const DashboardPage = () => {
+    const { accessToken } = useAuth();
+
     return (
-        <div>Dashboard</div>
+        <div>{`Saved token is ${accessToken}.`}</div>
     )
 }
 

@@ -292,19 +292,16 @@ function handleGetInbox($db)
     }
 }//Inbox
 
-function handleMarkMailAsRead($db)
+function handleMarkMailAsRead($db, $id)
 {
-    $input = handleFetchJsonBody();
-    $mailId = $input['mail_id'];
-
-    if (empty($mailId)) {
+    if (empty($id)) {
         respond400FieldsMissing();
     }
 
     try {
         $sqlFindMail = "SELECT * FROM inbox WHERE id = ?";
         $stmt = $db->prepare($sqlFindMail);
-        $stmt->execute([$mailId]);
+        $stmt->execute([$id]);
         $mail = $stmt->fetch();
 
         if (empty($mail)) {
@@ -313,7 +310,7 @@ function handleMarkMailAsRead($db)
 
         $sql = "UPDATE inbox SET isRead = 1 WHERE id = ?";
         $stmt = $db->prepare($sql);
-        $stmt->execute([$mailId]);
+        $stmt->execute([$id]);
 
         respondSuccess(200, "Mail marked as read.");
     } catch (PDOException $e) {

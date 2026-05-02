@@ -1,6 +1,7 @@
 import { cn } from "@/lib/utils"
 import axios from 'axios';
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/auth/AuthContext";
 
 //Import components.
 import { Button } from "@/components/ui/button"
@@ -12,11 +13,13 @@ import {
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { InputPasswordWithVisibleControl } from "./ui/password-visible-control"
-import { toast } from 'sonner';
+import { toast, Toaster } from 'sonner';
 import { API_ENDPOINTS } from "@/helper/config";
+import { consoleLogOnDev } from "@/helper/log";
+import { getCatchMessage } from "@/helper/request_handler";
 
 export function LoginForm({ className, ...props }: React.ComponentProps<"form">) {
-
+  const { accessToken, setAccessToken } = useAuth();
   const navigate = useNavigate();
 
   const handleUserLogin = async (e: any) => {
@@ -32,21 +35,18 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"form">)
     };
 
     try {
-      await axios.post(API_ENDPOINTS.Login, user);
+      const response = await axios.post(API_ENDPOINTS.Login, user);
 
       //Login success.
+      consoleLogOnDev(response.data);
+      const newAccessToken = response.data.access_token;
+      setAccessToken(newAccessToken);
+
+      toast.success("Login successfully.")
       navigate("/Dashboard");
     } catch (error: any) {
-
-      const message = error.response?.data?.message || "Login failed";
-
-      //If didn't verify email.
-      if (error.status === 401) {
-        navigate(`/verify-email-request?email=${user.email}`);
-      }
-
-      //Other.
-      toast.error(message);
+      const errorMessage = getCatchMessage(error);
+      toast.error(errorMessage);
     } //trycatch
   }; //Handle user login.
 

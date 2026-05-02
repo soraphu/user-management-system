@@ -5,7 +5,7 @@ export function getCatchMessage(err: any): string {
         const serverMessage = err.response.data.message || "There is no message response from the server.";
 
         consoleErrorOnDev("===========================================");
-        consoleErrorOnDev("Server response: ");
+        consoleErrorOnDev("Server response : Yes");
         consoleErrorOnDev(err.response);
         consoleErrorOnDev("API Server message: " + serverMessage);
         consoleErrorOnDev("===========================================");
@@ -13,6 +13,7 @@ export function getCatchMessage(err: any): string {
         return serverMessage;
     } else {
         consoleErrorOnDev("===========================================");
+        consoleErrorOnDev("Server response : No");
         consoleErrorOnDev("Error message: " + err.message);
         consoleErrorOnDev("===========================================");
 

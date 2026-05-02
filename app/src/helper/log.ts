@@ -1,4 +1,4 @@
-const isDevMode: boolean = import.meta.env.VITE_DEV_MODE === "true";
+import { isDevMode } from "./config";
 
 export function consoleLogOnDev(message: any) {
     if (isDevMode) {

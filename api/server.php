@@ -14,7 +14,7 @@ $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 // Check if the requester is in our "Trusted List"
 if (in_array($origin, $allowed_origins)) {
     header("Access-Control-Allow-Origin: " . $origin);
-    header("Access-Control-Allow-Methods: POST, GET, OPTIONS, DELETE, PUT");
+    header("Access-Control-Allow-Methods: POST, GET, OPTIONS, DELETE, PUT, PATCH");
     header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
     header("Access-Control-Allow-Credentials: true");
 }
@@ -103,7 +103,9 @@ if ($first2PathSegments === "/api/v1/auth") {
             }
             if ($pathSegments[4] === 'mark-as-read') {
                 ensureReqMethod("PATCH");
-                handleMarkMailAsRead($pdo);
+                $id = $pathSegments[5];
+
+                handleMarkMailAsRead($pdo, $id);
                 exit;
             }
 
