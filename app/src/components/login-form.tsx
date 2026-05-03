@@ -14,7 +14,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { InputPasswordWithVisibleControl } from "./ui/password-visible-control"
 import { toast } from 'sonner';
-import { API_AUTH } from "@/helper/config";
+import { API_AUTH, reqWithCookie } from "@/helper/config";
 import { consoleLogDevMode } from "@/helper/log";
 import { getCatchMessage } from "@/helper/request_handler";
 
@@ -35,15 +35,18 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"form">)
     };
 
     try {
-      const response = await axios.post(API_AUTH.Login, user);
+      const response = await reqWithCookie.post(API_AUTH.Login, user);
 
       //Login success.
       consoleLogDevMode(response.data);
       const newAccessToken = response.data.access_token;
       setAccessToken(newAccessToken);
 
-      toast.success("Login successfully.")
-      navigate("/Dashboard");
+      toast.success("Login successfully.");
+
+      consoleLogDevMode(document.cookie);
+
+      navigate("/home");
     } catch (error: any) {
       const errorMessage = getCatchMessage(error);
       toast.error(errorMessage);

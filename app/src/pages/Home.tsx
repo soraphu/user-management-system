@@ -1,4 +1,6 @@
 import { useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
+import { useUserAction } from '@/helper/customHook';
 
 import {
     Settings,
@@ -19,20 +21,16 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
+import { useAuth } from '@/auth/AuthContext';
 
 const HomePage = () => {
+    const { fetchUser } = useUserAction();
     const navigate = useNavigate();
+    const { handleLogout, user } = useAuth();
 
-    // Example data as requested
-    const user = {
-        username: "soraphu",
-        email: "test@test.com",
-        role: "admin"
-    };
-
-    const handleLogout = () => {
-
-    }
+    useEffect(() => {
+        fetchUser();
+    }, []);
 
     return (
         <div className="min-h-screen bg-slate-50">
@@ -47,7 +45,7 @@ const HomePage = () => {
 
                 <div className="flex items-center gap-4">
                     {/* Conditional Admin Button */}
-                    {user.role === "admin" && (
+                    {user?.role === "admin" && (
                         <Button variant="outline" className="hidden md:flex gap-2" onClick={() => navigate('/admin-dashboard')}>
                             <LayoutDashboard className="w-4 h-4" />
                             Admin Dashboard
@@ -60,7 +58,7 @@ const HomePage = () => {
                             <Button variant="ghost" className="relative h-10 w-10 rounded-full">
                                 <Avatar>
                                     <AvatarFallback className="bg-primary text-white">
-                                        {user.username.substring(0, 2).toUpperCase()}
+                                        {user?.username.substring(0, 2).toUpperCase()}
                                     </AvatarFallback>
                                 </Avatar>
                             </Button>
@@ -68,8 +66,8 @@ const HomePage = () => {
                         <DropdownMenuContent align="end" className="w-56">
                             <DropdownMenuLabel>
                                 <div className="flex flex-col space-y-1">
-                                    <p className="text-sm font-medium leading-none">{user.username}</p>
-                                    <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
+                                    <p className="text-sm font-medium leading-none">{user?.username}</p>
+                                    <p className="text-xs leading-none text-muted-foreground">{user?.email}</p>
                                 </div>
                             </DropdownMenuLabel>
                             <DropdownMenuSeparator />
@@ -132,9 +130,9 @@ const HomePage = () => {
                 {/* User Info Badge */}
                 <div className="mt-12 p-4 bg-slate-100 rounded-lg inline-flex items-center gap-3">
                     <div className="px-3 py-1 bg-white rounded border text-xs font-mono font-bold uppercase text-slate-500">
-                        Current Role: {user.role}
+                        Current Role: {user?.role}
                     </div>
-                    <span className="text-sm text-slate-500 italic">Logged in as {user.username}</span>
+                    <span className="text-sm text-slate-500 italic">Logged in as {user?.username}</span>
                 </div>
             </main>
         </div>

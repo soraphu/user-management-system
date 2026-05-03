@@ -15,13 +15,14 @@ export const API_AUTH = {
     MarkMailAsRead: `${apiBaseURL}/inbox/mark-as-read`,
     ForgetPassword: `${apiBaseURL}/password/forget`,
     ResetPassword: `${apiBaseURL}/password/reset`,
+    RefreshToken: `${apiBaseURL}/login/refresh-token`
 };
 
 export const API_ACTION = {
-    FetchUser: `${apiBaseURL}/user/info`,
+    FetchUser: `${apiBaseURL}/user/fetch-user`,
 }
 
-export const useCookie = axios.create({
+export const reqWithCookie = axios.create({
     withCredentials: true, // Crucial for your HttpOnly cookies
     headers: {
         'Content-Type': 'application/json',
