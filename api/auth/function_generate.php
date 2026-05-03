@@ -103,7 +103,9 @@ function createIdentityTokens($user, $db)
 function generateAccessToken($user)
 {
     $accessToken = JWT::encode([
-        'uid' => $user['id'],
+        'id' => $user['id'],
+        'username' => $user['username'],
+        'email' => $user['email'],
         'role' => $user['role'],
         'iat' => time(),
         'exp' => time() + (15 * 60)
@@ -128,12 +130,11 @@ function handleSetupRefreshToken($user, $db)
         $stmt = $db->prepare($sqlCreateToken);
         $stmt->execute([$user['id'], $hashedRefreshToken, $expires]);
 
-        // Send Refresh Token via Secure Cookie
         setcookie("refresh_token", $refreshToken, [
             'expires' => strtotime($expires),
             'httponly' => true,
             'secure' => !$isDevMode, //Set to true in production (requires HTTPS)
-            'samesite' => 'Strict'
+            'samesite' => 'Lax'
         ]);
     } catch (\Throwable $th) {
         respondFailed(500, $th->getMessage());

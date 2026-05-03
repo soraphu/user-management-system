@@ -1,8 +1,7 @@
 <?php
 include_once 'respond.php';
 require_once __DIR__ . '/../vendor/autoload.php';
-use Firebase\JWT\JWT;
-use Firebase\JWT\Key;
+
 function ensureDataNotEmpty($data)
 {
     if (empty($data)) {
@@ -70,7 +69,7 @@ function ensureReqMethod($expectMethod)
 
 function ensureValidRefreshToken($db)
 {
-    $refreshToken = $_COOKIE['refresh_token'];
+    $refreshToken = $_COOKIE['refresh_token'] ?? null;
 
     if (empty($refreshToken)) {
         respondFailed(400, "Unauthorized: No refresh token provided.");
@@ -80,50 +79,26 @@ function ensureValidRefreshToken($db)
     $hashedRefreshToken = hash('sha256', $refreshToken);
 
     try {
-        $sqlFindToken = "SELECT * FROM refresh_token WHERE token = ? AND expires_at > NOW()";
+        $sqlFindToken = "SELECT * FROM refresh_tokens WHERE token = ? AND expires_at > NOW()";
         $stmt = $db->prepare($sqlFindToken);
         $stmt->execute([$hashedRefreshToken]);
 
         $refreshTokenRows = $stmt->fetch();
 
+        $id = $refreshTokenRows['user_id'];
         if (empty($refreshTokenRows)) {
             respondFailed(404, "Invalid or expired refresh token.");
         }
 
-        $sqlFetchUser = "SELECT id, role FROM accounts WHERE id = ?";
+        $sqlFetchUser = "SELECT * FROM accounts WHERE id = ?";
         $stmt = $db->prepare($sqlFetchUser);
-        $stmt->execute([$hashedRefreshToken]);
+        $stmt->execute([$id]);
 
         $userRows = $stmt->fetch();
 
         return $userRows;
     } catch (\Throwable $th) {
-        respondFailed(500, "Internal server error.");
+        respondFailed(500, $th->getMessage());
         exit();
     }
-}
-
-function decodeAccessToken($access_token)
-{
-    // Check if the cookie even exists
-    if (empty($access_token)) {
-        respondFailed(401, "Unauthorized: No token provided");
-        exit();
-    }
-
-    $secretKey = $_ENV['JWT_SECRET']; // Your secret from .env
-
-    try {
-        // Decode and Verify
-        // This checks the signature AND the expiration (exp) automatically
-        $decoded = JWT::decode($access_token, new Key($secretKey, 'HS256'));
-
-        // Return the user data to be used in your logic
-        return (array) $decoded->data;
-
-    } catch (Exception $e) {
-        // Handle errors (Expired, Tampered, Invalid)
-        respondFailed(401, "Unauthorized: " . $e->getMessage());
-        exit();
-    }
-}
+}//ensure valid refresh token.

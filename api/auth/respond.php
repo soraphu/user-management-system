@@ -23,7 +23,10 @@ function respondSuccess($status, $message)
 function respondPageNotFound()
 {
     http_response_code(404);
-    echo json_encode(["error" => "Page not found."]);
+    echo json_encode([
+        "success" => false,
+        "message" => "Page not found."
+    ]);
     exit;
 } //Handle page not found.
 

@@ -59,12 +59,13 @@ if ($first2PathSegments === "/api/v1/auth") {
 
         //Handle login.
         case 'login':
-            ensureReqMethod("POST");
             if (empty($pathSegments[4])) {
+                ensureReqMethod("POST");
                 handleLogin($pdo);
                 exit;
             }
             if ($pathSegments[4] === "refresh-token") {
+                ensureReqMethod("GET");
                 handleRefreshAccessToken($pdo);
                 exit;
             }
@@ -108,6 +109,16 @@ if ($first2PathSegments === "/api/v1/auth") {
                 handleMarkMailAsRead($pdo, $id);
                 exit;
             }
+
+        case 'user':
+            if ($pathSegments[4] === 'fetch-user') {
+                handleFetchUser();
+                exit;
+            }
+
+        // case 'logout':
+        // handleLogout()
+        // exit ;
 
         default:
             respondPageNotFound();

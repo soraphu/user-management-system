@@ -2,6 +2,8 @@
 include_once "validation.php";
 include_once "respond.php";
 include_once "function_generate.php";
+use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
 
 function handleFetchJsonBody()
 {
@@ -317,3 +319,61 @@ function handleMarkMailAsRead($db, $id)
         respondFailed(500, $e->getMessage());
     }
 }//Mark mail as read.
+
+function handleFetchUser()
+{
+    $token = handleEnsureGetAccessToken();
+
+    $rawData = handleDecodeAccessToken($token);
+
+    http_response_code(200);
+    echo json_encode(
+        [
+            "success" => true,
+            "message" => "Fetch user successful.",
+            "user" => $rawData
+        ]
+    );
+}
+
+function handleEnsureGetAccessToken()
+{
+    $authHeader = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
+
+    if (empty($authHeader)) {
+        respondFailed(400, "Access token is missing.");
+    }
+
+    if (preg_match('/Bearer\s(\S+)/', $authHeader, $matches)) {
+
+        $accessToken = $matches[1];
+
+        return $accessToken;
+    } else {
+        respondFailed(401, "Unauthorized: No Bearer token found");
+    }
+}//handleEnsureGetAccessToken.
+
+function handleDecodeAccessToken($accessToken)
+{
+    $secretKey = $_ENV['JWT_SECRET'];
+
+    try {
+        // Decode and Verify
+        // This checks the signature AND the expiration (exp) automatically
+
+        $decoded = JWT::decode($accessToken, new Key($secretKey, 'HS256'));
+
+        // Return the user data to be used in your logic
+        return (array) $decoded;
+
+    } catch (Exception $e) {
+        // Handle errors (Expired, Tampered, Invalid)
+        respondFailed(401, $e->getMessage());
+    }
+}
+
+function handleLogout()
+{
+
+}
