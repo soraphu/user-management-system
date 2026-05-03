@@ -5,7 +5,7 @@ services:
   # frontend:
   #   build: ./app
   #   ports:
-  #     - "3000:80"
+  #     - "5173:80"
 
   server:
     build: ./api
