@@ -13,13 +13,13 @@ import {
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { InputPasswordWithVisibleControl } from "./ui/password-visible-control"
-import { toast, Toaster } from 'sonner';
-import { API_ENDPOINTS } from "@/helper/config";
-import { consoleLogDevMode as consoleLogDevMode } from "@/helper/log";
+import { toast } from 'sonner';
+import { API_AUTH } from "@/helper/config";
+import { consoleLogDevMode } from "@/helper/log";
 import { getCatchMessage } from "@/helper/request_handler";
 
 export function LoginForm({ className, ...props }: React.ComponentProps<"form">) {
-  const { accessToken, setAccessToken } = useAuth();
+  const { setAccessToken } = useAuth();
   const navigate = useNavigate();
 
   const handleUserLogin = async (e: any) => {
@@ -35,7 +35,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"form">)
     };
 
     try {
-      const response = await axios.post(API_ENDPOINTS.Login, user);
+      const response = await axios.post(API_AUTH.Login, user);
 
       //Login success.
       consoleLogDevMode(response.data);

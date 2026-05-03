@@ -17,7 +17,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { GoToMockMailButton } from "@/components/to-mock-mail-button"
 import { toast } from "sonner"
-import { API_ENDPOINTS } from "@/helper/config"
+import { API_AUTH } from "@/helper/config"
 
 const ForgetPasswordForm = () => {
     const [sentSuccess, setSentSuccess] = useState(false);
@@ -29,7 +29,7 @@ const ForgetPasswordForm = () => {
         consoleLogDevMode(`Target email: ${email}`);
 
         try {
-            const response = await axios.post(API_ENDPOINTS.ForgetPassword, { email: email });
+            const response = await axios.post(API_AUTH.ForgetPassword, { email: email });
             const responseMessage = response.data.message;
 
             setSentSuccess(true);

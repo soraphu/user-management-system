@@ -10,7 +10,7 @@ import MockMail from './pages/MockMail';
 import SendVerifyEmail from './pages/SendVerifyEmail';
 import ResetPasswordPage from './pages/ResetPassword';
 import ForgetPasswordPage from './pages/ForgetPassword';
-import DashboardPage from './pages/Dashboard';
+import HomePage from './pages/Home';
 import PageNotFound from './pages/PageNotFound';
 import VerifiedEmail from './pages/EmailVerfied';
 
@@ -23,7 +23,7 @@ const router = createBrowserRouter([
   { path: '/verify-email', element: <VerifiedEmail /> },
   { path: '/password/reset', element: <ResetPasswordPage /> },
   { path: '/password/forget', element: <ForgetPasswordPage /> },
-  { path: '/dashboard', element: <DashboardPage /> }
+  { path: '/home', element: <HomePage /> }
 ]);
 
 const App = () => {

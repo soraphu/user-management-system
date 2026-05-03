@@ -16,7 +16,7 @@ import { Navbar } from "@/components/ui/navbar";
 import { getCatchMessage } from "@/helper/request_handler";
 import { toast } from "sonner";
 import { consoleLogDevMode } from "@/helper/log";
-import { API_ENDPOINTS } from "@/helper/config";
+import { API_AUTH } from "@/helper/config";
 
 interface MailItem {
     id: number;
@@ -70,7 +70,7 @@ export default function MockMail() {
 
     const handleUpdateMailReaded = async (mail: MailItem) => {
         try {
-            await axios.patch(`${API_ENDPOINTS.MarkMailAsRead}/${mail.id}`);
+            await axios.patch(`${API_AUTH.MarkMailAsRead}/${mail.id}`);
             consoleLogDevMode("Mail marked as read successful: " + mail.id);
         } catch (error: any) {
             const errorMessage = getCatchMessage(error);
@@ -83,7 +83,7 @@ export default function MockMail() {
             setLoading(true);
 
             //GET
-            const dataResponse = await axios.get(API_ENDPOINTS.GetInbox + `?email=${email}`);
+            const dataResponse = await axios.get(API_AUTH.GetInbox + `?email=${email}`);
             const newInbox: MailItem[] = dataResponse.data.inbox;
             // If 200 OK, save the data
             setInbox(newInbox);
