@@ -6,11 +6,11 @@ import Swal from 'sweetalert2';
 import { useUserAction } from '@/helper/handleAccessUser';
 
 const RegisterPage = () => {
-    const { isLoggedInNavigateHome } = useUserAction();
+    const { ensureLoggedIn } = useUserAction();
 
     useEffect(() => {
         const initState = async () => {
-            const isNavigateHome = await isLoggedInNavigateHome();
+            const isNavigateHome = await ensureLoggedIn();
 
             if (isNavigateHome) return;
 

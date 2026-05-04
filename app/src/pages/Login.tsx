@@ -4,10 +4,10 @@ import { useEffect } from "react";
 import { useUserAction } from "@/helper/handleAccessUser";
 
 const LoginPage = () => {
-    const { isLoggedInNavigateHome } = useUserAction();
+    const { ensureLoggedIn } = useUserAction();
 
     useEffect(() => {
-        isLoggedInNavigateHome();
+        ensureLoggedIn();
     }, []);
 
     return (

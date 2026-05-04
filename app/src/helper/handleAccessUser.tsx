@@ -10,7 +10,7 @@ export const useUserAction = () => {
     const { setAccessToken, accessToken, handleLogout, setUser, user } = useAuth();
     const navigate = useNavigate();
 
-    const isLoggedInNavigateHome = async () => {
+    const ensureLoggedIn = async () => {
         if (accessToken || user) {
             navigate("/home");
             return true;
@@ -87,6 +87,6 @@ export const useUserAction = () => {
         }
     } //handleReqAccessAction.
 
-    return { handleReqAccessAction, fetchUser, isLoggedInNavigateHome };
+    return { handleReqAccessAction, fetchUser, ensureLoggedIn };
 }
 
