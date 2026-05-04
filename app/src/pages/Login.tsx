@@ -1,7 +1,14 @@
 import { FaGithub } from "react-icons/fa";
 import LoginForm from "../components/login-form"
+import { useEffect } from "react";
+import { useUserAction } from "@/helper/customHook";
 
 const LoginPage = () => {
+    const { isLoggedInNavigateHome } = useUserAction();
+
+    useEffect(() => {
+        isLoggedInNavigateHome();
+    }, []);
 
     return (
         <div className="grid min-h-svh lg:grid-cols-2">

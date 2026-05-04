@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/auth/AuthContext";
 import { getCatchMessage } from "./request_handler";
 import { API_ACTION, reqWithCookie } from "./config";
@@ -6,8 +7,27 @@ import { consoleLogDevMode } from "./log";
 import type { Method } from "axios";
 
 export const useUserAction = () => {
-    const { setAccessToken, accessToken, handleLogout, setUser } = useAuth();
+    const { setAccessToken, accessToken, handleLogout, setUser, user } = useAuth();
+    const navigate = useNavigate();
 
+    const isLoggedInNavigateHome = async () => {
+        if (accessToken || user) {
+            navigate("/home");
+            return true;
+        }
+
+        try {
+            const response = await reqWithCookie.get(API_AUTH.RefreshToken);
+            const newAccessToken = response.data.access_token;
+            if (newAccessToken) {
+                setAccessToken(newAccessToken);
+                navigate("/home");
+                return true;
+            }
+        } catch (error) {
+            getCatchMessage(error);
+        }
+    }//Redirect to home on logged in.
 
     const fetchUser = async () => {
         const response = await handleReqAccessAction({ method: "GET", url: API_ACTION.FetchUser, accessToken });
@@ -67,6 +87,6 @@ export const useUserAction = () => {
         }
     } //handleReqAccessAction.
 
-    return { handleReqAccessAction, fetchUser };
+    return { handleReqAccessAction, fetchUser, isLoggedInNavigateHome };
 }
 
