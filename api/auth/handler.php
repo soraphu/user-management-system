@@ -28,24 +28,24 @@ function handleLogin($db)
         $stmt = $db->prepare($sqlFindUser);
         $stmt->execute([$email]);
 
-        $user = $stmt->fetch();
+        $row = $stmt->fetch();
 
-        if (empty($user) || !password_verify($password, $user['password'])) {
+        if (empty($row) || !password_verify($password, $row['password'])) {
             respondFailed(409, "Invalid Email or Password.");
         }
 
-        if (password_verify($password, $user['password']) && !$user['verified']) {
+        if (password_verify($password, $row['password']) && !$row['verified']) {
             respondFailed(401, "Verify email required.");
         }
 
-        if (password_verify($password, $user['password']) && $user['verified']) {
+        if (password_verify($password, $row['password']) && $row['verified']) {
 
-            $accessToken = createIdentityTokens($user, $db);
+            $accessToken = createIdentityTokens($row, $db);
 
             http_response_code(200);
             echo json_encode([
                 "success" => true,
-                "message" => "User {$user['email']} login successfully.",
+                "message" => "User {$row['email']} login successfully.",
                 "access_token" => $accessToken,
                 "refresh_token" => "Automatically set via HttpOnly Cookie."
             ]);
@@ -115,15 +115,15 @@ function handleForgetPassword($db)
         $stmt = $db->prepare($sqlFindEmail);
         $stmt->execute([$email]);
 
-        $user = $stmt->fetch();
+        $row = $stmt->fetch();
 
-        if (!$user) {
+        if (!$row) {
             respondFailed(404, "User with this email not found.");
         }
 
         $token = createResetPasswordToken($db, $email);
 
-        createMailtoInbox($db, $user, "reset", "/password/reset?token=$token");
+        createMailtoInbox($db, $row, "reset", "/password/reset?token=$token");
 
         respondSuccess(200, "Password reset link was send to $email.");
     } catch (\Throwable $th) {
@@ -153,16 +153,16 @@ function handleResetPassword($db)
         $stmt = $db->prepare($sqlFindToken);
         $stmt->execute([$hashedToken]);
 
-        $rows = $stmt->fetch();
+        $row = $stmt->fetch();
 
-        if (empty($rows)) {
+        if (empty($row)) {
             respondFailed(404, "Invalid or expired reset token.");
         }
 
         //Security check successful, execute reset password.
         $sqlResetPassword = "UPDATE accounts SET password = ? WHERE email = ?";
         $stmt = $db->prepare($sqlResetPassword);
-        $stmt->execute([$hashNewPassword, $rows['email']]);
+        $stmt->execute([$hashNewPassword, $row['email']]);
 
         //Delete reset password token.
         $sqlDeleteToken = "DELETE FROM password_resets WHERE token = ?";
@@ -189,27 +189,27 @@ function handleVerifyEmailRequest($db)
         $sqlFindEmail = "SELECT * FROM accounts WHERE email = ?";
         $stmt = $db->prepare($sqlFindEmail);
         $stmt->execute([$email]);
-        $user = $stmt->fetch();
+        $row = $stmt->fetch();
 
         //Is email was exist in accounts table?
-        if (empty($user)) {
+        if (empty($row)) {
             respondFailed(404, "Account with this email not found.");
         }
 
         //Turn 0 | 1 to bool
-        $user['verified'] = (bool) $user['verified'];
+        $row['verified'] = (bool) $row['verified'];
 
         //Is this email already verified?
-        if ($user['verified'] == true) {
+        if ($row['verified'] == true) {
             respondFailed(409, "This email already verified.");
         }
 
-        $token = createVerifyEmailToken($db, $user['email']);
+        $token = createVerifyEmailToken($db, $row['email']);
 
         //Send verify token to mock mail.
-        createMailtoInbox($db, $user, "verify", "/verify-email?token=$token");
+        createMailtoInbox($db, $row, "verify", "/verify-email?token=$token");
 
-        respondSuccess(201, "Verify email request was send to {$user['email']}.");
+        respondSuccess(201, "Verify email request was send to {$row['email']}.");
     } catch (\Throwable $th) {
         respondSuccess(500, $th->getMessage());
     }
@@ -231,16 +231,16 @@ function handleVerifiedEmail($db)
         $stmt = $db->prepare($sqlFindToken);
         $stmt->execute([$hashedToken]);
 
-        $fetchRows = $stmt->fetch();
+        $row = $stmt->fetch();
 
-        if (empty($fetchRows)) {
+        if (empty($row)) {
             respondFailed(404, "Invalid or expired verification token.");
         }
 
         //Update email to verified.
         $sqlEmailVerifed = "UPDATE accounts SET verified = 1 WHERE email = ?";
         $stmt = $db->prepare($sqlEmailVerifed);
-        $stmt->execute([$fetchRows['email']]);
+        $stmt->execute([$row['email']]);
 
         //Delete token.
         $sqlDeleteToken = "DELETE FROM email_verifications WHERE token = ?";
@@ -248,7 +248,7 @@ function handleVerifiedEmail($db)
         $stmt->execute([$hashedToken]);
 
         http_response_code(200);
-        echo json_encode(["status" => "success", "message" => "Email {$fetchRows['email']} verified successfully."]);
+        echo json_encode(["status" => "success", "message" => "Email {$row['email']} verified successfully."]);
     } catch (\Throwable $th) {
         http_response_code(500);
         echo json_encode(["status" => "error", "message" => $th->getMessage()]);
@@ -265,9 +265,9 @@ function handleGetInbox($db)
         $stmt = $db->prepare($sqlFindEmail);
         $stmt->execute([$email]);
 
-        $user = $stmt->fetch();
+        $row = $stmt->fetch();
 
-        if (empty($user)) {
+        if (empty($row)) {
             respondFailed(404, "User with this email not found.");
         }//Exist email check.
 
@@ -279,10 +279,10 @@ function handleGetInbox($db)
         $stmt->execute([$email]);
 
         // Fetch all rows as an associative array.
-        $inbox = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         // MySQL stores BOOLEAN as 0 or 1; this ensures React sees true/false
-        foreach ($inbox as &$row) {
+        foreach ($rows as &$row) {
             $row['isRead'] = (bool) $row['isRead'];
             $row['id'] = (int) $row['id']; // Ensure ID is a number
         }
@@ -290,7 +290,7 @@ function handleGetInbox($db)
         // Response
         http_response_code(200);
         echo json_encode(
-            ["success" => true, "inbox" => $inbox]
+            ["success" => true, "inbox" => $rows]
         );
     } catch (PDOException $e) {
         respondFailed(500, $e->getMessage());
@@ -307,9 +307,9 @@ function handleMarkMailAsRead($db, $id)
         $sqlFindMail = "SELECT * FROM inbox WHERE id = ?";
         $stmt = $db->prepare($sqlFindMail);
         $stmt->execute([$id]);
-        $mail = $stmt->fetch();
+        $row = $stmt->fetch();
 
-        if (empty($mail)) {
+        if (empty($row)) {
             respondFailed(404, "Mail not found.");
         }//Mail exist check.
 

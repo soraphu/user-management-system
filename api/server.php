@@ -2,6 +2,7 @@
 require_once 'db/db_connect.php';
 require_once 'auth/handler.php';
 require_once 'auth/respond_docs.php';
+require_once 'actions/admin.php';
 
 // Define which frontends are allowed to talk to this API
 $allowed_origins = [
@@ -119,6 +120,13 @@ if ($first2PathSegments === "/api/v1/auth") {
             if ($pathSegments[4] === 'change-username') {
                 ensureReqMethod("PATCH");
                 handleChangeUsername($pdo);
+                exit;
+            }
+
+        case 'admin':
+            if ($pathSegments[4] === "fetch-all-users") {
+                ensureReqMethod("GET");
+                handleFetchAllUsers($pdo);
                 exit;
             }
 
