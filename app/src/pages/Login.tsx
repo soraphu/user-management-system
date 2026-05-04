@@ -1,7 +1,7 @@
 import { FaGithub } from "react-icons/fa";
 import LoginForm from "../components/login-form"
 import { useEffect } from "react";
-import { useUserAction } from "@/helper/handleAccessUser";
+import { useUserAction } from "@/helper/useUserAction";
 
 const LoginPage = () => {
     const { ensureLoggedIn } = useUserAction();

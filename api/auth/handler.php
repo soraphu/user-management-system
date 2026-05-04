@@ -402,3 +402,7 @@ function handleLogout($db)
 
     respondSuccess(200, "Logged out successfully.");
 } //Handle log out
+
+function handleChangeUsername($db) {
+    
+}

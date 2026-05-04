@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
-import { useUserAction } from '@/helper/handleAccessUser';
+import { useUserAction } from '@/helper/useUserAction';
 
 import {
     Settings,

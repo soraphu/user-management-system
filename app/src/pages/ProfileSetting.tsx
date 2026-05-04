@@ -14,15 +14,62 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { useEffect, useState } from "react"
+import { useAuth } from "@/auth/AuthContext"
+import { useUserAction } from "@/helper/useUserAction"
+import { toast } from "sonner"
+import { getCatchMessage } from "@/helper/request_handler"
+import { consoleLogDevMode } from "@/helper/log"
+import { API_ACTION } from "@/helper/config"
 
 export default function UserProfileSettings() {
-    const user = {
-        username: "Soraphu_Dev",
-        email: "soraphu_th67@live.rmutl.ac.th",
-        role: "user"
-    }
+    const { user } = useAuth();
+    const { fetchUser, handleReqAccessAction } = useUserAction();
+    const [isChange, setIsChange] = useState<boolean>(false);
 
-    const avatarInitials = user.username.substring(0, 2).toUpperCase();
+    useEffect(() => {
+        if (!user) {
+            fetchUser();
+        }
+    }, []);
+
+    const handleSaveChange = async () => {
+        const inputUsername: HTMLInputElement | null = document.querySelector('input');
+        const newUsername: string | null = inputUsername!.value;
+
+        if (!newUsername) {
+            toast.error("Username missing.");
+            return;
+        }
+
+        try {
+            const res = await handleReqAccessAction({
+                method: "PATCH",
+                url: API_ACTION.ChangeUsername,
+                body: { new_username: newUsername }
+            });
+
+            consoleLogDevMode(res);
+            const resMessage = res!.data.message;
+            toast.success(resMessage);
+        } catch (error) {
+            const errorMessage = getCatchMessage(error);
+            toast.error(errorMessage);
+        }
+    } //Handle save change.
+
+    const handleDuringChange = (e: any) => {
+        if (user?.username === e.target.value) {
+            return setIsChange(false);
+        }
+        else if (!e.target.value) {
+            return setIsChange(false);
+        } else {
+            return setIsChange(true);
+        }
+    } //Handle during change.
+
+    const avatarInitials = user?.username.substring(0, 2).toUpperCase();
 
     return (
         <div className="flex items-center justify-center min-h-screen bg-slate-50 p-4">
@@ -48,7 +95,7 @@ export default function UserProfileSettings() {
                             <span className="text-sm font-medium text-slate-700">Account Role</span>
                         </div>
                         <Badge variant="secondary" className="px-3 py-1">
-                            {user.role.toUpperCase()}
+                            {user?.role.toUpperCase()}
                         </Badge>
                     </div>
 
@@ -60,7 +107,10 @@ export default function UserProfileSettings() {
                                 <User className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
                                 <Input
                                     id="username"
-                                    defaultValue={user.username}
+                                    type="text"
+                                    defaultValue={user?.username}
+                                    onChange={handleDuringChange}
+                                    required
                                     className="pl-10 focus-visible:ring-primary"
                                 />
                             </div>
@@ -74,7 +124,7 @@ export default function UserProfileSettings() {
                                 <Input
                                     id="email"
                                     type="email"
-                                    value={user.email}
+                                    value={user?.email}
                                     disabled
                                     className="pl-10 bg-slate-50 cursor-not-allowed"
                                 />
@@ -88,7 +138,7 @@ export default function UserProfileSettings() {
 
                 <CardFooter className="flex flex-col gap-3">
                     {/* Save Changes Feat */}
-                    <Button className="w-full font-semibold transition-all hover:scale-[1.01]">
+                    <Button className="w-full font-semibold transition-all hover:scale-[1.01]" disabled={!isChange} onClick={handleSaveChange} >
                         Save Changes
                     </Button>
                     <Button variant="ghost" className="w-full text-slate-500">

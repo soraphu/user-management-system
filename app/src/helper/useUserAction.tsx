@@ -30,12 +30,14 @@ export const useUserAction = () => {
     }//Redirect to home on logged in.
 
     const fetchUser = async () => {
-        const response = await handleReqAccessAction({ method: "GET", url: API_ACTION.FetchUser, accessToken });
+        const response = await handleReqAccessAction({ method: "GET", url: API_ACTION.FetchUser });
         const user = response!.data.user;
         setUser(user);
     } //Fetch User.
 
-    const handleReqAccessAction = async ({ method, url, body, accessToken }: { method: Method, url: string, body?: object, accessToken: string | null }) => {
+    const handleReqAccessAction = async ({ method, url, body }: { method: Method, url: string, body?: object }) => {
+        let tempToken: string | null = accessToken;
+
         const refreshAccessToken = async () => {
             consoleLogDevMode("No access token. Attempting refresh");
 
@@ -65,13 +67,13 @@ export const useUserAction = () => {
             });
         };
 
-        if (!accessToken) {
-            accessToken = await refreshAccessToken();
-            if (!accessToken) return null;
+        if (!tempToken) {
+            tempToken = await refreshAccessToken();
+            if (!tempToken) return null;
         }
 
         try {
-            const response = await executeRequest(accessToken);
+            const response = await executeRequest(tempToken);
             consoleLogDevMode(response);
             return response;
         } catch (error) {

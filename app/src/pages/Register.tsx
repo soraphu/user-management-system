@@ -3,7 +3,7 @@ import { swalConfirmButtonColor } from '@/helper/config';
 import RegisterForm from '../components/register-form'
 import { useEffect } from 'react';
 import Swal from 'sweetalert2';
-import { useUserAction } from '@/helper/handleAccessUser';
+import { useUserAction } from '@/helper/useUserAction';
 
 const RegisterPage = () => {
     const { ensureLoggedIn } = useUserAction();

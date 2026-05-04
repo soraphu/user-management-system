@@ -112,7 +112,13 @@ if ($first2PathSegments === "/api/v1/auth") {
 
         case 'user':
             if ($pathSegments[4] === 'fetch-user') {
+                ensureReqMethod("GET");
                 handleFetchUser();
+                exit;
+            }
+            if ($pathSegments[4] === 'change-username') {
+                ensureReqMethod("PATCH");
+                handleChangeUsername($pdo);
                 exit;
             }
 
