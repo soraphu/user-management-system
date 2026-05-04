@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
-import { useUserAction } from '@/helper/customHook';
+import { useUserAction } from '@/helper/handleAccessUser';
 
 import {
     Settings,
@@ -71,7 +71,7 @@ const HomePage = () => {
                                 </div>
                             </DropdownMenuLabel>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem onClick={() => navigate('/profile-setting')}>
+                            <DropdownMenuItem onClick={() => navigate('/user/setting/profile')}>
                                 <Settings className="mr-2 h-4 w-4" />
                                 <span>Profile Settings</span>
                             </DropdownMenuItem>

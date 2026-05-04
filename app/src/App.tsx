@@ -13,21 +13,29 @@ import ForgetPasswordPage from './pages/ForgetPassword';
 import HomePage from './pages/Home';
 import PageNotFound from './pages/PageNotFound';
 import VerifiedEmail from './pages/EmailVerfied';
-import ProfileSettingPage from './pages/ProfileSetting';
+import UserProfileSettingPage from './pages/ProfileSetting';
 import AdminDashBoardPage from './pages/AdminDashBoard';
 
 const router = createBrowserRouter([
   { path: '/*', element: <PageNotFound /> },
+
   { path: '/', element: <LoginPage /> },
+
   { path: '/register', element: <RegisterPage /> },
+
   { path: '/verify-email-request', element: <SendVerifyEmail /> },
-  { path: '/mockmail', element: <MockMail /> },
   { path: '/verify-email', element: <VerifiedEmail /> },
+
+  { path: '/mockmail', element: <MockMail /> },
+
   { path: '/password/reset', element: <ResetPasswordPage /> },
   { path: '/password/forget', element: <ForgetPasswordPage /> },
+
   { path: '/home', element: <HomePage /> },
+
   { path: '/admin/dashboard', element: <AdminDashBoardPage /> },
-  { path: '/profile-setting', element: <ProfileSettingPage /> }
+
+  { path: '/user/setting/profile', element: <UserProfileSettingPage /> }
 ]);
 
 const App = () => {

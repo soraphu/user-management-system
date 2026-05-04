@@ -1,7 +1,7 @@
-const ProfileSettingPage = () => {
+const UserProfileSettingPage = () => {
     return (
-        <div>ProfileSettingPage</div>
+        <div>UserProfileSettingPage</div>
     )
 }
 
-export default ProfileSettingPage
+export default UserProfileSettingPage
