@@ -48,6 +48,13 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"form">)
       navigate("/home");
     } catch (error: any) {
       const errorMessage = getCatchMessage(error);
+
+      if (error.response && error.response.status === 401) {
+        navigate(`/verify-email-request?email=${user.email}`);
+        toast.error(errorMessage);
+        return;
+      }
+
       toast.error(errorMessage);
     } //trycatch
   }; //Handle user login.
