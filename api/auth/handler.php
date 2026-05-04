@@ -408,7 +408,7 @@ function handleChangeUsername($db)
 {
     $input = handleEnsureAndFetchJsonBody();
 
-    $rawData = handleEnsureAndDecodeAccessToken();
+    $decodedData = handleEnsureAndDecodeAccessToken();
 
     ensureDataNotEmpty($input);
 
@@ -422,10 +422,14 @@ function handleChangeUsername($db)
         respondFailed(400, "Username must at least 3 characters long.");
     }
 
+    if ($decodedData['username'] === $newUsername) {
+        respondFailed(409, "Current username was same as new.");
+    }
+
     try {
         $sqlUpdateUsername = "UPDATE accounts SET username = ? WHERE id = ?";
         $stmt = $db->prepare($sqlUpdateUsername);
-        $stmt->execute([$input['new_username'], $rawData['id']]);
+        $stmt->execute([$input['new_username'], $decodedData['id']]);
 
         respondSuccess(200, "Username updated successfully.");
     } catch (\Throwable $th) {
