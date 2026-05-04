@@ -126,6 +126,23 @@ function respondApiDocs()
                     ]
                 ],
 
+                "/logout" => [
+                    "description" => "Log out the authenticated user and clear the refresh token cookie.",
+                    "method" => "POST",
+                    "requestBody" => [
+                        "content_type" => "application/json",
+                        "schema" => []
+                    ],
+                    "response" => [
+                        "200" => [
+                            "success" => true,
+                            "message" => "Logged out successfully.",
+                            "note" => "Refresh token cookie will be cleared even when no token is present."
+                        ],
+                        "500" => ["success" => false, "message" => "Internal server error."]
+                    ]
+                ],
+
                 "login/refresh-token" => [
                     "description" => "Refresh access token using valid refresh token (from HttpOnly Cookie).",
                     "method" => "POST",
