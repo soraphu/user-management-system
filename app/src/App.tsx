@@ -13,6 +13,8 @@ import ForgetPasswordPage from './pages/ForgetPassword';
 import HomePage from './pages/Home';
 import PageNotFound from './pages/PageNotFound';
 import VerifiedEmail from './pages/EmailVerfied';
+import ProfileSettingPage from './pages/ProfileSetting';
+import AdminDashBoardPage from './pages/AdminDashBoard';
 
 const router = createBrowserRouter([
   { path: '/*', element: <PageNotFound /> },
@@ -23,7 +25,9 @@ const router = createBrowserRouter([
   { path: '/verify-email', element: <VerifiedEmail /> },
   { path: '/password/reset', element: <ResetPasswordPage /> },
   { path: '/password/forget', element: <ForgetPasswordPage /> },
-  { path: '/home', element: <HomePage /> }
+  { path: '/home', element: <HomePage /> },
+  { path: '/admin/dashboard', element: <AdminDashBoardPage /> },
+  { path: '/profile-setting', element: <ProfileSettingPage /> }
 ]);
 
 const App = () => {
