@@ -16,44 +16,56 @@ export const useUserAction = () => {
     }
 
     const handleReqAccessAction = async ({ method, url, body, accessToken }: { method: Method, url: string, body?: object, accessToken: string | null }) => {
-        reqWithCookie.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
-
-        while (true) {
-            if (!accessToken) {
-                consoleLogDevMode("No access token. Attemping refresh");
-                try {
-                    const response = await reqWithCookie.get(API_AUTH.RefreshToken);
-                    const newAccessToken = response.data.access_token;
-
-                    consoleLogDevMode(response.data);
-                    consoleLogDevMode("Receive new access token");
-                    setAccessToken(newAccessToken);
-
-                    accessToken = newAccessToken;
-                } catch (error) {
-                    getCatchMessage(error);
-                    consoleLogDevMode("Log out");
-                    handleLogout();
-                    return null;
-                }
-            }
+        const refreshAccessToken = async () => {
+            consoleLogDevMode("No access token. Attempting refresh");
 
             try {
-                const response = await reqWithCookie({
-                    method: method,
-                    url: url,
-                    data: body,
-                    headers: { Authorization: `Bearer ${accessToken}` }
-                });
+                const response = await reqWithCookie.get(API_AUTH.RefreshToken);
+                const newAccessToken = response.data.access_token;
 
-                consoleLogDevMode(response);
-                return response;
+                consoleLogDevMode(response.data);
+                consoleLogDevMode("Received new access token");
+                setAccessToken(newAccessToken);
+
+                return newAccessToken as string;
             } catch (error) {
                 getCatchMessage(error);
-                setAccessToken(null);
+                consoleLogDevMode("Log out");
+                handleLogout();
+                return null;
             }
-        }//while
-    } //handleFetchUser.
+        };
+
+        const executeRequest = async (newAccessToken: string) => {
+            return reqWithCookie({
+                method,
+                url,
+                data: body,
+                headers: { Authorization: `Bearer ${newAccessToken}` }
+            });
+        };
+
+        if (!accessToken) {
+            accessToken = await refreshAccessToken();
+            if (!accessToken) return null;
+        }
+
+        try {
+            const response = await executeRequest(accessToken);
+            consoleLogDevMode(response);
+            return response;
+        } catch (error) {
+            getCatchMessage(error);
+            setAccessToken(null);
+
+            const newAccessToken = await refreshAccessToken();
+            if (!newAccessToken) return null;
+
+            const response = await executeRequest(newAccessToken);
+            consoleLogDevMode(response);
+            return response;
+        }
+    } //handleReqAccessAction.
 
     return { handleReqAccessAction, fetchUser };
 }
