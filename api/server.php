@@ -116,9 +116,10 @@ if ($first2PathSegments === "/api/v1/auth") {
                 exit;
             }
 
-        // case 'logout':
-        // handleLogout()
-        // exit ;
+        case 'logout':
+            ensureReqMethod("POST");
+            handleLogout($pdo);
+            exit;
 
         default:
             respondPageNotFound();

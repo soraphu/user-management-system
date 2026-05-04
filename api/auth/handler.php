@@ -117,7 +117,6 @@ function handleForgetPassword($db)
             respondFailed(404, "User with this email not found.");
         }
 
-        // Generate reset token and save to database (for simplicity, we use a random string here)
         $token = createResetPasswordToken($db, $email);
 
         createMailtoInbox($db, $user, "reset", "/password/reset?token=$token");
@@ -373,7 +372,29 @@ function handleDecodeAccessToken($accessToken)
     }
 }
 
-function handleLogout()
+function handleLogout($db)
 {
+    $refreshToken = $_COOKIE['refresh_token'] ?? null;
+    $isDevMode = (bool) $_ENV['DEV'];
 
-}
+    if (isset($refreshToken)) {
+        $hashedRefreshToken = hash('sha256', $refreshToken);
+
+        try {
+            $sqlDeleteToken = "DELETE FROM refresh_tokens WHERE token = ?";
+            $stmt = $db->prepare($sqlDeleteToken);
+            $stmt->execute([$hashedRefreshToken]);
+        } catch (\Throwable $th) {
+            respondFailed(500, $th->getMessage());
+        }
+    }
+
+    setcookie("refresh_token", "", [
+        'expires' => time() - 3600,
+        'httponly' => true,
+        'secure' => !$isDevMode,
+        'samesite' => 'Lax'
+    ]);
+
+    respondSuccess(200, "Logged out successfully.");
+} //Handle log out

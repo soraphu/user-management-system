@@ -15,7 +15,8 @@ export const API_AUTH = {
     MarkMailAsRead: `${apiBaseURL}/inbox/mark-as-read`,
     ForgetPassword: `${apiBaseURL}/password/forget`,
     ResetPassword: `${apiBaseURL}/password/reset`,
-    RefreshToken: `${apiBaseURL}/login/refresh-token`
+    RefreshToken: `${apiBaseURL}/login/refresh-token`,
+    Logout: `${apiBaseURL}/logout`
 };
 
 export const API_ACTION = {

@@ -1,4 +1,4 @@
-import { reqWithCookie } from '@/helper/config';
+import { API_AUTH, reqWithCookie } from '@/helper/config';
 import { getCatchMessage } from '@/helper/request_handler';
 import { createContext, useState, type ReactNode, useContext } from 'react';
 
@@ -27,7 +27,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const handleLogout = async () => {
         try {
             // Call server to clear the HttpOnly Refresh Token cookie
-            await reqWithCookie.post('/logout.php');
+            await reqWithCookie.post(API_AUTH.Logout);
         } catch (error) {
             getCatchMessage(error);
         } finally {

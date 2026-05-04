@@ -13,7 +13,7 @@ export const useUserAction = () => {
         const response = await handleReqAccessAction({ method: "GET", url: API_ACTION.FetchUser, accessToken });
         const user = response!.data.user;
         setUser(user);
-    }
+    } //Fetch User.
 
     const handleReqAccessAction = async ({ method, url, body, accessToken }: { method: Method, url: string, body?: object, accessToken: string | null }) => {
         const refreshAccessToken = async () => {
