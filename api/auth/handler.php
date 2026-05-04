@@ -5,7 +5,7 @@ include_once "function_generate.php";
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 
-function handleFetchJsonBody()
+function handleEnsureAndFetchJsonBody()
 {
     $data = json_decode(file_get_contents('php://input'), true) ?? null;
     ensureDataNotEmpty($data);
@@ -14,7 +14,7 @@ function handleFetchJsonBody()
 
 function handleLogin($db)
 {
-    $input = handleFetchJsonBody();
+    $input = handleEnsureAndFetchJsonBody();
 
     $email = $input['email'];
     $password = $input['password'];
@@ -73,7 +73,7 @@ function handleRefreshAccessToken($db)
 
 function handleRegister($db)
 {
-    $input = handleFetchJsonBody();
+    $input = handleEnsureAndFetchJsonBody();
 
     ensureValidRegisterData($input);
 
@@ -98,7 +98,7 @@ function handleRegister($db)
 
 function handleForgetPassword($db)
 {
-    $input = handleFetchJsonBody();
+    $input = handleEnsureAndFetchJsonBody();
 
     $email = $input['email'];
 
@@ -133,7 +133,7 @@ function handleForgetPassword($db)
 
 function handleResetPassword($db)
 {
-    $input = handleFetchJsonBody();
+    $input = handleEnsureAndFetchJsonBody();
     $token = $input['token'];
     $newPassword = $input['new_password'];
 
@@ -177,7 +177,7 @@ function handleResetPassword($db)
 
 function handleVerifyEmailRequest($db)
 {
-    $input = handleFetchJsonBody();
+    $input = handleEnsureAndFetchJsonBody();
     $email = $input['email'];
 
     if (empty($email)) {
@@ -217,7 +217,7 @@ function handleVerifyEmailRequest($db)
 
 function handleVerifiedEmail($db)
 {
-    $input = handleFetchJsonBody();
+    $input = handleEnsureAndFetchJsonBody();
     $token = $input['token'];
 
     if (empty($token)) {
@@ -325,9 +325,7 @@ function handleMarkMailAsRead($db, $id)
 
 function handleFetchUser()
 {
-    $token = handleEnsureGetAccessToken();
-
-    $rawData = handleDecodeAccessToken($token);
+    $rawData = handleEnsureAndDecodeAccessToken();
 
     http_response_code(200);
     echo json_encode(
@@ -357,8 +355,9 @@ function handleEnsureGetAccessToken()
     }
 }//handleEnsureGetAccessToken.
 
-function handleDecodeAccessToken($accessToken)
+function handleEnsureAndDecodeAccessToken()
 {
+    $accessToken = handleEnsureGetAccessToken();
     $secretKey = $_ENV['JWT_SECRET'];
 
     try {
@@ -403,6 +402,27 @@ function handleLogout($db)
     respondSuccess(200, "Logged out successfully.");
 } //Handle log out
 
-function handleChangeUsername($db) {
-    
-}
+
+
+function handleChangeUsername($db)
+{
+    $input = handleEnsureAndFetchJsonBody();
+
+    $rawData = handleEnsureAndDecodeAccessToken();
+
+    ensureDataNotEmpty($input);
+
+    if (empty($input['new_username'])) {
+        respond400FieldsMissing();
+    }
+
+    try {
+        $sqlUpdateUsername = "UPDATE accounts SET username = ? WHERE id = ?";
+        $stmt = $db->prepare($sqlUpdateUsername);
+        $stmt->execute([$input['new_username'], $rawData['id']]);
+
+        respondSuccess(200, "Username updated successfully.");
+    } catch (\Throwable $th) {
+        respondFailed(500, $th->getMessage());
+    }
+} //handleChangeUsername.

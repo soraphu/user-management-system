@@ -36,6 +36,7 @@ export default function UserProfileSettings() {
     const handleSaveChange = async () => {
         const inputUsername: HTMLInputElement | null = document.querySelector('input');
         const newUsername: string | null = inputUsername!.value;
+        consoleLogDevMode(newUsername);
 
         if (!newUsername) {
             toast.error("Username missing.");
