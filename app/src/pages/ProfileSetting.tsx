@@ -43,6 +43,11 @@ export default function UserProfileSettings() {
             return;
         }
 
+        if (newUsername.length < 3) {
+            toast.error("Username must at least 3 characters long.")
+            return;
+        }
+
         try {
             const res = await handleReqAccessAction({
                 method: "PATCH",
@@ -51,8 +56,8 @@ export default function UserProfileSettings() {
             });
 
             consoleLogDevMode(res);
-            const resMessage = res!.data.message;
-            toast.success(resMessage);
+
+            window.location.href = ('/home');
         } catch (error) {
             const errorMessage = getCatchMessage(error);
             toast.error(errorMessage);
@@ -63,9 +68,11 @@ export default function UserProfileSettings() {
         if (user?.username === e.target.value) {
             return setIsChange(false);
         }
-        else if (!e.target.value) {
+
+        if (!e.target.value) {
             return setIsChange(false);
-        } else {
+        }
+        if (user?.username !== e.target.value) {
             return setIsChange(true);
         }
     } //Handle during change.
