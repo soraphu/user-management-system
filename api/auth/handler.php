@@ -106,6 +106,10 @@ function handleForgetPassword($db)
         respond400FieldsMissing();
     }
 
+    if ($email === 'admin@example.com') {
+        respondFailed(403, "Hehe, this account not allow to reset password.");
+    }
+
     try {
         $sqlFindEmail = "SELECT * FROM accounts WHERE email = ?";
         $stmt = $db->prepare($sqlFindEmail);
