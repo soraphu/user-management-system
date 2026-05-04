@@ -143,6 +143,29 @@ function respondApiDocs()
                     ]
                 ],
 
+                "/user/change-username" => [
+                    "description" => "Change the authenticated user's username.",
+                    "method" => "POST",
+                    "requestBody" => [
+                        "content_type" => "application/json",
+                        "schema" => [
+                            "new_username" => "string (required)"
+                        ]
+                    ],
+                    "response" => [
+                        "200" => ["success" => true, "message" => "Username updated successfully."],
+                        "400" => [
+                            "success" => false,
+                            "message" => [
+                                "Request data can't be empty.",
+                                "Required fields are missing."
+                            ]
+                        ],
+                        "401" => ["success" => false, "message" => "Unauthorized: No Bearer token found"],
+                        "500" => ["success" => false, "message" => "Internal server error."]
+                    ]
+                ],
+
                 "login/refresh-token" => [
                     "description" => "Refresh access token using valid refresh token (from HttpOnly Cookie).",
                     "method" => "POST",

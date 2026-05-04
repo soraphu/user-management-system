@@ -412,8 +412,14 @@ function handleChangeUsername($db)
 
     ensureDataNotEmpty($input);
 
-    if (empty($input['new_username'])) {
+    $newUsername = $input['new_username'];
+
+    if (empty($newUsername)) {
         respond400FieldsMissing();
+    }
+
+    if (strlen($newUsername) < 3) {
+        respondFailed(400, "Username must at least 3 characters long.");
     }
 
     try {
