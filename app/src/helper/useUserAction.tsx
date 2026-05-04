@@ -30,13 +30,18 @@ export const useUserAction = () => {
     }//Redirect to home on logged in.
 
     const fetchUser = async () => {
-        const response = await handleReqAccessAction({ method: "GET", url: API_ACTION.FetchUser });
-        const user = response!.data.user;
-        setUser(user);
+        try {
+            const response = await handleReqAccessAction({ method: "GET", url: API_ACTION.FetchUser });
+
+            const user = response?.data.user;
+            setUser(user);
+        } catch (error) {
+            getCatchMessage(error);
+        }
     } //Fetch User.
 
     const handleReqAccessAction = async ({ method, url, body }: { method: Method, url: string, body?: object }) => {
-        let tempToken: string | null = accessToken;
+        let recentToken: string | null = accessToken;
 
         const refreshAccessToken = async () => {
             consoleLogDevMode("No access token. Attempting refresh");
@@ -49,17 +54,17 @@ export const useUserAction = () => {
                 consoleLogDevMode("Received new access token");
                 setAccessToken(newAccessToken);
 
+                // success.
                 return newAccessToken as string;
             } catch (error) {
                 getCatchMessage(error);
-                consoleLogDevMode("Log out");
                 handleLogout();
                 return null;
             }
         };
 
         const executeRequest = async (newAccessToken: string) => {
-            return reqWithCookie({
+            return await reqWithCookie({
                 method,
                 url,
                 data: body,
@@ -67,14 +72,15 @@ export const useUserAction = () => {
             });
         };
 
-        if (!tempToken) {
-            tempToken = await refreshAccessToken();
-            if (!tempToken) return null;
+        if (!recentToken) {
+            recentToken = await refreshAccessToken();
+            if (!recentToken) return null;
         }
 
         try {
-            const response = await executeRequest(tempToken);
+            const response = await executeRequest(recentToken);
             consoleLogDevMode(response);
+
             return response;
         } catch (error) {
             getCatchMessage(error);

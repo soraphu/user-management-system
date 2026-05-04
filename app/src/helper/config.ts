@@ -22,6 +22,7 @@ export const API_AUTH = {
 export const API_ACTION = {
     FetchUser: `${apiBaseURL}/user/fetch-user`,
     ChangeUsername: `${apiBaseURL}/user/change-username`,
+    ADMIN_FetchAllUsers: `${apiBaseURL}/admin/fetch-all-users`
 }
 
 export const reqWithCookie = axios.create({
