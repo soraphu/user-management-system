@@ -1,6 +1,5 @@
-import React from "react";
 import { Link } from "react-router-dom";
-import { ShieldAlert, LayoutDashboard, LogIn, Lock } from "lucide-react";
+import { ShieldAlert, Lock, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -64,7 +63,7 @@ const PageNotFound = () => {
               <CardFooter className="gap-3">
                 <Button asChild className="flex-1 shadow-sm">
                   <Link to="/home">
-                    <LayoutDashboard className="h-4 w-4" />
+                    <LogIn />
                     Back to Home
                   </Link>
                 </Button>
