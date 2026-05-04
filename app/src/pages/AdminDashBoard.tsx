@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react';
+
+import { Link } from 'react-router-dom';
 import {
     Search,
     Filter,
@@ -27,7 +29,8 @@ import {
     DialogTitle,
     DialogFooter,
     DialogTrigger,
-    DialogDescription
+    DialogDescription,
+    DialogClose
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
@@ -37,6 +40,11 @@ import { toast } from 'sonner';
 import { useAuth } from '@/auth/AuthContext';
 import { getCatchMessage } from '@/helper/request_handler';
 import { consoleLogDevMode } from '@/helper/log';
+import {
+    HoverCard,
+    HoverCardContent,
+    HoverCardTrigger,
+} from "@/components/ui/hover-card"
 
 // --- Types & Mock Data ---
 type UserRole = 'user' | 'admin';
@@ -48,15 +56,6 @@ interface UsersType {
     role: UserRole;
     verified: boolean;
 }
-
-// Generate 30 test users for your UMS testing
-// const users: UsersType[] = Array.from({ length: 30 }, (_, i) => ({
-//     id: i + 1,
-//     username: `user_tester_${i + 1}`,
-//     email: `tester${i + 1}@live.rmutl.ac.th`,
-//     role: i % 5 === 0 ? 'admin' : 'user',
-//     verified: i % 3 !== 0,
-// }));
 
 const AdminDashboardPage = () => {
     const [searchTerm, setSearchTerm] = useState("");
@@ -142,7 +141,7 @@ const AdminDashboardPage = () => {
                         </SelectContent>
                     </Select>
                     <div className="text-xs text-white flex items-center justify-center border border-dashed border-yellow-200 rounded-md">
-                        Showing {filteredUsers?.length} Results
+                        Showing {filteredUsers?.length || '0'} Results
                     </div>
                 </div>
 
@@ -183,17 +182,33 @@ export default AdminDashboardPage;
 const HeaderSection = ({ admin }: { admin: any }) => {
     return (
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-yellow-500/20 pb-6">
-            <div>
-                <h1 className="text-3xl font-black tracking-tighter text-yellow-500 uppercase">
-                    Admin Dashboard
-                </h1>
-                <p className="text-slate-500 text-sm font-mono">{"admin: "} {admin?.email}</p>
-            </div>
+            <Link to='/home'>
+                <div >
+                    <h1 className="text-3xl font-black tracking-tighter text-yellow-500 uppercase">
+                        User Management System
+                    </h1>
+                    <p className="text-slate-500 text-sm font-mono">{"admin: "} {admin?.email}</p>
+                </div>
+            </Link>
 
             <div className="flex items-center gap-2">
-                <Badge variant="outline" className="border-yellow-500/50 text-yellow-500 bg-yellow-500/5">
-                    SECURE SESSION
-                </Badge>
+                <HoverCard>
+                    <HoverCardTrigger>
+                        <Badge variant="outline" className="border-yellow-500/50 text-yellow-500 bg-yellow-500/5 cursor-zoom-in">
+                            ADMINISTRATIVE GURAD
+                        </Badge>
+                    </HoverCardTrigger>
+                    <HoverCardContent className="w-80">
+                        <div className="flex justify-between space-x-4">
+                            <div className="space-y-1">
+                                <p className="text-sm text-muted-foreground">
+                                    All system-impact actions are protected by real-time role verification. Every request triggers a server-side check that cross-references your session token against the live database to ensure active administrative privileges before processing.
+                                </p>
+                            </div>
+                        </div>
+                    </HoverCardContent>
+                </HoverCard>
+
             </div>
         </div>
     )
@@ -246,7 +261,7 @@ const EditUserDialogSection = ({ user }: { user: UsersType }) => {
     return (
         <Dialog>
             <DialogTrigger asChild>
-                <Button variant="ghost" size="icon" className="hover:bg-yellow-500/10 hover:text-yellow-500">
+                <Button variant="ghost" size="icon" className="hover:bg-yellow-500/10 hover:text-yellow-500 cursor-pointer">
                     <Edit3 className="h-5 w-5" />
                 </Button>
             </DialogTrigger>
@@ -264,23 +279,28 @@ const EditUserDialogSection = ({ user }: { user: UsersType }) => {
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
                         <Label className="text-right">Access Role</Label>
-                        <Select defaultValue={user?.role}>
-                            <SelectTrigger className="col-span-3 bg-black border-slate-700">
+                        <Select defaultValue={user?.role} >
+                            <SelectTrigger className="col-span-3 bg-black border-slate-700 cursor-pointer">
                                 <SelectValue />
                             </SelectTrigger>
-                            <SelectContent className="bg-slate-900 border-slate-800 text-slate-100">
-                                <SelectItem value="user">User (Standard)</SelectItem>
-                                <SelectItem value="admin">Administrator (Elevated)</SelectItem>
+                            <SelectContent className="bg-slate-900 border-slate-800 text-slate-100 ">
+                                <SelectItem value="user" className='cursor-pointer'>User (Standard)</SelectItem>
+                                <SelectItem value="admin" className='cursor-pointer' >Administrator (Elevated)</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
                 </div>
-                <DialogFooter>
-                    <Button className="bg-yellow-500 text-black hover:bg-yellow-600 font-bold">
-                        Commit Changes
-                    </Button>
+                <DialogFooter className='grid grid-cols-1' >
+                    <DialogClose className='relative grid grid-cols-2 gap-4' >
+                        <Button className="bg-white text-black hover:bg-gray-300 font-bold cursor-pointer">
+                            Cancel
+                        </Button>
+                        <Button className="bg-yellow-500 text-black hover:bg-orange-500 hover:text-black font-bold cursor-pointer">
+                            Execute
+                        </Button>
+                    </DialogClose>
                 </DialogFooter>
             </DialogContent>
-        </Dialog>
+        </Dialog >
     )
 }//EditUserDialogSection

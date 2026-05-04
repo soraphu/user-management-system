@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import { useUserAction } from '@/helper/useUserAction';
 
+import { Link } from 'react-router-dom';
 import {
     Settings,
     LayoutDashboard,
@@ -40,13 +41,15 @@ const HomePage = () => {
                     <div className="bg-primary p-2 rounded-lg">
                         <ShieldCheck className="text-white w-6 h-6" />
                     </div>
-                    <span className="text-xl font-bold tracking-tight">User Management System</span>
+                    <Link to='/home' >
+                        <span className="text-xl font-bold tracking-tight">User Management System</span>
+                    </Link>
                 </div>
 
                 <div className="flex items-center gap-4">
                     {/* Conditional Admin Button */}
                     {user?.role === "admin" && (
-                        <Button variant="outline" className="hidden md:flex gap-2" onClick={() => navigate('/admin/dashboard')}>
+                        <Button variant="outline" className="hidden md:flex gap-2 cursor-pointer" onClick={() => navigate('/admin/dashboard')}>
                             <LayoutDashboard className="w-4 h-4" />
                             Admin Dashboard
                         </Button>
@@ -83,10 +86,10 @@ const HomePage = () => {
                         </DropdownMenuContent>
                     </DropdownMenu>
                 </div>
-            </nav>
+            </nav >
 
             {/* --- Main Content Section --- */}
-            <main className="max-w-5xl mx-auto py-12 px-6">
+            <main className="max-w-5xl mx-auto py-12 px-6" >
                 <header className="mb-12 text-center">
                     <h1 className="text-4xl font-extrabold text-slate-900 mb-4">
                         Advanced Authentication System
@@ -134,8 +137,8 @@ const HomePage = () => {
                     </div>
                     <span className="text-sm text-slate-500 italic">Logged in as {user?.username}</span>
                 </div>
-            </main>
-        </div>
+            </main >
+        </div >
     );
 };
 
