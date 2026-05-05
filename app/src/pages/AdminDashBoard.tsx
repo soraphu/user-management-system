@@ -109,6 +109,132 @@ const AdminDashboardPage = () => {
     const displayUsers = filteredUsers?.slice(indexOfFirstUser, indexOfLastUser);
     const totalPages = Math.ceil((filteredUsers?.length || 0) / usersPerPage);
 
+    const HeaderSection = ({ admin }: { admin: any }) => {
+        return (
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-yellow-500/20 pb-6">
+                <Link to='/home'>
+                    <div >
+                        <h1 className="text-3xl font-black tracking-tighter text-yellow-500 uppercase">
+                            User Management System
+                        </h1>
+                        <p className="text-slate-500 text-sm font-mono">{"admin: "} {admin?.email}</p>
+                    </div>
+                </Link>
+
+                <div className="flex items-center gap-2">
+                    <HoverCard>
+                        <HoverCardTrigger>
+                            <Badge variant="outline" className="border-yellow-500/50 text-yellow-500 bg-yellow-500/5 cursor-zoom-in">
+                                ADMINISTRATIVE GURAD
+                            </Badge>
+                        </HoverCardTrigger>
+                        <HoverCardContent className="w-80">
+                            <div className="flex justify-between space-x-4">
+                                <div className="space-y-1">
+                                    <p className="text-sm text-muted-foreground">
+                                        All system-impact actions are protected by real-time role verification. Every request triggers a server-side check that cross-references your session token against the live database to ensure active administrative privileges before processing.
+                                    </p>
+                                </div>
+                            </div>
+                        </HoverCardContent>
+                    </HoverCard>
+
+                </div>
+            </div>
+        )
+    }
+
+    const UserListContainer = ({ displayUsers }: { displayUsers: UsersType[] | undefined | null }) => {
+        return (
+            <div className="space-y-3">
+                {displayUsers?.map((user) => (
+                    <div
+                        key={user?.id}
+                        className="flex items-center justify-between p-4 bg-[#161616] border border-white/5 rounded-lg hover:border-yellow-500/30 transition-all group"
+                    >
+                        <div className="flex items-center gap-4">
+                            <div className="p-3 bg-black rounded-full border border-slate-800">
+                                {user?.role === 'admin' ?
+                                    <ShieldCheck className="h-5 w-5 text-yellow-500" /> :
+                                    <UserIcon className="h-5 w-5 text-slate-400" />
+                                }
+                            </div>
+                            <div>
+                                <div className="flex items-center gap-2">
+                                    <span className="font-bold text-slate-100">{user?.username}</span>
+                                    <Badge className={user?.role === 'admin' ? "bg-yellow-500/10 text-yellow-500 hover:bg-yellow-500/10 border-none text-[10px]" : "bg-slate-800 text-slate-400 border-none text-[10px]"}>
+                                        {user?.role?.toUpperCase()}
+                                    </Badge>
+                                </div>
+                                <div className="flex flex-col md:flex-row items-center gap-3 text-xs text-slate-500 mt-1 font-mono">
+                                    <span className="flex items-center gap-1"><Mail size={12} />{user?.email}</span>
+                                    <span className="flex items-center gap-1">
+                                        {user?.verified ?
+                                            <CheckCircle2 size={12} className="text-green-500" /> :
+                                            <XCircle size={12} className="text-red-500" />
+                                        }
+                                        {user?.verified ? 'Verified' : 'Unverified'}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Edit User - Dialog */}
+                        <EditUserDialogSection user={user} />
+                    </div>
+                ))}
+            </div>
+        )
+    }//UserListContainer
+
+    const EditUserDialogSection = ({ user }: { user: UsersType }) => {
+        return (
+            <Dialog>
+                <DialogTrigger asChild>
+                    <Button variant="ghost" size="icon" className="hover:bg-yellow-500/10 hover:text-yellow-500 cursor-pointer">
+                        <Edit3 className="h-5 w-5" />
+                    </Button>
+                </DialogTrigger>
+                <DialogContent className="bg-slate-900 border-slate-800 text-slate-100">
+                    <DialogHeader>
+                        <DialogTitle className="text-yellow-500">Edit User Authority</DialogTitle>
+                        <DialogDescription className="text-slate-400">
+                            Modifying record for UID: {user?.id}
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="grid gap-4 py-4">
+                        <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="username" className="text-right">Username</Label>
+                            <Input id="username" defaultValue={user?.username} className="col-span-3 bg-black border-slate-700" />
+                        </div>
+                        <div className="grid grid-cols-4 items-center gap-4">
+                            <Label className="text-right">Access Role</Label>
+                            <Select defaultValue={user?.role} >
+                                <SelectTrigger className="col-span-3 bg-black border-slate-700 cursor-pointer">
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent className="bg-slate-900 border-slate-800 text-slate-100 ">
+                                    <SelectItem value="user" className='cursor-pointer'>User (Standard)</SelectItem>
+                                    <SelectItem value="admin" className='cursor-pointer' >Administrator (Elevated)</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </div>
+                    <DialogFooter className='grid grid-cols-1' >
+                        <DialogClose className='relative grid grid-cols-2 gap-4' >
+                            <Button className="bg-white text-black hover:bg-gray-300 font-bold cursor-pointer">
+                                Cancel
+                            </Button>
+                            <Button className="bg-yellow-500 text-black hover:bg-orange-500 hover:text-black font-bold cursor-pointer">
+                                Execute
+                            </Button>
+                        </DialogClose>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog >
+        )
+    }//EditUserDialogSection
+
     return (
         <div className="min-h-screen bg-[#0a0a0a] text-slate-200 p-6 font-sans">
             <div className="max-w-6xl mx-auto space-y-6">
@@ -178,129 +304,3 @@ const AdminDashboardPage = () => {
 };
 
 export default AdminDashboardPage;
-
-const HeaderSection = ({ admin }: { admin: any }) => {
-    return (
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-yellow-500/20 pb-6">
-            <Link to='/home'>
-                <div >
-                    <h1 className="text-3xl font-black tracking-tighter text-yellow-500 uppercase">
-                        User Management System
-                    </h1>
-                    <p className="text-slate-500 text-sm font-mono">{"admin: "} {admin?.email}</p>
-                </div>
-            </Link>
-
-            <div className="flex items-center gap-2">
-                <HoverCard>
-                    <HoverCardTrigger>
-                        <Badge variant="outline" className="border-yellow-500/50 text-yellow-500 bg-yellow-500/5 cursor-zoom-in">
-                            ADMINISTRATIVE GURAD
-                        </Badge>
-                    </HoverCardTrigger>
-                    <HoverCardContent className="w-80">
-                        <div className="flex justify-between space-x-4">
-                            <div className="space-y-1">
-                                <p className="text-sm text-muted-foreground">
-                                    All system-impact actions are protected by real-time role verification. Every request triggers a server-side check that cross-references your session token against the live database to ensure active administrative privileges before processing.
-                                </p>
-                            </div>
-                        </div>
-                    </HoverCardContent>
-                </HoverCard>
-
-            </div>
-        </div>
-    )
-}
-
-const UserListContainer = ({ displayUsers }: { displayUsers: UsersType[] | undefined | null }) => {
-    return (
-        <div className="space-y-3">
-            {displayUsers?.map((user) => (
-                <div
-                    key={user?.id}
-                    className="flex items-center justify-between p-4 bg-[#161616] border border-white/5 rounded-lg hover:border-yellow-500/30 transition-all group"
-                >
-                    <div className="flex items-center gap-4">
-                        <div className="p-3 bg-black rounded-full border border-slate-800">
-                            {user?.role === 'admin' ?
-                                <ShieldCheck className="h-5 w-5 text-yellow-500" /> :
-                                <UserIcon className="h-5 w-5 text-slate-400" />
-                            }
-                        </div>
-                        <div>
-                            <div className="flex items-center gap-2">
-                                <span className="font-bold text-slate-100">{user?.username}</span>
-                                <Badge className={user?.role === 'admin' ? "bg-yellow-500/10 text-yellow-500 hover:bg-yellow-500/10 border-none text-[10px]" : "bg-slate-800 text-slate-400 border-none text-[10px]"}>
-                                    {user?.role?.toUpperCase()}
-                                </Badge>
-                            </div>
-                            <div className="flex flex-col md:flex-row items-center gap-3 text-xs text-slate-500 mt-1 font-mono">
-                                <span className="flex items-center gap-1"><Mail size={12} />{user?.email}</span>
-                                <span className="flex items-center gap-1">
-                                    {user?.verified ?
-                                        <CheckCircle2 size={12} className="text-green-500" /> :
-                                        <XCircle size={12} className="text-red-500" />
-                                    }
-                                    {user?.verified ? 'Verified' : 'Unverified'}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Edit User - Dialog */}
-                    <EditUserDialogSection user={user} />
-                </div>
-            ))}
-        </div>
-    )
-}//UserListContainer
-
-const EditUserDialogSection = ({ user }: { user: UsersType }) => {
-    return (
-        <Dialog>
-            <DialogTrigger asChild>
-                <Button variant="ghost" size="icon" className="hover:bg-yellow-500/10 hover:text-yellow-500 cursor-pointer">
-                    <Edit3 className="h-5 w-5" />
-                </Button>
-            </DialogTrigger>
-            <DialogContent className="bg-slate-900 border-slate-800 text-slate-100">
-                <DialogHeader>
-                    <DialogTitle className="text-yellow-500">Edit User Authority</DialogTitle>
-                    <DialogDescription className="text-slate-400">
-                        Modifying record for UID: {user?.id}
-                    </DialogDescription>
-                </DialogHeader>
-                <div className="grid gap-4 py-4">
-                    <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="username" className="text-right">Username</Label>
-                        <Input id="username" defaultValue={user?.username} className="col-span-3 bg-black border-slate-700" />
-                    </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                        <Label className="text-right">Access Role</Label>
-                        <Select defaultValue={user?.role} >
-                            <SelectTrigger className="col-span-3 bg-black border-slate-700 cursor-pointer">
-                                <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent className="bg-slate-900 border-slate-800 text-slate-100 ">
-                                <SelectItem value="user" className='cursor-pointer'>User (Standard)</SelectItem>
-                                <SelectItem value="admin" className='cursor-pointer' >Administrator (Elevated)</SelectItem>
-                            </SelectContent>
-                        </Select>
-                    </div>
-                </div>
-                <DialogFooter className='grid grid-cols-1' >
-                    <DialogClose className='relative grid grid-cols-2 gap-4' >
-                        <Button className="bg-white text-black hover:bg-gray-300 font-bold cursor-pointer">
-                            Cancel
-                        </Button>
-                        <Button className="bg-yellow-500 text-black hover:bg-orange-500 hover:text-black font-bold cursor-pointer">
-                            Execute
-                        </Button>
-                    </DialogClose>
-                </DialogFooter>
-            </DialogContent>
-        </Dialog >
-    )
-}//EditUserDialogSection
