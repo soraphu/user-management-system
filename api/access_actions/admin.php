@@ -8,7 +8,7 @@ function ensureIsAdmin($role)
 
 function handleFetchAllUsers($db)
 {
-    $decodedData = handleEnsureAndDecodeAccessToken();
+    $decodedData = ensureAndGetDecodedAccessToken();
 
     $id = $decodedData['id'];
 

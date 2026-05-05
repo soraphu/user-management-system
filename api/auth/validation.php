@@ -102,3 +102,28 @@ function ensureValidRefreshToken($db)
         exit();
     }
 }//ensure valid refresh token.
+
+function ensureAndGetRequestBody()
+{
+    $data = json_decode(file_get_contents('php://input'), true) ?? null;
+    ensureDataNotEmpty($data);
+    return $data;
+}
+
+function ensureAndGetAccessToken()
+{
+    $authHeader = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
+
+    if (empty($authHeader)) {
+        respondFailed(400, "Access token is missing.");
+    }
+
+    if (preg_match('/Bearer\s(\S+)/', $authHeader, $matches)) {
+
+        $accessToken = $matches[1];
+
+        return $accessToken;
+    } else {
+        respondFailed(401, "Unauthorized: No Bearer token found");
+    }
+}//ensureAndGetAccessToken.

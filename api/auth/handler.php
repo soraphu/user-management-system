@@ -5,16 +5,9 @@ include_once "function_generate.php";
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 
-function handleEnsureAndFetchJsonBody()
-{
-    $data = json_decode(file_get_contents('php://input'), true) ?? null;
-    ensureDataNotEmpty($data);
-    return $data;
-}
-
 function handleLogin($db)
 {
-    $input = handleEnsureAndFetchJsonBody();
+    $input = ensureAndGetRequestBody();
 
     $email = $input['email'];
     $password = $input['password'];
@@ -73,7 +66,7 @@ function handleRefreshAccessToken($db)
 
 function handleRegister($db)
 {
-    $input = handleEnsureAndFetchJsonBody();
+    $input = ensureAndGetRequestBody();
 
     ensureValidRegisterData($input);
 
@@ -98,7 +91,7 @@ function handleRegister($db)
 
 function handleForgetPassword($db)
 {
-    $input = handleEnsureAndFetchJsonBody();
+    $input = ensureAndGetRequestBody();
 
     $email = $input['email'];
 
@@ -133,7 +126,7 @@ function handleForgetPassword($db)
 
 function handleResetPassword($db)
 {
-    $input = handleEnsureAndFetchJsonBody();
+    $input = ensureAndGetRequestBody();
     $token = $input['token'];
     $newPassword = $input['new_password'];
 
@@ -177,7 +170,7 @@ function handleResetPassword($db)
 
 function handleVerifyEmailRequest($db)
 {
-    $input = handleEnsureAndFetchJsonBody();
+    $input = ensureAndGetRequestBody();
     $email = $input['email'];
 
     if (empty($email)) {
@@ -217,7 +210,7 @@ function handleVerifyEmailRequest($db)
 
 function handleVerifiedEmail($db)
 {
-    $input = handleEnsureAndFetchJsonBody();
+    $input = ensureAndGetRequestBody();
     $token = $input['token'];
 
     if (empty($token)) {
@@ -323,41 +316,9 @@ function handleMarkMailAsRead($db, $id)
     }
 }//Mark mail as read.
 
-function handleFetchUser()
+function ensureAndGetDecodedAccessToken()
 {
-    $rawData = handleEnsureAndDecodeAccessToken();
-
-    http_response_code(200);
-    echo json_encode(
-        [
-            "success" => true,
-            "message" => "Fetch user successful.",
-            "user" => $rawData
-        ]
-    );
-}
-
-function handleEnsureGetAccessToken()
-{
-    $authHeader = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
-
-    if (empty($authHeader)) {
-        respondFailed(400, "Access token is missing.");
-    }
-
-    if (preg_match('/Bearer\s(\S+)/', $authHeader, $matches)) {
-
-        $accessToken = $matches[1];
-
-        return $accessToken;
-    } else {
-        respondFailed(401, "Unauthorized: No Bearer token found");
-    }
-}//handleEnsureGetAccessToken.
-
-function handleEnsureAndDecodeAccessToken()
-{
-    $accessToken = handleEnsureGetAccessToken();
+    $accessToken = ensureAndGetAccessToken();
     $secretKey = $_ENV['JWT_SECRET'];
 
     try {
@@ -373,7 +334,7 @@ function handleEnsureAndDecodeAccessToken()
         // Handle errors (Expired, Tampered, Invalid)
         respondFailed(401, $e->getMessage());
     }
-}
+}//ensureAndGetDecodedAccessToken()
 
 function handleLogout($db)
 {
@@ -401,38 +362,3 @@ function handleLogout($db)
 
     respondSuccess(200, "Logged out successfully.");
 } //Handle log out
-
-
-
-function handleChangeUsername($db)
-{
-    $input = handleEnsureAndFetchJsonBody();
-
-    $decodedData = handleEnsureAndDecodeAccessToken();
-
-    ensureDataNotEmpty($input);
-
-    $newUsername = $input['new_username'];
-
-    if (empty($newUsername)) {
-        respond400FieldsMissing();
-    }
-
-    if (strlen($newUsername) < 3) {
-        respondFailed(400, "Username must at least 3 characters long.");
-    }
-
-    if ($decodedData['username'] === $newUsername) {
-        respondFailed(409, "Current username was same as new.");
-    }
-
-    try {
-        $sqlUpdateUsername = "UPDATE accounts SET username = ? WHERE id = ?";
-        $stmt = $db->prepare($sqlUpdateUsername);
-        $stmt->execute([$input['new_username'], $decodedData['id']]);
-
-        respondSuccess(200, "Username updated successfully.");
-    } catch (\Throwable $th) {
-        respondFailed(500, $th->getMessage());
-    }
-} //handleChangeUsername.
