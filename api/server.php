@@ -1,7 +1,7 @@
 <?php
 require_once 'db/db_connect.php';
 require_once 'auth/handler.php';
-require_once 'auth/respond_docs.php';
+require_once 'auth/docs_endpoints.php';
 require_once 'access_actions/admin.php';
 
 // Define which frontends are allowed to talk to this API
