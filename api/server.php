@@ -130,6 +130,11 @@ if ($first2PathSegments === "/api/v1/auth") {
                 handleFetchAllUsers($pdo);
                 exit;
             }
+            if ($pathSegments[4] === "edit-user-info") {
+                ensureReqMethod("PATCH");
+                handleEditUserInfo($pdo);
+                exit;
+            }
 
         case 'logout':
             ensureReqMethod("POST");
