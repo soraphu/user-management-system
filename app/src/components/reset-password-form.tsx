@@ -101,7 +101,7 @@ const ResetPasswordForm = () => {
                     Reset Password
                 </Button>
                 <Button variant="link" className="text-sm text-muted-foreground" asChild>
-                    <a href="/login">Back to login</a>
+                    <a href="/">Back to login</a>
                 </Button>
             </CardFooter>
         </Card>

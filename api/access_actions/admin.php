@@ -1,4 +1,11 @@
 <?php
+function ensureNotSpecificAdmin($id)
+{
+    if ($id === 4) {
+        respondFailed(403, "Hehe, this account not allow to reset password.");
+    }
+}
+
 function ensureIsAdmin($db, $id)
 {
     try {
@@ -60,6 +67,9 @@ function handleEditUserInfo($db)
     $role = $input['role'];
 
     $decodedData = ensureAndGetDecodedAccessToken();
+
+    ensureNotSpecificAdmin($uid);
+
     $operatorId = $decodedData['id'];
 
     ensureIsAdmin($db, $operatorId);

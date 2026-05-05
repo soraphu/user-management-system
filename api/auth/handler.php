@@ -89,7 +89,7 @@ function handleRegister($db)
 
         respondSuccess(201, "User registered.");
     } catch (Throwable $th) {
-        respondFailed(500, "Internal server error.");
+        respondFailed(500, $th->getMessage());
     }
 } //Register.
 
@@ -103,9 +103,7 @@ function handleForgetPassword($db)
         respond400FieldsMissing();
     }
 
-    if ($email === 'admin@example.com') {
-        respondFailed(403, "Hehe, this account not allow to reset password.");
-    }
+    ensureNotSpecificAdmin(id: $input['id']);
 
     try {
         $user = dbFetch(
