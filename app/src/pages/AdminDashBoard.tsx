@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { Link } from 'react-router-dom';
 import {
@@ -35,7 +35,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { useUserAction } from '@/helper/useUserAction';
-import { API_ACTION } from '@/helper/config';
+import { API_ADMIN } from '@/helper/config';
 import { toast } from 'sonner';
 import { useAuth } from '@/auth/AuthContext';
 import { getCatchMessage } from '@/helper/request_handler';
@@ -47,13 +47,11 @@ import {
 } from "@/components/ui/hover-card"
 
 // --- Types & Mock Data ---
-type UserRole = 'user' | 'admin';
-
 interface UsersType {
     id: number;
     username: string;
     email: string;
-    role: UserRole;
+    role: string;
     verified: boolean;
 }
 
@@ -68,31 +66,30 @@ const AdminDashboardPage = () => {
     const { fetchUser, handleReqAccessAction } = useUserAction();
 
     useEffect(() => {
-
-        const handleFetchAllUsers = async () => {
-            try {
-                const res = await handleReqAccessAction({
-                    method: 'GET',
-                    url: API_ACTION.ADMIN_FetchAllUsers
-                });
-
-                //Request sucessfully.
-                const getUsers: UsersType[] = res?.data.users;
-                const resMessage = res?.data.message;
-
-                consoleLogDevMode(resMessage);
-
-                setUsers(getUsers);
-            } catch (error) {
-                const errMessage = getCatchMessage(error);
-                toast.error(errMessage);
-            }//trycatch.
-        }; //handleFetchAllUsers().
-
-        if (!admin) fetchUser();
-
         handleFetchAllUsers();
     }, []);
+
+    const handleFetchAllUsers = async () => {
+        try {
+            const res = await handleReqAccessAction({
+                method: 'GET',
+                url: API_ADMIN.FetchAllUsers
+            });
+
+            //Request sucessfully.
+            const getUsers: UsersType[] = res?.data.users;
+            const resMessage = res?.data.message;
+
+            consoleLogDevMode(resMessage);
+
+            setUsers(getUsers);
+        } catch (error) {
+            const errMessage = getCatchMessage(error);
+            toast.error(errMessage);
+        }//trycatch.
+    }; //handleFetchAllUsers().
+
+    if (!admin) fetchUser();
 
     // Filter Logic
     const filteredUsers = users?.filter((user) => {
@@ -188,6 +185,51 @@ const AdminDashboardPage = () => {
     }//UserListContainer
 
     const EditUserDialogSection = ({ user }: { user: UsersType }) => {
+        const [isChanging, setIsChanging] = useState<boolean>(false);
+        const initUsername = user?.username;
+        const initRole = user?.role;
+        const currUsername = useRef<string>(initUsername);
+        const currRole = useRef<string>(initRole);
+
+        const handleIsChangeCondition = () => {
+            const newUsername = currUsername.current;
+            const newRole = currRole.current;
+
+            if (newUsername !== initUsername || newRole !== initRole) {
+                setIsChanging(true);
+            }
+            if (newUsername === initUsername && newRole === initRole) {
+                setIsChanging(false);
+            }
+        }//handleOnChangeInfo
+
+        const handleExecuteTheChange = async () => {
+
+            const executeData = {
+                uid: user?.id,
+                username: currUsername.current,
+                role: currRole.current
+            };
+
+            consoleLogDevMode(executeData);
+
+            try {
+                const res = await handleReqAccessAction({
+                    method: 'PATCH',
+                    url: API_ADMIN.EditUserInfo,
+                    body: executeData
+                });
+
+                const resMessage = res?.data.message;
+                toast.success(resMessage);
+
+                handleFetchAllUsers();
+            } catch (error) {
+                const errMessage = getCatchMessage(error);
+                toast.error(errMessage);
+            }
+        } //onExecuteChange
+
         return (
             <Dialog>
                 <DialogTrigger asChild>
@@ -205,15 +247,21 @@ const AdminDashboardPage = () => {
                     <div className="grid gap-4 py-4">
                         <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="username" className="text-right">Username</Label>
-                            <Input id="username" defaultValue={user?.username} className="col-span-3 bg-black border-slate-700" />
+                            <Input id="username" defaultValue={user?.username} onChange={(e) => {
+                                currUsername.current = e.target.value;
+                                handleIsChangeCondition();
+                            }} className="col-span-3 bg-black border-slate-700" />
                         </div>
                         <div className="grid grid-cols-4 items-center gap-4">
                             <Label className="text-right">Access Role</Label>
-                            <Select defaultValue={user?.role} >
-                                <SelectTrigger className="col-span-3 bg-black border-slate-700 cursor-pointer">
+                            <Select defaultValue={user?.role} onValueChange={(selectValue) => {
+                                currRole.current = selectValue;
+                                handleIsChangeCondition();
+                            }} >
+                                <SelectTrigger id='role' className="col-span-3 bg-black border-slate-700 cursor-pointer">
                                     <SelectValue />
                                 </SelectTrigger>
-                                <SelectContent className="bg-slate-900 border-slate-800 text-slate-100 ">
+                                <SelectContent className="bg-slate-900 border-slate-800 text-slate-100 " >
                                     <SelectItem value="user" className='cursor-pointer'>User (Standard)</SelectItem>
                                     <SelectItem value="admin" className='cursor-pointer' >Administrator (Elevated)</SelectItem>
                                 </SelectContent>
@@ -225,7 +273,11 @@ const AdminDashboardPage = () => {
                             <Button className="bg-white text-black hover:bg-gray-300 font-bold cursor-pointer">
                                 Cancel
                             </Button>
-                            <Button className="bg-yellow-500 text-black hover:bg-orange-500 hover:text-black font-bold cursor-pointer">
+                            <Button
+                                onClick={handleExecuteTheChange}
+                                disabled={!isChanging}
+                                className="bg-yellow-500 text-black hover:bg-orange-500 hover:text-black font-bold cursor-pointer"
+                            >
                                 Execute
                             </Button>
                         </DialogClose>

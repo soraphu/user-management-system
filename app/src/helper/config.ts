@@ -16,13 +16,17 @@ export const API_AUTH = {
     ForgetPassword: `${apiBaseURL}/password/forget`,
     ResetPassword: `${apiBaseURL}/password/reset`,
     RefreshToken: `${apiBaseURL}/login/refresh-token`,
-    Logout: `${apiBaseURL}/logout`
+    Logout: `${apiBaseURL}/logout`,
 };
 
 export const API_ACTION = {
     FetchUser: `${apiBaseURL}/user/fetch-user`,
     ChangeUsername: `${apiBaseURL}/user/change-username`,
-    ADMIN_FetchAllUsers: `${apiBaseURL}/admin/fetch-all-users`
+}
+
+export const API_ADMIN = {
+    FetchAllUsers: `${apiBaseURL}/admin/fetch-all-users`,
+    EditUserInfo: `${apiBaseURL}/admin/edit-user-info`
 }
 
 export const reqWithCookie = axios.create({
