@@ -1,7 +1,8 @@
 <?php
 include_once 'respond.php';
 require_once __DIR__ . '/../vendor/autoload.php';
-
+use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
 function ensureDataNotEmpty($data)
 {
     if (empty($data)) {
@@ -127,3 +128,23 @@ function ensureAndGetAccessToken()
         respondFailed(401, "Unauthorized: No Bearer token found");
     }
 }//ensureAndGetAccessToken.
+
+function ensureAndGetDecodedAccessToken()
+{
+    $accessToken = ensureAndGetAccessToken();
+    $secretKey = $_ENV['JWT_SECRET'];
+
+    try {
+        // Decode and Verify
+        // This checks the signature AND the expiration (exp) automatically
+
+        $decoded = JWT::decode($accessToken, new Key($secretKey, 'HS256'));
+
+        // Return the user data to be used in your logic
+        return (array) $decoded;
+
+    } catch (Exception $e) {
+        // Handle errors (Expired, Tampered, Invalid)
+        respondFailed(401, $e->getMessage());
+    }
+}//ensureAndGetDecodedAccessToken()

@@ -2,8 +2,7 @@
 include_once "validation.php";
 include_once "respond.php";
 include_once "function_generate.php";
-use Firebase\JWT\JWT;
-use Firebase\JWT\Key;
+include_once '../db/db_execute.php';
 
 function handleLogin($db)
 {
@@ -315,26 +314,6 @@ function handleMarkMailAsRead($db, $id)
         respondFailed(500, $e->getMessage());
     }
 }//Mark mail as read.
-
-function ensureAndGetDecodedAccessToken()
-{
-    $accessToken = ensureAndGetAccessToken();
-    $secretKey = $_ENV['JWT_SECRET'];
-
-    try {
-        // Decode and Verify
-        // This checks the signature AND the expiration (exp) automatically
-
-        $decoded = JWT::decode($accessToken, new Key($secretKey, 'HS256'));
-
-        // Return the user data to be used in your logic
-        return (array) $decoded;
-
-    } catch (Exception $e) {
-        // Handle errors (Expired, Tampered, Invalid)
-        respondFailed(401, $e->getMessage());
-    }
-}//ensureAndGetDecodedAccessToken()
 
 function handleLogout($db)
 {
