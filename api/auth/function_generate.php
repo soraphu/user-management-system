@@ -26,25 +26,12 @@ function createMailtoInbox($db, $user, $type, $newUrl)
     $isRead = 0; // 0 for false, 1 for true in MySQL
 
     try {
-        $sqlCreateMail = "INSERT INTO inbox (
-                    owner_email, 
-                    sender, 
-                    subject, 
-                    preview, 
-                    url, 
-                    buttonLabel, 
-                    isRead
-                ) VALUES (?, ?, ?, ?, ?, ?, ?)";
-        $stmt = $db->prepare($sqlCreateMail);
-        $stmt->execute([
-            $owner_email,
-            $sender,
-            $subject,
-            $preview,
-            $url,
-            $buttonLabel,
-            $isRead
-        ]);
+        dbInsertInto(
+            $db,
+            table: 'inbox',
+            cols: '(owner_email, sender, subject, preview, url, buttonLabel, isRead )',
+            execute: [$owner_email, $sender, $subject, $preview, $url, $buttonLabel, $isRead]
+        );
 
     } catch (\Throwable $th) {
         respondFailed(500, $th->getMessage());
@@ -59,9 +46,10 @@ function createResetPasswordToken($db, $email)
 
     try {
         //Keep hash token in password_resets table.
-        $sql = "INSERT INTO password_resets (email, token, expires_at) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE token = VALUES(token), expires_at = VALUES(expires_at)";
-        $stmt = $db->prepare($sql);
-        $stmt->execute([$email, $hashedToken, $expiresAt]);
+        $sql = "INSERT INTO password_resets (email, token, expires_at) 
+                VALUES (?, ?, ?) 
+                ON DUPLICATE KEY UPDATE token = VALUES(token), expires_at = VALUES(expires_at)";
+        dbSqlExecute($db, $sql, [$email, $hashedToken, $expiresAt]);
 
         //Real token.
         return $token;
@@ -78,9 +66,10 @@ function createVerifyEmailToken($db, $email)
 
     try {
         //Keep hashed token in email_verifications table.
-        $sqlCreateToken = "INSERT INTO email_verifications (email, token, expires_at) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE token = VALUES(token), expires_at = VALUES(expires_at)";
-        $stmt = $db->prepare($sqlCreateToken);
-        $stmt->execute([$email, $hashedToken, $expiresAt]);
+        $sqlCreateToken = "INSERT INTO email_verifications (email, token, expires_at) 
+                            VALUES (?, ?, ?) 
+                            ON DUPLICATE KEY UPDATE token = VALUES(token), expires_at = VALUES(expires_at)";
+        dbSqlExecute($db, $sqlCreateToken, [$email, $hashedToken, $expiresAt]);
 
         //Real token.
         return $token;
@@ -126,9 +115,10 @@ function handleSetupRefreshToken($user, $db)
     // Save to MySQL (Your refresh_tokens table)
     try {
         $sqlCreateToken = "INSERT INTO refresh_tokens (user_id, token, expires_at) 
-                    VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE token = VALUES(token), expires_at = VALUES(expires_at)";
-        $stmt = $db->prepare($sqlCreateToken);
-        $stmt->execute([$user['id'], $hashedRefreshToken, $expires]);
+                            VALUES (?, ?, ?) 
+                            ON DUPLICATE KEY 
+                            UPDATE token = VALUES(token), expires_at = VALUES(expires_at)";
+        dbSqlExecute($db, $sqlCreateToken, execute: [$user['id'], $hashedRefreshToken, $expires]);
 
         setcookie("refresh_token", $refreshToken, [
             'expires' => strtotime($expires),

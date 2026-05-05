@@ -12,12 +12,16 @@ function ensureDataNotEmpty($data)
 
 function ensureEmailNotDuplicate($db, $email)
 {
-    $sql = "SELECT * FROM accounts WHERE email = ?";
-    $stmt = $db->prepare($sql);
-    $stmt->execute([$email]);
-
     try {
-        if ($stmt->fetch()) {
+        $existingUser = dbFetch(
+            $db,
+            cols: '*',
+            table: 'accounts',
+            condition: 'WHERE email = ?',
+            execute: [$email]
+        );
+
+        if ($existingUser) {
             respondFailed(409, "This email already exists.");
         }
     } catch (\Throwable $th) {
@@ -80,22 +84,26 @@ function ensureValidRefreshToken($db)
     $hashedRefreshToken = hash('sha256', $refreshToken);
 
     try {
-        $sqlFindToken = "SELECT * FROM refresh_tokens WHERE token = ? AND expires_at > NOW()";
-        $stmt = $db->prepare($sqlFindToken);
-        $stmt->execute([$hashedRefreshToken]);
-
-        $refreshTokenRows = $stmt->fetch();
+        $refreshTokenRows = dbFetch(
+            $db,
+            cols: '*',
+            table: 'refresh_tokens',
+            condition: 'WHERE token = ? AND expires_at > NOW()',
+            execute: [$hashedRefreshToken]
+        );
 
         $id = $refreshTokenRows['user_id'];
         if (empty($refreshTokenRows)) {
             respondFailed(404, "Invalid or expired refresh token.");
         }
 
-        $sqlFetchUser = "SELECT * FROM accounts WHERE id = ?";
-        $stmt = $db->prepare($sqlFetchUser);
-        $stmt->execute([$id]);
-
-        $userRows = $stmt->fetch();
+        $userRows = dbFetch(
+            $db,
+            cols: '*',
+            table: 'accounts',
+            condition: 'WHERE id = ?',
+            execute: [$id]
+        );
 
         return $userRows;
     } catch (\Throwable $th) {

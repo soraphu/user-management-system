@@ -2,7 +2,7 @@
 include_once "validation.php";
 include_once "respond.php";
 include_once "function_generate.php";
-include_once '../db/db_execute.php';
+include_once __DIR__ . '/../db/db_execute.php';
 
 function handleLogin($db)
 {
@@ -16,11 +16,13 @@ function handleLogin($db)
     } //Validate input.
 
     try {
-        $sqlFindUser = "SELECT * FROM accounts WHERE email = ?";
-        $stmt = $db->prepare($sqlFindUser);
-        $stmt->execute([$email]);
-
-        $row = $stmt->fetch();
+        $row = dbFetch(
+            $db,
+            cols: '*',
+            table: 'accounts',
+            condition: 'WHERE email = ?',
+            execute: [$email]
+        );
 
         if (empty($row) || !password_verify($password, $row['password'])) {
             respondFailed(409, "Invalid Email or Password.");
@@ -78,9 +80,12 @@ function handleRegister($db)
     try {
         ensureEmailNotDuplicate($db, $email);
 
-        $sql = "INSERT INTO accounts (username, email, password) VALUES (?, ?, ?)";
-        $stmt = $db->prepare($sql);
-        $stmt->execute([$username, $email, $hashPassword]);
+        dbInsertInto(
+            $db,
+            table: 'accounts',
+            cols: '(username, email, password)',
+            execute: [$username, $email, $hashPassword]
+        );
 
         respondSuccess(201, "User registered.");
     } catch (Throwable $th) {
@@ -103,11 +108,13 @@ function handleForgetPassword($db)
     }
 
     try {
-        $sqlFindEmail = "SELECT * FROM accounts WHERE email = ?";
-        $stmt = $db->prepare($sqlFindEmail);
-        $stmt->execute([$email]);
-
-        $row = $stmt->fetch();
+        $row = dbFetch(
+            $db,
+            cols: '*',
+            table: 'accounts',
+            condition: 'WHERE email = ?',
+            execute: [$email]
+        );
 
         if (!$row) {
             respondFailed(404, "User with this email not found.");
@@ -141,11 +148,13 @@ function handleResetPassword($db)
     $hashedToken = hash('sha256', $token);
 
     try {
-        $sqlFindToken = "SELECT * FROM password_resets WHERE token = ? AND expires_at > NOW()";
-        $stmt = $db->prepare($sqlFindToken);
-        $stmt->execute([$hashedToken]);
-
-        $row = $stmt->fetch();
+        $row = dbFetch(
+            $db,
+            cols: '*',
+            table: 'password_resets',
+            condition: 'WHERE token = ? AND expires_at > NOW()',
+            execute: [$hashedToken]
+        );
 
         if (empty($row)) {
             respondFailed(404, "Invalid or expired reset token.");
@@ -153,13 +162,10 @@ function handleResetPassword($db)
 
         //Security check successful, execute reset password.
         $sqlResetPassword = "UPDATE accounts SET password = ? WHERE email = ?";
-        $stmt = $db->prepare($sqlResetPassword);
-        $stmt->execute([$hashNewPassword, $row['email']]);
+        dbSqlExecute($db, $sqlResetPassword, [$hashNewPassword, $row['email']]);
 
         //Delete reset password token.
-        $sqlDeleteToken = "DELETE FROM password_resets WHERE token = ?";
-        $stmt = $db->prepare($sqlDeleteToken);
-        $stmt->execute([$hashedToken]);
+        dbDelete($db, table: 'password_resets', where: 'token = ?', execute: [$hashedToken]);
 
         respondSuccess(200, "Password updated successfully.");
     } catch (\Throwable $th) {
@@ -178,10 +184,13 @@ function handleVerifyEmailRequest($db)
 
     try {
         //Find email.
-        $sqlFindEmail = "SELECT * FROM accounts WHERE email = ?";
-        $stmt = $db->prepare($sqlFindEmail);
-        $stmt->execute([$email]);
-        $row = $stmt->fetch();
+        $row = dbFetch(
+            $db,
+            cols: '*',
+            table: 'accounts',
+            condition: 'WHERE email = ?',
+            execute: [$email]
+        );
 
         //Is email was exist in accounts table?
         if (empty($row)) {
@@ -219,11 +228,13 @@ function handleVerifiedEmail($db)
     $hashedToken = hash('sha256', $token);
 
     try {
-        $sqlFindToken = "SELECT * FROM email_verifications WHERE token = ? AND expires_at > NOW()";
-        $stmt = $db->prepare($sqlFindToken);
-        $stmt->execute([$hashedToken]);
-
-        $row = $stmt->fetch();
+        $row = dbFetch(
+            $db,
+            cols: '*',
+            table: 'email_verifications',
+            condition: 'WHERE token = ? AND expires_at > NOW()',
+            execute: [$hashedToken]
+        );
 
         if (empty($row)) {
             respondFailed(404, "Invalid or expired verification token.");
@@ -231,13 +242,10 @@ function handleVerifiedEmail($db)
 
         //Update email to verified.
         $sqlEmailVerifed = "UPDATE accounts SET verified = 1 WHERE email = ?";
-        $stmt = $db->prepare($sqlEmailVerifed);
-        $stmt->execute([$row['email']]);
+        dbSqlExecute($db, $sqlEmailVerifed, [$row['email']]);
 
         //Delete token.
-        $sqlDeleteToken = "DELETE FROM email_verifications WHERE token = ?";
-        $stmt = $db->prepare($sqlDeleteToken);
-        $stmt->execute([$hashedToken]);
+        dbDelete($db, table: 'email_verifications', where: 'token = ?', execute: [[$hashedToken]]);
 
         http_response_code(200);
         echo json_encode(["status" => "success", "message" => "Email {$row['email']} verified successfully."]);
@@ -253,25 +261,25 @@ function handleGetInbox($db)
     ensureDataNotEmpty($email);
 
     try {
-        $sqlFindEmail = "SELECT * FROM accounts WHERE email = ?";
-        $stmt = $db->prepare($sqlFindEmail);
-        $stmt->execute([$email]);
-
-        $row = $stmt->fetch();
+        $row = dbFetch(
+            $db,
+            cols: '*',
+            table: 'accounts',
+            condition: 'WHERE email = ?',
+            execute: [$email]
+        );
 
         if (empty($row)) {
             respondFailed(404, "User with this email not found.");
         }//Exist email check.
 
-        $sql = "SELECT id, sender, subject, preview, url, buttonLabel, time, isRead 
-                FROM inbox 
-                WHERE owner_email = ? 
-                ORDER BY time DESC";
-        $stmt = $db->prepare($sql);
-        $stmt->execute([$email]);
-
-        // Fetch all rows as an associative array.
-        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $rows = dbFetchAll(
+            $db,
+            cols: 'id, sender, subject, preview, url, buttonLabel, time, isRead',
+            table: 'inbox',
+            condition: 'WHERE owner_email = ? ORDER BY time DESC',
+            execute: [$email]
+        );
 
         // MySQL stores BOOLEAN as 0 or 1; this ensures React sees true/false
         foreach ($rows as &$row) {
@@ -296,18 +304,20 @@ function handleMarkMailAsRead($db, $id)
     }
 
     try {
-        $sqlFindMail = "SELECT * FROM inbox WHERE id = ?";
-        $stmt = $db->prepare($sqlFindMail);
-        $stmt->execute([$id]);
-        $row = $stmt->fetch();
+        $row = dbFetch(
+            $db,
+            cols: '*',
+            table: 'inbox',
+            condition: 'WHERE id = ?',
+            execute: [$id]
+        );
 
         if (empty($row)) {
             respondFailed(404, "Mail not found.");
         }//Mail exist check.
 
         $sql = "UPDATE inbox SET isRead = 1 WHERE id = ?";
-        $stmt = $db->prepare($sql);
-        $stmt->execute([$id]);
+        dbSqlExecute($db, $sql, [$id]);
 
         respondSuccess(200, "Mail marked as read.");
     } catch (PDOException $e) {
@@ -324,9 +334,7 @@ function handleLogout($db)
         $hashedRefreshToken = hash('sha256', $refreshToken);
 
         try {
-            $sqlDeleteToken = "DELETE FROM refresh_tokens WHERE token = ?";
-            $stmt = $db->prepare($sqlDeleteToken);
-            $stmt->execute([$hashedRefreshToken]);
+            dbDelete($db, table: 'refresh_tokens', where: 'token = ?', execute: [$hashedRefreshToken]);
         } catch (\Throwable $th) {
             respondFailed(500, $th->getMessage());
         }

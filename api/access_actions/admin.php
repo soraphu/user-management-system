@@ -13,17 +13,23 @@ function handleFetchAllUsers($db)
     $id = $decodedData['id'];
 
     try {
-        $sqlFetchRole = "SELECT role FROM accounts WHERE id = ?";
-        $stmt = $db->prepare($sqlFetchRole);
-        $stmt->execute([$id]);
-        $row = $stmt->fetch();
+        $row = dbFetch(
+            $db,
+            cols: 'role',
+            table: 'accounts',
+            condition: 'WHERE id = ?',
+            execute: [$id]
+        );
 
         ensureIsAdmin($row['role']);
 
-        $sqlFetchAllUsers = 'SELECT id, username, email, role, verified FROM accounts WHERE id != ? ';
-        $stmt = $db->prepare($sqlFetchAllUsers);
-        $stmt->execute([$id]);
-        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $rows = dbFetchAll(
+            $db,
+            cols: "id, username, email, role, verified",
+            table: "accounts",
+            condition: "WHERE id != ?",
+            execute: [$id]
+        );
 
         http_response_code(200);
         echo json_encode([

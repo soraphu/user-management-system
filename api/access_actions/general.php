@@ -35,9 +35,8 @@ function handleChangeUsername($db)
     }
 
     try {
-        $sqlUpdateUsername = "UPDATE accounts SET username = ? WHERE id = ?";
-        $stmt = $db->prepare($sqlUpdateUsername);
-        $stmt->execute([$input['new_username'], $decodedData['id']]);
+        $sqlChangeUsername = "UPDATE accounts SET username = ? WHERE id = ?";
+        dbSqlExecute($db, sql: $sqlChangeUsername, execute: [$input['new_username'], $decodedData['id']]);
 
         respondSuccess(200, "Username updated successfully.");
     } catch (\Throwable $th) {
