@@ -2,7 +2,7 @@
 require_once __DIR__ . '/../vendor/autoload.php';
 use Firebase\JWT\JWT;
 
-function createMailtoInbox($db, $user, $type, $newUrl)
+function createMailtoInbox($db, $user, $type, $navigateUrl)
 {
     $newPreview = "";
     $newButtonLabel = "";
@@ -21,7 +21,7 @@ function createMailtoInbox($db, $user, $type, $newUrl)
     $sender = "server@user.management.system.com";
     $subject = "Hi {$user['username']},";
     $preview = $newPreview;
-    $url = $newUrl;
+    $url = $navigateUrl;
     $buttonLabel = $newButtonLabel;
     $isRead = 0; // 0 for false, 1 for true in MySQL
 
