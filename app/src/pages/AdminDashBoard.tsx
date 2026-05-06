@@ -45,6 +45,7 @@ import {
     HoverCardContent,
     HoverCardTrigger,
 } from "@/components/ui/hover-card"
+import { HashLoader } from 'react-spinners';
 
 // --- Types & Mock Data ---
 interface UsersType {
@@ -60,6 +61,7 @@ const AdminDashboardPage = () => {
     const [roleFilter, setRoleFilter] = useState("all");
     const [currentPage, setCurrentPage] = useState(1);
     const [users, setUsers] = useState<UsersType[] | null>(null);
+    const [loading, setLoading] = useState<boolean>(true);
     const usersPerPage = 10;
 
     const { user: admin } = useAuth();
@@ -86,7 +88,9 @@ const AdminDashboardPage = () => {
         } catch (error) {
             const errMessage = getCatchMessage(error);
             toast.error(errMessage);
-        }//trycatch.
+        } finally {
+            setLoading(false);
+        }
     }; //handleFetchAllUsers().
 
     if (!admin) fetchUser();
@@ -324,7 +328,9 @@ const AdminDashboardPage = () => {
                 </div>
 
                 {/* User List */}
-                <UserListContainer displayUsers={displayUsers} />
+                {loading ? <HashLoader className='relative justify-self-center mt-20 mb-20' color='#FFFFFF' size={60} />
+                    :
+                    <UserListContainer displayUsers={displayUsers} />}
 
                 {/* Pagination Controls */}
                 <div className="flex items-center justify-between pt-4 border-t border-white/5 text-slate-500">

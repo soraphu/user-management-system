@@ -6,10 +6,7 @@ require_once 'access_actions/admin.php';
 require_once 'access_actions/general.php';
 
 // Define which frontends are allowed to talk to this API
-$allowed_origins = [
-    'http://localhost:5173',
-    'http://127.0.0.1:5173',
-];
+$allowed_origins = [$_ENV['CLIENT_URL']];
 
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 

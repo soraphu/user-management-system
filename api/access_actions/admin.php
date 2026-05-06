@@ -1,8 +1,11 @@
 <?php
-function ensureNotSpecificAdmin($id)
+function ensureNotSpecificAdmin($uid)
 {
-    if ($id === 4) {
-        respondFailed(403, "Hehe, this account not allow to reset password.");
+    $forbiddenId = (int) $_ENV['STATIC_ADMIN_ID'];
+
+    if ($uid === $forbiddenId) {
+        respondFailed(403, "Hehe, this account not allow to change any infomation.");
+        exit;
     }
 }
 

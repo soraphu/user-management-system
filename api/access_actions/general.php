@@ -15,14 +15,15 @@ function handleFetchUser()
 function handleChangeUsername($db)
 {
     $input = ensureAndGetRequestBody();
-    if (empty($input['username'])) {
+    $newUsername = $input['new_username'];
+
+    if (empty($input['new_username'])) {
         respond400FieldsMissing();
     }
 
     $decodedData = ensureAndGetDecodedAccessToken();
-    ensureNotSpecificAdmin(id: $decodedData['id']);
+    ensureNotSpecificAdmin(uid: $decodedData['id']);
 
-    $newUsername = $input['new_username'];
 
     if (empty($newUsername)) {
         respond400FieldsMissing();
