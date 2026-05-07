@@ -5,7 +5,6 @@ function ensureNotSpecificAdmin($uid)
 
     if ($uid === $forbiddenId) {
         respondFailed(403, "Hehe, this account not allow to change any infomation.");
-        exit;
     }
 }
 

@@ -32,6 +32,7 @@ const ForgetPasswordForm = () => {
             const response = await axios.post(API_AUTH.ForgetPassword, { email: email });
             const responseMessage = response.data.message;
 
+            consoleLogDevMode(response);
             setSentSuccess(true);
             setEmail(email);
             toast.success(responseMessage);

@@ -103,7 +103,9 @@ function handleForgetPassword($db)
         respond400FieldsMissing();
     }
 
-    ensureNotSpecificAdmin(id: $input['id']);
+    if ($email === "admin@test.com") {
+        respondFailed(403, "Hehe, this account not allow to change any infomation.");
+    }
 
     try {
         $user = dbFetch(
