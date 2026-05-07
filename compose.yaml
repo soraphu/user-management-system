@@ -3,12 +3,16 @@ name: user-management-system
 services:
 
   frontend:
-    build: ./app
+    build:
+      context: ./app
+      dockerfile: Dockerfile.local
     ports:
       - "5173:80"
 
   server:
-    build: ./api
+    build:
+      context: ./api
+      dockerfile: Dockerfile.local
     env_file:
       - ./api/.env
     volumes:

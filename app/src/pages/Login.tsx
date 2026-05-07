@@ -14,7 +14,7 @@ const LoginPage = () => {
         Swal.fire({
             icon: "question",
             title: "NOTICE",
-            text: "This website was run as stateless server, so the registered account will disapear eveytime the server goes down, so hope you enjoy my user management system project website.",
+            text: "Welcome! Please note that this is a live demo running on a stateless server. To keep the demo fast and secure, all registered accounts are temporary and will be cleared when the server restarts. Feel free to explore the management features!",
             confirmButtonColor: swalConfirmButtonColor,
             confirmButtonText: "I Understand"
         });
