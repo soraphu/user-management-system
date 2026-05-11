@@ -1,6 +1,6 @@
 FROM mysql:9.6
 
-COPY init.sql /docker-entrypoint-initdb.d/
+COPY /database/init.sql /docker-entrypoint-initdb.d/
 
 EXPOSE 3306
 
