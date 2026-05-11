@@ -1,15 +1,5 @@
 FROM php:8.4-fpm
 
-ENV DEV=1
-ENV JWT_SECRET=secret*key@user*management*system
-ENV STATIC_ADMIN_ID=1
-ENV CLIENT_URL=http://localhost:5173
-
-ENV MYSQL_HOST=db
-ENV MYSQL_DB_NAME=user_management_system
-ENV MYSQL_USERNAME=user
-ENV MYSQL_PASS=1234
-
 RUN apt-get update \
     && apt-get install -y nginx \
     && docker-php-ext-install pdo pdo_mysql \
