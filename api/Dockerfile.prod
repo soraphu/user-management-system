@@ -5,6 +5,8 @@ RUN apt-get update \
     && docker-php-ext-install pdo pdo_mysql \
     && rm -rf /var/lib/apt/lists/*
 
+RUN rm -f /etc/nginx/sites-enabled/default
+
 WORKDIR /src/api
 
 COPY . .
