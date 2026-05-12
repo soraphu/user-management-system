@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/auth/AuthContext";
 
 //Import components.
+import { BeatLoader } from "react-spinners";
 import { Button } from "@/components/ui/button"
 import {
   Field,
@@ -16,9 +17,11 @@ import { toast } from 'sonner';
 import { API_AUTH, reqWithCookie } from "@/helper/config";
 import { consoleLogDevMode } from "@/helper/log";
 import { getCatchMessage } from "@/helper/request_handler";
+import { useState } from "react";
 
 export function LoginForm({ className, ...props }: React.ComponentProps<"form">) {
   const { setAccessToken } = useAuth();
+  const [loggingIn, setLoggingIn] = useState<boolean>(false);
   const navigate = useNavigate();
 
   const handleUserLogin = async (e: any) => {
@@ -34,6 +37,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"form">)
     };
 
     try {
+      setLoggingIn(true);
       const response = await reqWithCookie.post(API_AUTH.Login, user);
 
       //Login success.
@@ -56,7 +60,9 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"form">)
       }
 
       toast.error(errorMessage);
-    } //trycatch
+    } finally {
+      setLoggingIn(false);
+    }
   }; //Handle user login.
 
   return (
@@ -91,7 +97,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"form">)
           <InputPasswordWithVisibleControl id="password" />
         </Field>
         <Field>
-          <Button type="submit">Login</Button>
+          <Button type="submit">{!loggingIn ? "Login" : <BeatLoader size={8} color="#FFFFFF" />}</Button>
         </Field>
         <Field>
           <FieldDescription className="text-center">
