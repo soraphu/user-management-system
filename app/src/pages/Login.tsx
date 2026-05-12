@@ -4,9 +4,12 @@ import { useEffect } from "react";
 import { useUserAction } from "@/helper/useUserAction";
 import Swal from "sweetalert2";
 import { swalConfirmButtonColor } from "@/helper/config";
+import CopyToClipboradIcon from "@/components/copy-to-clipboard-icon";
 
 const LoginPage = () => {
     const { ensureLoggedIn } = useUserAction();
+    const copyIconClass = "cursor-pointer flex align-bottom ml-auto";
+    const suggestAdminAccountClass = "font-mono bg-muted p-2 rounded flex max-w-full items-center";
 
     useEffect(() => {
         ensureLoggedIn();
@@ -50,17 +53,17 @@ const LoginPage = () => {
                     <div className="space-y-4">
                         <div className="bg-card rounded-lg p-4 border border-border">
                             <h3 className="font-semibold text-lg mb-3 flex items-center gap-2">
-                                <span className="inline-flex items-center justify-center size-6 rounded-full bg-primary text-primary-foreground text-sm font-bold">👑</span>
+                                <span className="inline-flex items-center justify-center size-6 rounded-full bg-primary text-primary-foreground text-sm font-bold ">👑</span>
                                 Admin Account
                             </h3>
                             <div className="space-y-2 text-sm">
-                                <div>
+                                <div >
                                     <p className="text-muted-foreground">Email</p>
-                                    <p className="font-mono bg-muted p-2 rounded">admin@test.com</p>
+                                    <label className={suggestAdminAccountClass}>admin@test.com<CopyToClipboradIcon copyContent="admin@test.com" className={copyIconClass} /></label>
                                 </div>
                                 <div>
                                     <p className="text-muted-foreground">Password</p>
-                                    <p className="font-mono bg-muted p-2 rounded">Admin@project</p>
+                                    <label className={suggestAdminAccountClass}>Admin@project<CopyToClipboradIcon copyContent="Admin@project" className={copyIconClass} /></label>
                                 </div>
                             </div>
                         </div>
