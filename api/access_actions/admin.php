@@ -84,7 +84,7 @@ function handleEditUserInfo($db)
             execute: [$username, $role, $uid]
         );
 
-        respondSuccess(200, "Edit UID: 1 info successfully");
+        respondSuccess(200, "Edit UID: $uid info successfully");
     } catch (\Throwable $th) {
         respondFailed(500, $th->getMessage());
     }
