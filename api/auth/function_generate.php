@@ -124,7 +124,8 @@ function handleSetupRefreshToken($user, $db)
             'expires' => strtotime($expires),
             'httponly' => true,
             'secure' => !$isDevMode, //Set to true in production (requires HTTPS)
-            'samesite' => 'Lax'
+            'samesite' => 'None',
+            'path' => '/'
         ]);
     } catch (\Throwable $th) {
         respondFailed(500, $th->getMessage());
