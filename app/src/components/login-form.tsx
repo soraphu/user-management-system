@@ -97,7 +97,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"form">)
           <InputPasswordWithVisibleControl id="password" />
         </Field>
         <Field>
-          <Button type="submit">{!loggingIn ? "Login" : <BeatLoader size={8} color="#FFFFFF" />}</Button>
+          <Button type="submit" disabled={loggingIn} >{!loggingIn ? "Login" : <BeatLoader size={8} color="#FFFFFF" />}</Button>
         </Field>
         <Field>
           <FieldDescription className="text-center">
