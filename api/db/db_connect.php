@@ -27,7 +27,7 @@ try {
     // echo "Connected successfully to the MySQL container.";
 } catch (PDOException $e) {
     // If connection fails (e.g., wrong password or service name)
-    http_response_code(500);
+    http_response_code(503);
     echo $e->getMessage();
     exit;
 }
