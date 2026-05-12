@@ -28,5 +28,5 @@ try {
 } catch (PDOException $e) {
     // If connection fails (e.g., wrong password or service name)
     http_response_code(500);
-    echo json_encode(["status" => "error", "message" => "Connection failed: " . $e->getMessage()]);
+    echo $e->getMessage();
 }
