@@ -4,6 +4,8 @@ A full-stack user management system built with Docker, Nginx, PHP, MySQL, and a 
 
 This project demonstrates a complete authentication flow that includes registration, email verification, login, logout, password reset, user actions, and admin actions.
 
+[**Live Demo**](https://user-management-system-zeta-two.vercel.app/) | [**API Documentation**](https://user-management-system-db.onrender.com/api)
+
 ## 🚀 Features
 
 | Feature | Description |
