@@ -2,12 +2,22 @@ import { FaGithub } from "react-icons/fa";
 import LoginForm from "../components/login-form"
 import { useEffect } from "react";
 import { useUserAction } from "@/helper/useUserAction";
+import Swal from "sweetalert2";
+import { swalConfirmButtonColor } from "@/helper/config";
 
 const LoginPage = () => {
     const { ensureLoggedIn } = useUserAction();
 
     useEffect(() => {
         ensureLoggedIn();
+
+        Swal.fire({
+            icon: "question",
+            title: "NOTICE",
+            text: "Due to free-tier limitations, you may see a 500/503 error while the API wakes up (wait 30s); persistent errors suggest the database is powered down.",
+            confirmButtonColor: swalConfirmButtonColor,
+            confirmButtonText: "I Understand"
+        });
     }, []);
 
     return (
