@@ -2,22 +2,12 @@ import { FaGithub } from "react-icons/fa";
 import LoginForm from "../components/login-form"
 import { useEffect } from "react";
 import { useUserAction } from "@/helper/useUserAction";
-import Swal from "sweetalert2";
-import { swalConfirmButtonColor } from "@/helper/config";
 
 const LoginPage = () => {
     const { ensureLoggedIn } = useUserAction();
 
     useEffect(() => {
         ensureLoggedIn();
-
-        Swal.fire({
-            icon: "question",
-            title: "NOTICE",
-            text: "Welcome! Please note that this is a live demo running on a stateless server. To keep the demo fast and secure, all registered accounts are temporary and will be cleared when the server restarts. Feel free to explore the management features!",
-            confirmButtonColor: swalConfirmButtonColor,
-            confirmButtonText: "I Understand"
-        });
     }, []);
 
     return (

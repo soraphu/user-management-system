@@ -2,7 +2,7 @@ import axios from 'axios';
 
 export const swalConfirmButtonColor = "#3085d6";
 
-export const isDevMode = true;
+export const isDevMode = import.meta.env.VITE_DEV_MODE === 'true';
 
 const apiBaseURL = import.meta.env.VITE_AUTH_API_BASE_URL;
 
