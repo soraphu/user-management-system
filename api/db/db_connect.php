@@ -29,4 +29,5 @@ try {
     // If connection fails (e.g., wrong password or service name)
     http_response_code(500);
     echo $e->getMessage();
+    exit;
 }
