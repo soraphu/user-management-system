@@ -309,7 +309,12 @@ const AdminDashboardPage = () => {
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
                     </div>
-                    <Select onValueChange={setRoleFilter} defaultValue="all">
+                    <Select onValueChange={
+                        (value) => {
+                            setRoleFilter(value);
+                            setCurrentPage(1);
+                        }
+                    } defaultValue="all">
                         <SelectTrigger className="bg-black border-slate-800">
                             <div className="flex items-center gap-2">
                                 <Filter className="h-4 w-4 text-yellow-500" />
