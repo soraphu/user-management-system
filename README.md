@@ -6,6 +6,31 @@ This project demonstrates a complete authentication flow that includes registrat
 
 [**Live Demo**](https://user-management-system-zeta-two.vercel.app/) | [**API Documentation**](https://user-management-system-db.onrender.com/api)
 
+## 🔗 Table of Contents
+
+- [Features](#-features)
+- [Tech Stack](#-tech-stack)
+- [Project Structure](#-project-structure)
+- [Setup](#-setup)
+  - [Requirements](#requirements)
+  - [Run the project](#run-the-project)
+  - [Access URLs](#access-urls)
+- [Environment Configuration](#-environment-configuration)
+  - [Backend environment](#backend-environment)
+  - [Frontend environment](#frontend-environment)
+- [Database](#-database)
+- [API Endpoints](#-api-endpoints)
+  - [Authentication](#authentication)
+  - [Email verification](#email-verification)
+  - [Password reset](#password-reset)
+  - [Inbox](#inbox)
+  - [User actions](#user-actions)
+  - [Admin actions](#admin-actions)
+- [API Documentation](#-api-documentation)
+- [Notes](#-notes)
+- [Useful Files](#-useful-files)
+- [Contribution](#-contribution)
+
 ## 🚀 Features
 
 | Feature | Description |
