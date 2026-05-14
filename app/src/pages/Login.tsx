@@ -3,8 +3,10 @@ import LoginForm from "../components/login-form"
 import { useEffect } from "react";
 import { useUserAction } from "@/helper/useUserAction";
 import Swal from "sweetalert2";
-import { swalConfirmButtonColor } from "@/helper/config";
+import { API_CHECK_SERVER_RESPONSE, swalConfirmButtonColor } from "@/helper/config";
 import CopyToClipboradIcon from "@/components/copy-to-clipboard-icon";
+import axios from "axios";
+import { toast } from "sonner";
 
 const LoginPage = () => {
     const { ensureLoggedIn } = useUserAction();
@@ -12,15 +14,42 @@ const LoginPage = () => {
     const suggestAdminAccountClass = "font-mono bg-muted p-2 rounded flex max-w-full items-center";
 
     useEffect(() => {
-        ensureLoggedIn();
+        const init = async () => {
+            Swal.fire({
+                title: "Waking up backend service",
+                html: "Please wait while Render cloud wakes up the API...",
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
 
-        Swal.fire({
-            icon: "question",
-            title: "NOTICE",
-            text: "Due to free-tier limitations, you may see a 500/503 error while the API wakes up (wait 30s); persistent errors suggest the database is powered down.",
-            confirmButtonColor: swalConfirmButtonColor,
-            confirmButtonText: "I Understand"
-        });
+            try {
+                await axios.get(API_CHECK_SERVER_RESPONSE, {
+                    timeout: 60000
+                });
+            } catch (error: any) {
+                if (!error?.response) {
+                    Swal.close();
+                    toast.error("Server not responding, try visit website next time.");
+                    return;
+                }
+            }
+
+            Swal.close();
+            Swal.fire({
+                icon: "question",
+                title: "NOTICE",
+                text: "Due to free-tier limitations, you may see a 500/503 error while the API wakes up (wait 30s); persistent errors suggest the database is powered down.",
+                confirmButtonColor: swalConfirmButtonColor,
+                confirmButtonText: "I Understand"
+            });
+
+            await ensureLoggedIn();
+        };
+
+        init();
     }, []);
 
     return (

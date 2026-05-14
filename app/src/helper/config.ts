@@ -6,6 +6,8 @@ export const isDevMode = import.meta.env.VITE_DEV_MODE === 'true';
 
 const apiBaseURL = import.meta.env.VITE_AUTH_API_BASE_URL;
 
+export const API_CHECK_SERVER_RESPONSE = apiBaseURL;
+
 export const API_AUTH = {
     Register: `${apiBaseURL}/register`,
     Login: `${apiBaseURL}/login`,
